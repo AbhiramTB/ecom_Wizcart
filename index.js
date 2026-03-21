@@ -16,7 +16,7 @@ const cors = require('cors');
 
 require('dotenv').config()
 
-const port = process.env.port
+const port = process.env.port||3000
 
 mongoose.connect(process.env.mongodbConnect);
 
@@ -41,6 +41,11 @@ app.use(
   })
 );
 
+
+app.get("/", (req, res) => {
+  res.send("Server Working");
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -48,6 +53,6 @@ app.use(express.static(path.join(__dirname,"public")));
 
 app.use(userRoute.userRoute);
 app.use(adminRoute.adminRoute);
+app.listen(process.env.PORT, () => console.log(`http://localhost:${process.env.PORT}`));
 
-app.listen(port, () => console.log(`http://localhost:${port}`));
 app.use(googleAuth.authRoute);

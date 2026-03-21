@@ -344,11 +344,12 @@ const otpSending = (req, res) => {
         const transporter = nodemailer.createTransport({
           service: "gmail",
           auth: {
-            user: process.env.email,
-            pass: process.env.App_password,
+            user: process.env.EMAIL_SERVICE_EMAIL,
+            pass: process.env.EMAIL_SERVICE_PASSWORD,
           },
         });
 
+    
         const mailGenerator = new Mailgen({
           theme: "default",
           product: {
