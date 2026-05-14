@@ -6,7 +6,7 @@ const userController = require("../controller/userController");
 const { isLogin, isLogout } = require("../auth/userAuth");
 const nocache = require("nocache");
 const { log } = require("console");
-const { db, updateSearchIndex } = require("../model/userModer");
+const { db, updateSearchIndex } = require("../model/userModel");
 const { block } = require("sharp");
 require("../auth/google");
 

@@ -1,4 +1,4 @@
-const User = require("../model/userModer");
+const User = require("../model/userModel");
 const bcrypt = require("bcryptjs");
 const { resizeImages } = require("../config/imageResizing");
 const Product = require("../model/productModel");

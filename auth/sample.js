@@ -3,7 +3,7 @@ const express = require('express');
 const authRoute = express.Router();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-const User = require('../models/userModel');
+const User = require('../model/userModel');
 
 let userProfile;
 
