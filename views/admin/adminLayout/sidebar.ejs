@@ -1,0 +1,130 @@
+<ul class="navbar-nav bg-dark sidebar sidebar-dark accordion" id="accordionSidebar" style="background-color: #1b1a1a !important;">
+  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/dashboard">
+    <div class="sidebar-brand-icon rotate-n-15">
+      <i class="fab fa-wizards-of-the-coast" style="color: #ffffff;"></i>
+    </div>
+    <div class="sidebar-brand-text mx-3">Wizcart</div>
+  </a>
+
+  <hr class="sidebar-divider my-0">
+
+  <li class="nav-item active">
+    <a class="nav-link" href="/dashboard">
+      <i class="fas fa-fw fa-tachometer-alt"></i>
+      <span>Dashboard</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="/salesReport?filter=today">
+      <i class="fas fa-file" style="color: #ffffff;"></i>
+      <span>Sales Report</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="/ledger">
+      <i class="fas fa-fw fa-book"></i>
+      <span>Ledger Book</span>
+    </a>
+  </li>
+
+  <hr class="sidebar-divider">
+
+  <div class="sidebar-heading">
+    Interface
+  </div>
+
+  <li class="nav-item">
+    <a class="nav-link" href="/userList">
+      <i class="fas fa-fw fa-user"></i>
+      <span>User Management</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="/orderMangement">
+      <i class="fa-solid fa-truck-fast" style="color: #ffffff;"></i>
+      <span>Order Management</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="/returnOrders">
+      <i class="fa-solid fa-rotate-left" style="color: #ffffff;"></i>
+      <span>Return Orders</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="/couponMangement">
+      <i class="fa-solid fa-gift" style="color: #ffffff;"></i>
+      <span>Coupon Management</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="/offerManagemanent">
+      <i class="fa-solid fa-chart-simple" style="color: #ffffff;"></i>
+      <span>Offer Management</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
+      <i class="fas fa-box" style="color: #ffffff;"></i>
+      <span>Products</span>
+    </a>
+    <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+      <div class="bg-white py-2 collapse-inner rounded">
+        <h6 class="collapse-header" style="color: red;">Product Management</h6>
+        <a class="collapse-item" style="background-color: rgb(0, 0, 0); color: #f0f2f5;" href="/addProduct">
+          <i class="fa-solid fa-box" style="color: #ff0000;"></i> Add New Product
+        </a>
+        <a class="collapse-item" href="Products">
+          <i class="fa-solid fa-pen-to-square" style="color: #ff0400;"></i> Edit Product
+        </a>
+        <a class="collapse-item" style="background-color: rgb(0, 0, 0); color: #f0f2f5;" href="Products">
+          <i class="fa-solid fa-eye-slash" style="color: #ff0000;"></i> Hide Product
+        </a>
+        <a class="collapse-item" href="Products">
+          <i class="fa-solid fa-trash" style="color: #ff0000;"></i> Delete Product
+        </a>
+      </div>
+    </div>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="/category">
+      <i class="fas fa-boxes" style="color: #ffffff;"></i>
+      <span>Category Management</span>
+    </a>
+  </li>
+
+  <hr class="sidebar-divider">
+
+  <div class="sidebar-heading">
+    Profile
+  </div>
+
+  <li class="nav-item">
+    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
+      <i class="fas fa-fw fa-folder"></i>
+      <span>Profile</span>
+    </a>
+    <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+      <div class="bg-white py-2 collapse-inner rounded">
+        <h6 class="collapse-header">Login Screens:</h6>
+        <a class="collapse-item" href="/logout">
+          <i class="fas fa-sign-out-alt" style="color: #000000;"></i> Logout
+        </a>
+      </div>
+    </div>
+  </li>
+
+  <hr class="sidebar-divider d-none d-md-block">
+
+  <div class="text-center d-none d-md-inline">
+    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+  </div>
+</ul>

@@ -1,188 +1,190 @@
-
 <%- include('../layout/header') %>
-<link rel="stylesheet" href="css/mystyle.css">
+
 <style>
-    .is-valid {
-        border-color: green;
+    :root {
+        --accent-color: #000000; 
+        --bg-color: #f9f9f9;
+        --border-color: #e2e2e2;
+        --error-red: #d93025;
     }
 
-    .is-valid::after {
-        content: '✔';
-        color: green;
-        position: absolute;
-        right: 15px;
-        top: calc(50% - 10px);
+    body {
+        background-color: var(--bg-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
     }
 
-    .is-invalid {
-        border-color: red;
+    .login-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 400px;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
-    .is-invalid::after {
-        content: '✖';
-        color: red;
-        position: absolute;
-        right: 15px;
-        top: calc(50% - 10px);
+    .brand-title {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+        text-align: center;
     }
 
-    .error-message {
-        color: red;
+    .brand-subtitle {
+        font-size: 14px;
+        color: #666;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
         font-size: 12px;
-        margin-top: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        color: #444;
     }
 
-    
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 14px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: #fafafa;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
 
+    .form-control:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        background: #fff;
+    }
+
+    .is-invalid { border-color: var(--error-red) !important; }
+    
+    .error-message {
+        color: var(--error-red);
+        font-size: 12px;
+        margin-top: 6px;
+        min-height: 18px;
+    }
+
+    ._btn_05 {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+        margin-top: 10px;
+    }
+
+    ._btn_05:hover {
+        opacity: 0.85;
+    }
+
+    .toast-minimal {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
 </style>
 
+<div class="login-card">
+    <div class="brand-title">Wizcart</div>
+    <div class="brand-subtitle">Admin Login</div>
 
-
-<div id="page">
-    <nav class="colorlib-nav" role="navigation">
-        <!-- navigation content -->
-    </nav>
-
-    <div class="breadcrumbs">
-        <div class="container">
+    <form id="SignUPForm" action="/adminLoginData" method="post" onsubmit="return validateForm()">
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" name="email" class="form-control" id="email" placeholder="admin@wizcart.com" required onkeyup="vemail()">
+            <div id="errmesg-email" class="error-message"></div>
         </div>
-    </div>
 
-    <section class="_form_06 " style="margin-top: 130px;">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="_form-05-box ">
-                        <div class="row">
-                            <div class="col-sm-5 _lk_nb">
-                                <div class="form-06-box-a text-center">
-                                    <div class="_form_05_logo mb-4">
-                                        <h2>Wizcart</h2>
-                                        <p>-------------------------------------</p>
-                                    </div>
-                                  
-                                </div>
-                            </div>
-                            <div class="col-sm-7 _nb-pl">
-                                <div class="_mn_df">
-                                    <div class="main-head">
-                                        <h2>Admin login</h2>
-                                    </div>
-                                    <form id="SignUPForm" action="/adminLoginData" method="post" onsubmit="return validateForm()">
-                                        <div class="form-group position-relative">
-                                            <input type="email" name="email" class="form-control" id="email" placeholder="Enter Email" required onkeyup="vemail()">
-                                            <div id="errmesg-email" class="error-message">&nbsp</div>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <input type="password" name="password" class="form-control" id="password" placeholder="Enter Password" required onkeyup="vpassword()">
-                                            <div id="errmesg-password" class="error-message">&nbsp</div>
-                                        </div>
-                                        <div class="">
-                                            
-                                                
-                                                
-                                            
-                
-                                            <div class=" mb-5  d-flex justify-content-end">
-                                                <!-- <a href="#">Forgot Password</a> -->
-                                             </div>
-                                        </div>                        
-                                                <input  class="_btn_05" type="submit" value="SignUP">
-                                                <% if (typeof(message) !== 'undefined') { %>
-                                                    <h4 class="text-center text-danger"><%= message %></h4>
-                                                <% } %>
-                                        
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" class="form-control" id="password" placeholder="••••••••" required onkeyup="vpassword()">
+            <div id="errmesg-password" class="error-message"></div>
+        </div>
+
+        <button class="_btn_05" type="submit">Continue</button>
+
+        <% if (typeof(message) !== 'undefined') { %>
+            <div class="error-message text-center" style="margin-top: 15px;">
+                <%= message %>
             </div>
-        </div>
-    </section>
-    <% if (toast.length > 0) { %>
-        <div id="toast" class="toast-black  toast show"><%= toast[0] %></div>
-    <% } %>
-    <footer id="colorlib-footer" role="contentinfo">
-        <!-- footer content -->
-    </footer>
+        <% } %>
+    </form>
 </div>
 
-<div class="gototop js-top">
-    <a href="#" class="js-gotop"><i class="ion-ios-arrow-up"></i></a>
-</div>
+<% if (toast && toast.length > 0) { %>
+    <div id="toast" class="toast-minimal"><%= toast[0] %></div>
+<% } %>
 
 <script>
-
-document.addEventListener('DOMContentLoaded', function() {
-        var toast = document.getElementById('toast');
-        if (toast) {
-            toast.classList.add('show');
-            // Hide the toast message after 3 seconds (3000 milliseconds)
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 3000);
-        }
+    // Simple toast handler
+    document.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById('toast');
+        if (toast) setTimeout(() => toast.style.display = 'none', 3000);
     });
 
-
-
-
-function vemail() {
-    const emailog = document.getElementById("email");
-    const email = emailog.value;
-    const EMAIL_REGEX = /^[^\s@]+@gmail\.com$/i;
-    const err = document.getElementById("errmesg-email");
-
-    if (!EMAIL_REGEX.test(email)) {
-        err.innerHTML = 'Invalid email address';
-        emailog.classList.add('is-invalid');
-        emailog.classList.remove('is-valid');
-    } else {
-        err.innerHTML = '';
-        emailog.classList.remove('is-invalid');
-        emailog.classList.add('is-valid');
+    function vemail() {
+        const el = document.getElementById("email");
+        const err = document.getElementById("errmesg-email");
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!regex.test(el.value)) {
+            err.innerText = 'Valid email required';
+            el.classList.add('is-invalid');
+        } else {
+            err.innerText = '';
+            el.classList.remove('is-invalid');
+        }
     }
-}
 
-function vpassword() {
-    const password = document.getElementById("password");
-    const PASSWORD_REGEX = /^[\w\d]{6,}$/;
-    const err = document.getElementById("errmesg-password");
-
-    if (!PASSWORD_REGEX.test(password.value)) {
-        err.innerHTML = 'Password must be at least 6 characters';
-        password.classList.add('is-invalid');
-        password.classList.remove('is-valid');
-    } else {
-        err.innerHTML = '';
-        password.classList.remove('is-invalid');
-        password.classList.add('is-valid');
+    function vpassword() {
+        const el = document.getElementById("password");
+        const err = document.getElementById("errmesg-password");
+        
+        if (el.value.length < 6) {
+            err.innerText = 'Min 6 characters';
+            el.classList.add('is-invalid');
+        } else {
+            err.innerText = '';
+            el.classList.remove('is-invalid');
+        }
     }
-}
 
-function validateForm() {
-    const emailog = document.getElementById("email");
-    const password = document.getElementById("password");
-
-    vemail();
-    vpassword();
-
-    if (emailog.classList.contains('is-invalid') || password.classList.contains('is-invalid')) {
-        return false;
+    function validateForm() {
+        vemail();
+        vpassword();
+        return !document.querySelectorAll('.is-invalid').length;
     }
-    return true;
-}
-
-document.getElementById('SignUPForm').addEventListener('submit', function (e) {
-    if (!validateForm()) {
-        alert('Details are incorrect');
-        e.preventDefault();
-
-    }
-});
 </script>
-
 
 <%- include('../layout/footer') %>
