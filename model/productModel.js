@@ -1,6 +1,4 @@
-
 const mongoose = require("mongoose");
-const { type } = require("os");
 
 const ProductSchema = new mongoose.Schema({
     product_name: {

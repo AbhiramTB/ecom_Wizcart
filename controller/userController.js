@@ -1,9 +1,8 @@
 const { sanitizeUser } = require("../lib/userSanitizer");
 const { getCartQuantity } = require("../lib/cartHelper");
-const { log, error, Console } = require("console");
+const { log, error } = require("console");
 const object_id = require('mongoose').Types.ObjectId;
 const WishList = require('../model/wishlistModel'); // Update the path to your WishList model
-const pathe=require('path')
 const User = require("../model/userModel");
 const Product = require("../model/productModel");
 const Cart = require("../model/cartModel");
@@ -18,14 +17,11 @@ const Category = require("../model/categoryModel");
 const Coupons=require('../model/couponModel')
 const wishlist=require('../model/wishlistModel');
 const wishlistModel = require("../model/wishlistModel");
-require("dotenv").config();
-const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = process.env;
+const env = require("../lib/env");
+const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = env;
 const Wallet=require('../model/walletModel')
 const PDFDocument = require('pdfkit');
 const fs=require('fs')
-// const { privateDecrypt } = require("crypto");
-// const session=require('express-session')
-
 const homeLogin = async (req, res) => {
   try {
     const products = await Product.find({}).limit(8);
@@ -322,8 +318,8 @@ const otpSending = (req, res) => {
         const transporter = nodemailer.createTransport({
           service: "gmail",
           auth: {
-            user: process.env.EMAIL_SERVICE_EMAIL,
-            pass: process.env.EMAIL_SERVICE_PASSWORD,
+            user: env.EMAIL_SERVICE_EMAIL,
+            pass: env.EMAIL_SERVICE_PASSWORD,
           },
         });
 
@@ -354,7 +350,7 @@ const otpSending = (req, res) => {
         const mail = mailGenerator.generate(emailContent);
 
         const message = {
-          from: process.env.email,
+          from: env.EMAIL_SERVICE_EMAIL,
           to: otpEmail,
           subject: "OTP verification",
           html: mail,
@@ -567,8 +563,8 @@ const ProfileUpdateEmail = async (req, res) => {
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: process.env.email,
-          pass: process.env.App_password,
+          user: env.EMAIL_SERVICE_EMAIL,
+          pass: env.EMAIL_SERVICE_PASSWORD,
         },
       });
 
@@ -598,7 +594,7 @@ const ProfileUpdateEmail = async (req, res) => {
       const mail = mailGenerator.generate(emailContent);
 
       const message = {
-        from: process.env.email,
+        from: env.EMAIL_SERVICE_EMAIL,
         to: newEmail,
         subject: "OTP verification",
         html: mail,
@@ -732,8 +728,8 @@ const forgotEmail = async (req, res) => {
         const transporter = nodemailer.createTransport({
           service: "gmail",
           auth: {
-            user: process.env.EMAIL,
-            pass: process.env.APP_PASSWORD,
+            user: env.EMAIL_SERVICE_EMAIL,
+            pass: env.EMAIL_SERVICE_PASSWORD,
           },
         });
 
@@ -763,7 +759,7 @@ const forgotEmail = async (req, res) => {
         const mail = mailGenerator.generate(emailContent);
 
         const message = {
-          from: process.env.EMAIL,
+          from: env.EMAIL_SERVICE_EMAIL,
           to: forgetpasswordEmail, // Corrected here to use forgetpasswordEmail
           subject: "OTP verification",
           html: mail,
@@ -1854,27 +1850,7 @@ const Coupon = async (req, res) => {
         return res.status(500).json({ message: "Coupon has expired" });
       }
 
-
-     
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      
 
       const applyCoupon = await Cart.findOneAndUpdate(
         { user_id: req.session.user_id },  // Filter to find the document

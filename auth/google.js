@@ -1,4 +1,4 @@
-require('dotenv').config();
+const env = require('../lib/env');
 const express = require('express');
 const authRoute = express.Router();
 const passport = require('passport');
@@ -25,8 +25,8 @@ passport.deserializeUser(function(obj, cb) {
 
 passport.use(
   new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    clientID: env.GOOGLE_CLIENT_ID,
+    clientSecret: env.GOOGLE_CLIENT_SECRET,
     callbackURL: "http://localhost:3200/signup/google/callback",
   },
   async (accessToken, refreshToken, profile, done) => {

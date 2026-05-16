@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const { log } = require('console');
 const Product=require('../model/productModel');
-const { products } = require('./adminController');
+
 
 
 

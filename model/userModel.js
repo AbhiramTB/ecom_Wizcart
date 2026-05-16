@@ -1,6 +1,4 @@
-const { Module } = require("module");
 const mongoose = require("mongoose");
-const { type } = require("os");
 
 const userSchema = new mongoose.Schema({
   name: {

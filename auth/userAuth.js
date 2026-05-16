@@ -3,7 +3,7 @@ const isLogin = async (req, res, next) => {
       if (req.session.user_id||req.authenticate) {
         next();
       } else {
-        res.redirect("/wizcart");
+        res.redirect("/login");
       }
     } catch (error) {
       console.error("Error in isLogin middleware:", error.message);

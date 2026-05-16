@@ -4,7 +4,7 @@ const Cart = require("../model/cartModel");
 const Order = require("../model/orders.model");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
-require("dotenv").config();
+const env = require("../lib/env");
 const axios = require("axios");
 const { log, error } = require("console");
 const object_id = require("mongoose").Types.ObjectId;
@@ -12,7 +12,7 @@ const Wallet = require("../model/walletModel");
 const { cart } = require("./userController");
 const mongoose = require("mongoose");
 
-const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = process.env;
+const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = env;
 
 const instance = new Razorpay({
   key_id: RAZORPAY_ID_KEY,
