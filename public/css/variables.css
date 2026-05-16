@@ -1,0 +1,128 @@
+/* ============================================
+   WIZCART DESIGN SYSTEM — CSS VARIABLES
+   ============================================ */
+
+:root {
+  /* ── Brand Colors ── */
+  --wz-primary: #1a1a2e;
+  --wz-primary-light: #16213e;
+  --wz-primary-dark: #0f0f1a;
+  --wz-accent: #e94560;
+  --wz-accent-hover: #d63851;
+  --wz-secondary: #533483;
+  --wz-secondary-light: #6c44a0;
+
+  /* ── Neutral Palette ── */
+  --wz-white: #ffffff;
+  --wz-gray-50: #f8f9fa;
+  --wz-gray-100: #f1f3f5;
+  --wz-gray-200: #e9ecef;
+  --wz-gray-300: #dee2e6;
+  --wz-gray-400: #ced4da;
+  --wz-gray-500: #adb5bd;
+  --wz-gray-600: #6c757d;
+  --wz-gray-700: #495057;
+  --wz-gray-800: #343a40;
+  --wz-gray-900: #212529;
+  --wz-black: #000000;
+
+  /* ── Semantic Colors ── */
+  --wz-success: #2ecc71;
+  --wz-success-bg: #d4edda;
+  --wz-warning: #f39c12;
+  --wz-warning-bg: #fff3cd;
+  --wz-danger: #e74c3c;
+  --wz-danger-bg: #f8d7da;
+  --wz-info: #3498db;
+  --wz-info-bg: #d1ecf1;
+
+  /* ── Background ── */
+  --wz-bg-body: #f5f6fa;
+  --wz-bg-card: #ffffff;
+  --wz-bg-nav: #1a1a2e;
+  --wz-bg-footer: #1a1a2e;
+
+  /* ── Text Colors ── */
+  --wz-text-primary: #212529;
+  --wz-text-secondary: #6c757d;
+  --wz-text-muted: #adb5bd;
+  --wz-text-inverse: #ffffff;
+  --wz-text-link: #e94560;
+
+  /* ── Typography ── */
+  --wz-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --wz-font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --wz-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --wz-fs-xs: 0.75rem;     /* 12px */
+  --wz-fs-sm: 0.875rem;    /* 14px */
+  --wz-fs-base: 1rem;      /* 16px */
+  --wz-fs-md: 1.125rem;    /* 18px */
+  --wz-fs-lg: 1.25rem;     /* 20px */
+  --wz-fs-xl: 1.5rem;      /* 24px */
+  --wz-fs-2xl: 2rem;       /* 32px */
+  --wz-fs-3xl: 2.5rem;     /* 40px */
+  --wz-fs-4xl: 3rem;       /* 48px */
+
+  --wz-fw-light: 300;
+  --wz-fw-normal: 400;
+  --wz-fw-medium: 500;
+  --wz-fw-semibold: 600;
+  --wz-fw-bold: 700;
+
+  --wz-lh-tight: 1.25;
+  --wz-lh-normal: 1.5;
+  --wz-lh-relaxed: 1.75;
+
+  /* ── Spacing (4px base unit) ── */
+  --wz-space-1: 0.25rem;   /* 4px */
+  --wz-space-2: 0.5rem;    /* 8px */
+  --wz-space-3: 0.75rem;   /* 12px */
+  --wz-space-4: 1rem;      /* 16px */
+  --wz-space-5: 1.25rem;   /* 20px */
+  --wz-space-6: 1.5rem;    /* 24px */
+  --wz-space-8: 2rem;      /* 32px */
+  --wz-space-10: 2.5rem;   /* 40px */
+  --wz-space-12: 3rem;     /* 48px */
+  --wz-space-16: 4rem;     /* 64px */
+  --wz-space-20: 5rem;     /* 80px */
+
+  /* ── Border Radius ── */
+  --wz-radius-sm: 4px;
+  --wz-radius-md: 8px;
+  --wz-radius-lg: 12px;
+  --wz-radius-xl: 16px;
+  --wz-radius-2xl: 24px;
+  --wz-radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --wz-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --wz-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --wz-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --wz-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --wz-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  --wz-shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --wz-shadow-glow: 0 0 20px rgba(233, 69, 96, 0.3);
+
+  /* ── Transitions ── */
+  --wz-transition-fast: 150ms ease;
+  --wz-transition-base: 250ms ease;
+  --wz-transition-slow: 350ms ease;
+  --wz-transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-Index Scale ── */
+  --wz-z-dropdown: 100;
+  --wz-z-sticky: 200;
+  --wz-z-fixed: 300;
+  --wz-z-overlay: 400;
+  --wz-z-modal: 500;
+  --wz-z-popover: 600;
+  --wz-z-toast: 700;
+
+  /* ── Container Widths ── */
+  --wz-container-sm: 640px;
+  --wz-container-md: 768px;
+  --wz-container-lg: 1024px;
+  --wz-container-xl: 1200px;
+  --wz-container-2xl: 1400px;
+}
