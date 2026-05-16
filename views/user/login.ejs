@@ -1,240 +1,176 @@
 <%- include('../layout/header') %>
-<link rel="stylesheet" href="css/mystyle.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
-    .is-valid {
-        border-color: green;
-    }
-
-    .is-valid::after {
-        content: '✔';
-        color: green;
-        position: absolute;
-        right: 15px;
-        top: calc(50% - 10px);
-    }
-
-    .is-invalid {
-        border-color: red;
-    }
-
-    .is-invalid::after {
-        content: '✖';
-        color: red;
-        position: absolute;
-        right: 15px;
-        top: calc(50% - 10px);
-    }
-
-    .error-message {
-        color: red;
-        font-size: 12px;
-        margin-top: 4px;
-    }
-
-    .password-toggle {
-        position: absolute;
-        right: 10px;
-        top: calc(50% - 10px);
-        cursor: pointer;
-    }
+  .wz-auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--wz-primary) 0%, var(--wz-primary-light) 50%, var(--wz-secondary) 100%);
+    padding: var(--wz-space-4);
+  }
+  .wz-auth-card {
+    background: var(--wz-white);
+    border-radius: var(--wz-radius-xl);
+    box-shadow: var(--wz-shadow-2xl);
+    overflow: hidden;
+    max-width: 860px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+  }
+  .wz-auth-brand {
+    background: var(--wz-primary);
+    color: var(--wz-white);
+    padding: var(--wz-space-10);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .wz-auth-brand i { font-size: 3rem; color: var(--wz-accent); margin-bottom: var(--wz-space-4); }
+  .wz-auth-brand h2 { font-size: var(--wz-fs-2xl); margin-bottom: var(--wz-space-3); color: var(--wz-white); }
+  .wz-auth-brand p { color: var(--wz-gray-400); font-size: var(--wz-fs-sm); margin-bottom: var(--wz-space-6); }
+  .wz-google-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--wz-space-3);
+    background: rgba(255,255,255,0.08);
+    color: var(--wz-white);
+    padding: var(--wz-space-3) var(--wz-space-6);
+    border-radius: var(--wz-radius-md);
+    font-size: var(--wz-fs-sm);
+    font-weight: var(--wz-fw-medium);
+    transition: all var(--wz-transition-fast);
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .wz-google-btn:hover { background: rgba(255,255,255,0.14); color: var(--wz-white); }
+  .wz-auth-form { padding: var(--wz-space-10); }
+  .wz-auth-form h2 { font-size: var(--wz-fs-xl); margin-bottom: var(--wz-space-8); }
+  .wz-auth-form .wz-form-group { margin-bottom: var(--wz-space-5); }
+  .wz-auth-form .wz-form-control { padding: var(--wz-space-3) var(--wz-space-4); }
+  .wz-pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--wz-gray-500); }
+  @media (max-width: 767px) {
+    .wz-auth-card { grid-template-columns: 1fr; }
+    .wz-auth-brand { padding: var(--wz-space-6); }
+    .wz-auth-form { padding: var(--wz-space-6); }
+  }
 </style>
 
-<div id="page">
-    <section class="_form_05">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="_form-05-box ">
-                        <div class="row">
-                            <div class="col-sm-5 _lk_nb">
-                                <div class="form-05-box-a text-center">
-                                    <div class="_form_05_logo mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fa-brands fa-wizards-of-the-coast" style="color: #ffffff; font-size: rem;"></i>
-                                            <h2 class="mb-0 ms-2">Wizcart</h2>
-                                        </div>
-                                        <p>Login using social media to get quick access</p>
-                                    </div>
-                                    <div class="_form_05_socialmedia">
-                                        <ol class="list-unstyled">
-                                            <li><a href="/signup/google"><i class="fa fa-google-plus"></i></a> Sign With Google</li>
-                                        </ol>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-7 _nb-pl">
-                                <div class="_mn_df">
-                                    <div class="main-head">
-                                        <h2>Login to your account</h2>
-                                    </div>
-                                    <form id="loginForm">
-                                        <div class="form-group position-relative">
-                                            <input type="email" name="email" class="form-control" id="email" placeholder="Enter Email" required onkeyup="vemail()">
-                                            <div id="errmesg-email" class="error-message">&nbsp;</div>
-                                        </div>
-                                        <div class="form-group position-relative">
-                                            <input type="password" name="password" class="form-control" id="password" placeholder="Enter Password" required onkeyup="vpassword()">
-                                            <i class="fa fa-eye password-toggle" id="togglePassword"></i>
-                                            <div id="errmesg-password" class="error-message">&nbsp;</div>
-                                        </div>
-                                        <div class=" mb-5 d-flex justify-content-end ">
-                                            <a href="/forgetpassword">forgot password?</a>
-                                         </div>
-                                        <div class="">
-                                            <p>Don't have an account? <a href="/signup" class="text-danger">Sign Up</a></p>
-                                        </div>
-                                        <input class="_btn_04" type="submit" value="Login">
-
-                                        <% if (typeof(message) !== 'undefined') { %>
-                                            <h4 class="text-center text-danger"><%= message %></h4>
-                                        <% } %>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="wz-auth-page">
+  <div class="wz-auth-card">
+    <div class="wz-auth-brand">
+      <img src="../images/logo.png" alt="Logo" style="width: 180px; height: 60px; object-fit: contain; margin-bottom: var(--wz-space-4);">
+      <p>Login using social media to get quick access</p>
+      <a href="/signup/google" class="wz-google-btn">
+        <i class="fab fa-google"></i> Sign in with Google
+      </a>
+    </div>
+    <div class="wz-auth-form">
+      <h2>Login to your account</h2>
+      <form id="loginForm">
+        <div class="wz-form-group">
+          <label class="wz-form-label" for="email">Email</label>
+          <input type="email" name="email" class="wz-form-control" id="email" placeholder="Enter your email" required onkeyup="vemail()">
+          <div id="errmesg-email" class="wz-form-error"></div>
         </div>
-    </section>
-    <div class="errorMessageDiv"></div>
-    <footer id="colorlib-footer" role="contentinfo">
-        <!-- footer content -->
-    </footer>
+        <div class="wz-form-group" style="position: relative;">
+          <label class="wz-form-label" for="password">Password</label>
+          <input type="password" name="password" class="wz-form-control" id="password" placeholder="Enter your password" required onkeyup="vpassword()">
+          <i class="fa fa-eye wz-pw-toggle" id="togglePassword"></i>
+          <div id="errmesg-password" class="wz-form-error"></div>
+        </div>
+        <div style="text-align: right; margin-bottom: var(--wz-space-4);">
+          <a href="/forgetpassword" style="font-size: var(--wz-fs-sm);">Forgot password?</a>
+        </div>
+        <div style="margin-bottom: var(--wz-space-4);">
+          <p style="font-size: var(--wz-fs-sm); color: var(--wz-text-secondary);">Don't have an account? <a href="/signup" style="color: var(--wz-accent); font-weight: var(--wz-fw-semibold);">Sign Up</a></p>
+        </div>
+        <button type="submit" class="wz-btn wz-btn-primary wz-btn-block wz-btn-lg">Login</button>
+        <% if (typeof(message) !== 'undefined') { %>
+          <p style="color: var(--wz-danger); text-align: center; margin-top: var(--wz-space-4); font-weight: var(--wz-fw-medium);"><%= message %></p>
+        <% } %>
+      </form>
+    </div>
+  </div>
 </div>
 
-<div class="gototop js-top">
-    <a href="#" class="js-gotop"><i class="ion-ios-arrow-up"></i></a>
-</div>
-<% if (toast.length > 0) { %>
-    <div id="toast" class="toast-black toast show"><%= toast[0] %></div>
+<% if (typeof toast !== 'undefined' && toast && toast.length > 0) { %>
+  <div id="wzToast" class="wz-toast show"><%= toast[0] %></div>
 <% } %>
 
 <script>
-document.getElementById('loginForm').addEventListener('submit', function(event) {
-    if(validateForm()) {
-        event.preventDefault(); 
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        fetch("/loginData", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ email, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                } else if (data.message) {
-                    Swal.fire({
-                        title: data.message,
-                        text: data.message,
-                        icon: 'error',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            popup: 'swal-custom-popup',
-                            title: 'swal-custom-title',
-                            content: 'swal-custom-content',
-                            confirmButton: 'swal-custom-confirm-button'
-                        }
-                    }).then(() => {
-                        if (data.redirectUrl) {
-                            window.location.href = data.redirectUrl;
-                        }
-                    });
-                }
-            })
-            .catch(error => {
-                Swal.fire({
-                    title: 'Error!',
-                    text: error.message,
-                    icon: 'error',
-                    confirmButtonText: 'Try Again',
-                    customClass: {
-                        popup: 'swal-custom-popup',
-                        title: 'swal-custom-title',
-                        content: 'swal-custom-content',
-                        confirmButton: 'swal-custom-confirm-button'
-                    }
-                });
-            });
-    }
-});
+  document.addEventListener('DOMContentLoaded', function() {
+    var t = document.getElementById('wzToast');
+    if (t) setTimeout(function() { t.classList.remove('show'); }, 5000);
+  });
 
-document.addEventListener('DOMContentLoaded', function() {
-    var toast = document.getElementById('toast');
-    if (toast) {
-        toast.classList.add('show');
-        setTimeout(function() {
-            toast.classList.remove('show');
-        }, 7000);
-    }
-});
+  document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    if (!validateForm()) return;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    fetch("/loginData", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else if (data.message) {
+        Swal.fire({ title: data.message, text: data.message, icon: 'error', confirmButtonText: 'OK' })
+          .then(() => { if (data.redirectUrl) window.location.href = data.redirectUrl; });
+      }
+    })
+    .catch(error => {
+      Swal.fire({ title: 'Error!', text: error.message, icon: 'error', confirmButtonText: 'Try Again' });
+    });
+  });
 
-function vemail() {
-    const emailog = document.getElementById("email");
-    const email = emailog.value;
-    const EMAIL_REGEX = /^[^\s@]+@gmail\.com$/i;
+  function vemail() {
+    const el = document.getElementById("email");
     const err = document.getElementById("errmesg-email");
-
-    if (!EMAIL_REGEX.test(email)) {
-        err.innerHTML = 'Invalid email address';
-        emailog.classList.add('is-invalid');
-        emailog.classList.remove('is-valid');
+    if (!/^[^\s@]+@gmail\.com$/i.test(el.value)) {
+      err.innerText = 'Invalid email address';
+      el.classList.add('is-invalid');
+      el.classList.remove('is-valid');
     } else {
-        err.innerHTML = '';
-        emailog.classList.remove('is-invalid');
-        emailog.classList.add('is-valid');
+      err.innerText = '';
+      el.classList.remove('is-invalid');
+      el.classList.add('is-valid');
     }
-}
+  }
 
-function vpassword() {
-    const password = document.getElementById("password");
-    const PASSWORD_REGEX = /^[\w\d]{6,}$/;
+  function vpassword() {
+    const el = document.getElementById("password");
     const err = document.getElementById("errmesg-password");
-
-    if (!PASSWORD_REGEX.test(password.value)) {
-        err.innerHTML = 'Password must be at least 6 characters';
-        password.classList.add('is-invalid');
-        password.classList.remove('is-valid');
+    if (!/^[\w\d]{6,}$/.test(el.value)) {
+      err.innerText = 'Password must be at least 6 characters';
+      el.classList.add('is-invalid');
+      el.classList.remove('is-valid');
     } else {
-        err.innerHTML = '';
-        password.classList.remove('is-invalid');
-        password.classList.add('is-valid');
+      err.innerText = '';
+      el.classList.remove('is-invalid');
+      el.classList.add('is-valid');
     }
-}
+  }
 
-function validateForm() {
-    const emailog = document.getElementById("email");
-    const password = document.getElementById("password");
-
+  function validateForm() {
     vemail();
     vpassword();
+    return !document.querySelectorAll('.is-invalid').length;
+  }
 
-    if (emailog.classList.contains('is-invalid') || password.classList.contains('is-invalid')) {
-        return false;
-    }
-    return true;
-}
-
-document.getElementById('loginForm').addEventListener('submit', function (e) {
-    if (!validateForm()) {
-        alert('Details are incorrect');
-        e.preventDefault();
-    }
-});
-
-document.getElementById('togglePassword').addEventListener('click', function () {
-    const passwordField = document.getElementById('password');
-    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordField.setAttribute('type', type);
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    const pw = document.getElementById('password');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
     this.classList.toggle('fa-eye-slash');
-});
+  });
 </script>
 
 <%- include('../layout/footer') %>

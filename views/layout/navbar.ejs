@@ -1,0 +1,81 @@
+<nav class="wz-navbar">
+  <div class="wz-navbar-inner">
+   <a href="/home" class="wz-navbar-brand">
+  <img 
+    src="../images/logo.png" 
+    alt="Logo"
+    style="width: 180px; height: 60px; object-fit: contain;"
+  >
+</a>
+
+    <div class="wz-nav-links" id="navLinks">
+      <div class="wz-nav-search-mobile">
+        <input type="search" placeholder="Search products..." />
+      </div>
+      <a href="/home" class="active">Home</a>
+      <a href="/shopmore">Shop</a>
+      <a href="/wishlist">Wishlist</a>
+    </div>
+
+    <div class="wz-nav-actions">
+      <div class="wz-nav-search hide-mobile">
+        <i class="fas fa-search"></i>
+        <input type="search" placeholder="Search products..." />
+      </div>
+
+      <a href="/cart" class="wz-cart-btn" title="Cart">
+        <i class="fas fa-shopping-bag"></i>
+        <% if (typeof cartQuantity !== 'undefined' && cartQuantity > 0) { %>
+          <span class="wz-badge wz-badge-accent"><%= cartQuantity %></span>
+        <% } %>
+      </a>
+
+      <% if (typeof user !== 'undefined' && user !== null) { %>
+        <div class="wz-user-dropdown" id="userDropdown">
+          <a class="wz-user-dropdown-toggle" onclick="document.getElementById('userDropdown').classList.toggle('open')">
+            <i class="fas fa-user-circle"></i>
+            <span class="hide-mobile"><%= user.name %></span>
+            <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+          </a>
+          <div class="wz-user-menu">
+            <a href="/profile"><i class="fas fa-user"></i> My Account</a>
+            <a href="/getOrderHistory"><i class="fas fa-truck"></i> My Orders</a>
+            <a href="/wallet"><i class="fas fa-wallet"></i> Wallet</a>
+            <a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+          </div>
+        </div>
+      <% } else { %>
+        <a href="/login" class="wz-btn wz-btn-primary wz-btn-sm">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+      <% } %>
+
+      <div class="wz-hamburger" id="hamburger" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+  <div class="wz-mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+</nav>
+
+<script>
+  function toggleMobileMenu() {
+    document.getElementById('navLinks').classList.toggle('active');
+    document.getElementById('hamburger').classList.toggle('active');
+    document.getElementById('mobileOverlay').classList.toggle('active');
+    document.body.style.overflow = document.getElementById('navLinks').classList.contains('active') ? 'hidden' : '';
+  }
+
+  document.addEventListener('click', function(e) {
+    var dd = document.getElementById('userDropdown');
+    if (dd && !dd.contains(e.target)) dd.classList.remove('open');
+  });
+
+  window.addEventListener('scroll', function() {
+    var btn = document.querySelector('.wz-goto-top');
+    if (btn) btn.classList.toggle('visible', window.scrollY > 300);
+  });
+</script>

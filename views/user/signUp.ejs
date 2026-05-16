@@ -1,301 +1,167 @@
 <%- include('../layout/header') %>
-<link rel="stylesheet" href="css/mystyle.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
-    body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f0f2f5;
-    }
-
-    .form-container {
-        max-width: 900px;
-        margin: 50px auto;
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    .row {
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    .col-left {
-        flex: 1;
-        background-color: #88c8bc;
-        padding: 40px;
-        color: #ffffff;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-    }
-
-    .col-right {
-        flex: 1;
-        padding: 40px;
-    }
-
-    .logo {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 20px;
-    }
-
-    .social-btn {
-        background-color: #ffffff;
-        color: #333333;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 500;
-        margin-top: 20px;
-        transition: all 0.3s ease;
-    }
-
-    .social-btn:hover {
-        background-color: #f0f0f0;
-        transform: translateY(-2px);
-    }
-
-    .social-btn i {
-        margin-right: 10px;
-    }
-
-    h2 {
-        font-size: 2rem;
-        color: #333333;
-        margin-bottom: 30px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-        position: relative;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px 15px;
-        border: 1px solid #dddddd;
-        border-radius: 5px;
-        font-size: 14px;
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
-    }
-
-    .is-valid {
-        border-color: #28a745;
-    }
-
-    .is-invalid {
-        border-color: #dc3545;
-    }
-
-    .error-message {
-        color: #dc3545;
-        font-size: 12px;
-        margin-top: 5px;
-        position: absolute;
-        top: 100%;
-        left: 0;
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 12px;
-        background-color: #88c8bc;
-        border: none;
-        border-radius: 5px;
-        color: #ffffff;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .login-link {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    .login-link a {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .server-error {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-    }
+  .wz-auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--wz-primary) 0%, var(--wz-primary-light) 50%, var(--wz-secondary) 100%);
+    padding: var(--wz-space-4);
+  }
+  .wz-auth-card {
+    background: var(--wz-white);
+    border-radius: var(--wz-radius-xl);
+    box-shadow: var(--wz-shadow-2xl);
+    overflow: hidden;
+    max-width: 860px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+  }
+  .wz-auth-brand {
+    background: var(--wz-primary);
+    color: var(--wz-white);
+    padding: var(--wz-space-10);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .wz-auth-brand i { font-size: 3rem; color: var(--wz-accent); margin-bottom: var(--wz-space-4); }
+  .wz-auth-brand h2 { font-size: var(--wz-fs-2xl); margin-bottom: var(--wz-space-3); color: var(--wz-white); }
+  .wz-auth-brand p { color: var(--wz-gray-400); font-size: var(--wz-fs-sm); margin-bottom: var(--wz-space-6); }
+  .wz-google-btn {
+    display: flex; align-items: center; gap: var(--wz-space-3);
+    background: rgba(255,255,255,0.08); color: var(--wz-white);
+    padding: var(--wz-space-3) var(--wz-space-6); border-radius: var(--wz-radius-md);
+    font-size: var(--wz-fs-sm); font-weight: var(--wz-fw-medium);
+    transition: all var(--wz-transition-fast); text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .wz-google-btn:hover { background: rgba(255,255,255,0.14); color: var(--wz-white); }
+  .wz-auth-form { padding: var(--wz-space-8); }
+  .wz-auth-form h2 { font-size: var(--wz-fs-xl); margin-bottom: var(--wz-space-6); }
+  .wz-form-group { margin-bottom: var(--wz-space-5); position: relative; }
+  .wz-form-control { padding: var(--wz-space-3) var(--wz-space-4); width: 100%; border: 1.5px solid var(--wz-gray-300); border-radius: var(--wz-radius-md); font-size: var(--wz-fs-sm); transition: all 0.2s; }
+  .wz-form-control:focus { outline: none; border-color: var(--wz-accent); box-shadow: 0 0 0 3px rgba(233,69,96,0.1); }
+  .wz-form-control.is-invalid { border-color: var(--wz-danger); }
+  .wz-form-control.is-valid { border-color: var(--wz-success); }
+  .wz-form-error { color: var(--wz-danger); font-size: var(--wz-fs-xs); margin-top: 4px; position: absolute; top: 100%; left: 0; }
+  .wz-pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--wz-gray-500); }
+  .server-error { background: var(--wz-danger-bg); border: 1px solid #f5c6cb; color: #721c24; padding: var(--wz-space-3); border-radius: var(--wz-radius-md); margin-bottom: var(--wz-space-4); text-align: center; font-size: var(--wz-fs-sm); }
+  @media (max-width: 767px) {
+    .wz-auth-card { grid-template-columns: 1fr; }
+    .wz-auth-brand { padding: var(--wz-space-6); }
+    .wz-auth-form { padding: var(--wz-space-6); }
+  }
 </style>
 
-<div class="form-container">
-    <div class="row">
-        <div class="col-left">
-            <div class="logo">
-                <i class="fa-brands fa-wizards-of-the-coast"></i>
-                Wizcart
-            </div>
-            <p>Sign up using social media to get quick access</p>
-            <a href="/signup/google" class="social-btn">
-                <i class="fab fa-google"></i> Sign up with Google
-            </a>
-        </div>
-        <div class="col-right">
-            <h2>Create Your Account</h2>
-            <% if (typeof(message) !== 'undefined') { %>
-                <div class="server-error"><%= message %></div>
-            <% } %>
-            <form id="SignUPForm" action="/signupData" method="post" onsubmit="return validateForm()">
-                <div class="form-group">
-                    <input type="text" name="name" class="form-control" id="name" placeholder="Full Name" required onkeyup="vname()">
-                    <div id="errmesg-name" class="error-message"></div>
-                </div>
-                <div class="form-group">
-                    <input type="email" name="email" class="form-control" id="email" placeholder="Email Address" required onkeyup="vemail()">
-                    <div id="errmesg-email" class="error-message"></div>
-                </div>
-                <div class="form-group">
-                    <input type="password" name="password" class="form-control" id="password" placeholder="Password" required onkeyup="vpassword()">
-                    <i class="far fa-eye toggle-password" onclick="togglePassword('password')"></i>
-                    <div id="errmesg-password" class="error-message"></div>
-                </div>
-                <div class="form-group">
-                    <input type="password" name="confirm_password" class="form-control" id="confirm_password" placeholder="Confirm Password" required onkeyup="vpassword()">
-                    <i class="far fa-eye toggle-password" onclick="togglePassword('confirm_password')"></i>
-                    <div id="errmesg-confirm-password" class="error-message"></div>
-                </div>
-                <button type="submit" class="btn-submit">Sign Up</button>
-            </form>
-            <div class="login-link">
-                Already have an account? <a href="/login">Log in</a>
-            </div>
-        </div>
+<div class="wz-auth-page">
+  <div class="wz-auth-card">
+    <div class="wz-auth-brand">
+      <img src="../images/logo.png" alt="Logo" style="width: 180px; height: 60px; object-fit: contain; margin-bottom: var(--wz-space-4);">
+      <p>Sign up using social media to get quick access</p>
+      <a href="/signup/google" class="wz-google-btn">
+        <i class="fab fa-google"></i> Sign up with Google
+      </a>
     </div>
+    <div class="wz-auth-form">
+      <h2>Create Your Account</h2>
+      <% if (typeof(message) !== 'undefined') { %>
+        <div class="server-error"><%= message %></div>
+      <% } %>
+      <form id="SignUPForm" action="/signupData" method="post" onsubmit="return validateForm()">
+        <div class="wz-form-group">
+          <input type="text" name="name" class="wz-form-control" id="name" placeholder="Full Name" required onkeyup="vname()">
+          <div id="errmesg-name" class="wz-form-error"></div>
+        </div>
+        <div class="wz-form-group">
+          <input type="email" name="email" class="wz-form-control" id="email" placeholder="Email Address" required onkeyup="vemail()">
+          <div id="errmesg-email" class="wz-form-error"></div>
+        </div>
+        <div class="wz-form-group">
+          <input type="password" name="password" class="wz-form-control" id="password" placeholder="Password" required onkeyup="vpassword()">
+          <i class="far fa-eye wz-pw-toggle" onclick="togglePassword('password')"></i>
+          <div id="errmesg-password" class="wz-form-error"></div>
+        </div>
+        <div class="wz-form-group">
+          <input type="password" name="confirm_password" class="wz-form-control" id="confirm_password" placeholder="Confirm Password" required onkeyup="vpassword()">
+          <i class="far fa-eye wz-pw-toggle" onclick="togglePassword('confirm_password')"></i>
+          <div id="errmesg-confirm-password" class="wz-form-error"></div>
+        </div>
+        <button type="submit" class="wz-btn wz-btn-primary wz-btn-block wz-btn-lg" style="margin-top: var(--wz-space-4);">Sign Up</button>
+      </form>
+      <div style="text-align: center; margin-top: var(--wz-space-5);">
+        <p style="font-size: var(--wz-fs-sm); color: var(--wz-text-secondary);">Already have an account? <a href="/login" style="color: var(--wz-accent); font-weight: var(--wz-fw-semibold);">Log in</a></p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-function vemail() {
-    const emailog = document.getElementById("email");
-    const email = emailog.value;
-    const EMAIL_REGEX = /^[^\s@]+@gmail\.com$/i;
+  function vemail() {
+    const el = document.getElementById("email");
     const err = document.getElementById("errmesg-email");
-
-    if (!EMAIL_REGEX.test(email)) {
-        err.innerHTML = 'Invalid email address';
-        emailog.classList.add('is-invalid');
-        emailog.classList.remove('is-valid');
+    if (!/^[^\s@]+@gmail\.com$/i.test(el.value)) {
+      err.innerText = 'Invalid email address';
+      el.classList.add('is-invalid'); el.classList.remove('is-valid');
     } else {
-        err.innerHTML = '';
-        emailog.classList.remove('is-invalid');
-        emailog.classList.add('is-valid');
+      err.innerText = '';
+      el.classList.remove('is-invalid'); el.classList.add('is-valid');
     }
-}
+  }
 
-function vpassword() {
-    const password = document.getElementById("password");
-    const confirmPassword = document.getElementById("confirm_password");
-    const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)[\w\d]{6,}$/;
+  function vpassword() {
+    const pw = document.getElementById("password");
+    const cpw = document.getElementById("confirm_password");
     const err = document.getElementById("errmesg-password");
-    const confirmErr = document.getElementById("errmesg-confirm-password");
-
-    if (!PASSWORD_REGEX.test(password.value)) {
-        err.innerHTML = 'Password must be at least 6 characters, include an uppercase letter and a number';
-        password.classList.add('is-invalid');
-        password.classList.remove('is-valid');
+    const cerr = document.getElementById("errmesg-confirm-password");
+    if (!/^(?=.*[A-Z])(?=.*\d)[\w\d]{6,}$/.test(pw.value)) {
+      err.innerText = 'Min 6 chars, 1 uppercase, 1 number';
+      pw.classList.add('is-invalid'); pw.classList.remove('is-valid');
     } else {
-        err.innerHTML = '';
-        password.classList.remove('is-invalid');
-        password.classList.add('is-valid');
+      err.innerText = '';
+      pw.classList.remove('is-invalid'); pw.classList.add('is-valid');
     }
-
-    if (confirmPassword.value !== password.value) {
-        confirmErr.innerHTML = 'Passwords do not match';
-        confirmPassword.classList.add('is-invalid');
-        confirmPassword.classList.remove('is-valid');
+    if (cpw.value !== pw.value) {
+      cerr.innerText = 'Passwords do not match';
+      cpw.classList.add('is-invalid'); cpw.classList.remove('is-valid');
     } else {
-        confirmErr.innerHTML = '';
-        confirmPassword.classList.remove('is-invalid');
-        confirmPassword.classList.add('is-valid');
+      cerr.innerText = '';
+      cpw.classList.remove('is-invalid'); cpw.classList.add('is-valid');
     }
-}
+  }
 
-function vname() {
-    const name = document.getElementById("name");
-    const NAME_REGEX = /^[a-zA-Z ]{2,30}$/;
+  function vname() {
+    const el = document.getElementById("name");
     const err = document.getElementById("errmesg-name");
-
-    if (!NAME_REGEX.test(name.value)) {
-        err.innerHTML = 'Name must be between 2 and 30 characters';
-        name.classList.add('is-invalid');
-        name.classList.remove('is-valid');
+    if (!/^[a-zA-Z ]{2,30}$/.test(el.value)) {
+      err.innerText = 'Name must be 2–30 characters';
+      el.classList.add('is-invalid'); el.classList.remove('is-valid');
     } else {
-        err.innerHTML = '';
-        name.classList.remove('is-invalid');
-        name.classList.add('is-valid');
+      err.innerText = '';
+      el.classList.remove('is-invalid'); el.classList.add('is-valid');
     }
-}
+  }
 
-function validateForm() {
-    const emailog = document.getElementById("email");
-    const password = document.getElementById("password");
-    const confirmPassword = document.getElementById("confirm_password");
+  function validateForm() {
+    vemail(); vpassword(); vname();
+    return !document.querySelectorAll('.is-invalid').length;
+  }
 
-    vemail();
-    vpassword();
-    vname();
-
-    if (emailog.classList.contains('is-invalid') || password.classList.contains('is-invalid') || confirmPassword.classList.contains('is-invalid')) {
-        return false;
-    }
-    return true;
-}
-
-document.getElementById('SignUPForm').addEventListener('submit', function (e) {
-    if (!validateForm()) {
-        e.preventDefault();
-    }
-});
-
-function togglePassword(id) {
+  function togglePassword(id) {
     const input = document.getElementById(id);
     const icon = input.nextElementSibling;
     if (input.type === "password") {
-        input.type = "text";
-        icon.classList.replace("fa-eye", "fa-eye-slash");
+      input.type = "text";
+      icon.classList.replace("fa-eye", "fa-eye-slash");
     } else {
-        input.type = "password";
-        icon.classList.replace("fa-eye-slash", "fa-eye");
+      input.type = "password";
+      icon.classList.replace("fa-eye-slash", "fa-eye");
     }
-}
+  }
 </script>
+
+<%- include('../layout/footer') %>

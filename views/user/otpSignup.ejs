@@ -1,259 +1,159 @@
 <%- include('../layout/header') %>
-<link rel="stylesheet" href="css/mystyle.css">
+
 <style>
-    .is-valid {
-        border-color: green;
-    }
-
-    .is-valid::after {
-        content: '✔';
-        color: green;
-        position: absolute;
-        right: 15px;
-        top: calc(50% - 10px);
-    }
-
-    .is-invalid {
-        border-color: red;
-    }
-
-    .is-invalid::after {
-        content: '✖';
-        color: red;
-        position: absolute;
-        right: 15px;
-        top: calc(50% - 10px);
-    }
-
-    .error-message {
-        color: red;
-        font-size: 12px;
-        margin-top: 4px;
-    }
+  .wz-auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--wz-primary) 0%, var(--wz-primary-light) 50%, var(--wz-secondary) 100%);
+    padding: var(--wz-space-4);
+  }
+  .wz-auth-card {
+    background: var(--wz-white);
+    border-radius: var(--wz-radius-xl);
+    box-shadow: var(--wz-shadow-2xl);
+    overflow: hidden;
+    max-width: 860px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+  }
+  .wz-auth-brand {
+    background: var(--wz-primary);
+    color: var(--wz-white);
+    padding: var(--wz-space-10);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .wz-auth-brand i { font-size: 3rem; color: var(--wz-accent); margin-bottom: var(--wz-space-4); }
+  .wz-auth-brand h2 { font-size: var(--wz-fs-2xl); margin-bottom: var(--wz-space-3); color: var(--wz-white); }
+  .wz-auth-form { padding: var(--wz-space-8); }
+  .wz-auth-form h2 { font-size: var(--wz-fs-xl); margin-bottom: var(--wz-space-6); }
+  .otp-input-group { display: flex; gap: var(--wz-space-2); justify-content: center; margin-bottom: var(--wz-space-4); }
+  .otp-input {
+    width: 48px; height: 56px; text-align: center; font-size: var(--wz-fs-xl); font-weight: var(--wz-fw-bold);
+    border: 2px solid var(--wz-gray-300); border-radius: var(--wz-radius-md);
+    transition: all 0.2s; outline: none;
+  }
+  .otp-input:focus { border-color: var(--wz-accent); box-shadow: 0 0 0 3px rgba(233,69,96,0.1); }
+  .otp-input.is-valid { border-color: var(--wz-success); }
+  .otp-input.is-invalid { border-color: var(--wz-danger); }
+  @media (max-width: 767px) {
+    .wz-auth-card { grid-template-columns: 1fr; }
+    .wz-auth-brand { padding: var(--wz-space-6); }
+    .wz-auth-form { padding: var(--wz-space-6); }
+    .otp-input { width: 40px; height: 48px; font-size: var(--wz-fs-lg); }
+  }
 </style>
 
-<div id="page">
-    <nav class="colorlib-nav" role="navigation">
-        <!-- navigation content -->
-    </nav>
- 
-
-    <div class="breadcrumbs">
-        <div class="container">
-        </div>
+<div class="wz-auth-page">
+  <div class="wz-auth-card">
+    <div class="wz-auth-brand">
+      <img src="../images/logo.png" alt="Logo" style="width: 180px; height: 60px; object-fit: contain; margin-bottom: var(--wz-space-4);">
+      <p style="color: var(--wz-gray-400); font-size: var(--wz-fs-sm);">Enter the 6-digit OTP sent to your email</p>
     </div>
-    
-  
-
-    <section class="_form_05">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="_form-05-box">
-                        <div class="row">
-                            <div class="col-sm-5 _lk_nb">
-                                <div class="form-05-box-a text-center">
-                                    <div class="_form_05_logo mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fa-brands fa-wizards-of-the-coast" style="color: #ffffff; font-size: 3rem;"></i>
-                                            <h2 class="mb-0 ms-2">Wizcart</h2>
-                                        </div>
-                                    </div>
-                                    <div class="_form_05_socialmedia">
-                                        <!-- Social media links can be added here -->
-                                    </div>
-                                </div>
-                            </div>
-                         
-                              
-                            <div class="col-sm-7 _nb-pl">
-                                <div class="_mn_df">
-                                    <div class="main-head">
-                                        <h2>Sign up to your account</h2>
-                                    </div>
-                                    <form id="SignUpForm" action="/otpData" method="post" onsubmit="return validateForm()">
-                                        <div class="form-group d-flex justify-content-center mb-3">
-                                            <input type="text" class="form-control otp-input" name="otp" id="otp1" maxlength="1" onkeyup="moveToNext(this, 'otp2')" required>
-                                            <input type="text" class="form-control otp-input" name="otp" id="otp2" maxlength="1" onkeyup="moveToNext(this, 'otp3')" required>
-                                            <input type="text" class="form-control otp-input" name="otp" id="otp3" maxlength="1" onkeyup="moveToNext(this, 'otp4')" required>
-                                            <input type="text" class="form-control otp-input" name="otp" id="otp4" maxlength="1" onkeyup="moveToNext(this, 'otp5')" required>
-                                            <input type="text" class="form-control otp-input" name="otp" id="otp5" maxlength="1" onkeyup="moveToNext(this, 'otp6')" required>
-                                            <input type="text" class="form-control otp-input" name="otp" id="otp6" maxlength="1" onkeyup="moveToNext(this, null)" required>
-                                        </div>
-                                        <div id="errmesg-otp" class="error-message"></div>
-                                        <div>
-                                            <p>Already have an account? <a href="/login" class="text-danger fw-bold">Login</a></p>
-                                            <div class="mb-5 d-flex justify-content-end">
-                                                <a href="/signupOtp" class="btn btn-light" id="resendBtn" style="display: none;" onclick="resendOtp()">Resend OTP</a>
-                                                <p id="cooldownTimer" class="text-danger ms-3"></p>
-                                            </div>
-                                        </div>
-                                        <input class="btn btn-primary _btn_04" type="submit" value="Sign Up">
-                                    </form>
-                                    <p id="otpExpirationMessage" class="text-danger mt-2"></p>
-
-                                    <% if (typeof(message) !== 'undefined') { %>
-                                    <div class="alert alert-danger " role="alert">
-                                        
-                                        <P class="text-center"> <%= message %></P>
-                                         </div>
-                                         <% } %>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="otpSection" style="display: none;">
-                        <p id="otpExpirationMessage"></p>
-                        <button id="resendBtn" onclick="resendOtp()">Resend OTP</button>
-                        <p id="cooldownTimer"></p>
-                        
-
-                    </div>
-                </div>
-              
-            </div>
+    <div class="wz-auth-form">
+      <h2>Verify Your Email</h2>
+      <% if (typeof(message) !== 'undefined') { %>
+        <div style="background: var(--wz-danger-bg); border: 1px solid #f5c6cb; color: #721c24; padding: var(--wz-space-3); border-radius: var(--wz-radius-md); margin-bottom: var(--wz-space-4); text-align: center; font-size: var(--wz-fs-sm);"><%= message %></div>
+      <% } %>
+      <form id="SignUpForm" action="/otpData" method="post" onsubmit="return validateForm()">
+        <div class="otp-input-group">
+          <input type="text" class="otp-input" name="otp" id="otp1" maxlength="1" onkeyup="moveToNext(this, 'otp2')" required>
+          <input type="text" class="otp-input" name="otp" id="otp2" maxlength="1" onkeyup="moveToNext(this, 'otp3')" required>
+          <input type="text" class="otp-input" name="otp" id="otp3" maxlength="1" onkeyup="moveToNext(this, 'otp4')" required>
+          <input type="text" class="otp-input" name="otp" id="otp4" maxlength="1" onkeyup="moveToNext(this, 'otp5')" required>
+          <input type="text" class="otp-input" name="otp" id="otp5" maxlength="1" onkeyup="moveToNext(this, 'otp6')" required>
+          <input type="text" class="otp-input" name="otp" id="otp6" maxlength="1" onkeyup="moveToNext(this, null)" required>
         </div>
-    </section>
-
-
+        <div id="errmesg-otp" style="color: var(--wz-danger); font-size: var(--wz-fs-xs); text-align: center; min-height: 18px;"></div>
+        <p id="otpExpirationMessage" style="color: var(--wz-accent); text-align: center; font-size: var(--wz-fs-sm); margin: var(--wz-space-3) 0;"></p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--wz-space-4);">
+          <p style="font-size: var(--wz-fs-sm); margin: 0;">Already have an account? <a href="/login" style="color: var(--wz-accent); font-weight: var(--wz-fw-semibold);">Login</a></p>
+          <a href="/signupOtp" class="wz-btn wz-btn-outline wz-btn-sm" id="resendBtn" style="display: none;">Resend OTP</a>
+        </div>
+        <button type="submit" class="wz-btn wz-btn-primary wz-btn-block wz-btn-lg">Verify & Sign Up</button>
+      </form>
+    </div>
+  </div>
 </div>
 
-
-    
- 
- 
-
-
-<div class="gototop js-top">
-    <a href="#" class="js-gotop"><i class="ion-ios-arrow-up"></i></a>
-</div>
-
-
-<% if (toast.length > 0) { %>
-    <div id="toast" class="toast-black toast show"><%= toast[0] %></div>
-<% } %>
+<%- include('../layout/toast') %>
 
 <script>
-    function moveToNext(current, nextFieldID) {
-        if (current.value.length === current.maxLength) {
-            if (nextFieldID) {
-                document.getElementById(nextFieldID).focus();
-            } else {
-                current.blur(); // Unfocus the current input if it's the last one
-            }
-        }
+  function moveToNext(current, nextFieldID) {
+    if (current.value.length === current.maxLength) {
+      if (nextFieldID) document.getElementById(nextFieldID).focus();
+      else current.blur();
     }
+  }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var toast = document.getElementById('toast');
-        if (toast) {
-            toast.classList.add('show');
-            // Hide the toast message after 3 seconds (3000 milliseconds)
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 7000);
-        }
-    });
+  let otpExpirationTime = 60;
+  let resendCooldownTime = 60;
+  let resendCooldownInterval;
+  let countdownInterval;
 
-    let otpExpirationTime = 60; // OTP expiration time in seconds
-    let resendCooldownTime = 60; // Cooldown time for resend in seconds
-    let resendCooldownInterval;
-    let countdownInterval;
+  function startResendCooldown() {
+    let secondsLeft = localStorage.getItem('cooldownSecondsLeft') || resendCooldownTime;
+    document.getElementById('resendBtn').style.display = 'none';
+    if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+    resendCooldownInterval = setInterval(() => {
+      secondsLeft--;
+      localStorage.setItem('cooldownSecondsLeft', secondsLeft);
+      if (secondsLeft <= 0) {
+        clearInterval(resendCooldownInterval);
+        document.getElementById('resendBtn').style.display = 'inline-flex';
+        localStorage.removeItem('cooldownSecondsLeft');
+      }
+    }, 1000);
+  }
 
-    function startResendCooldown() {
-        let secondsLeft = localStorage.getItem('cooldownSecondsLeft') || resendCooldownTime;
-        document.getElementById('resendBtn').style.display = 'none'; // Hide resend button during cooldown
-        document.getElementById('cooldownTimer').innerText = `    `; // Display cooldown timer message
+  function startOTPTimer() {
+    let secondsLeft = localStorage.getItem('otpExpirationTime') || otpExpirationTime;
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      secondsLeft--;
+      let minutes = Math.floor(secondsLeft / 60);
+      let seconds = secondsLeft % 60;
+      document.getElementById('otpExpirationMessage').innerText = `OTP expires in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      localStorage.setItem('otpExpirationTime', secondsLeft);
+      if (secondsLeft <= 0) {
+        clearInterval(countdownInterval);
+        document.getElementById('otpExpirationMessage').innerText = 'OTP has expired. Please resend.';
+        localStorage.removeItem('otpExpirationTime');
+        document.getElementById('resendBtn').style.display = 'inline-flex';
+      }
+    }, 1000);
+  }
 
-        if (resendCooldownInterval) {
-            clearInterval(resendCooldownInterval);
-        }
-
-        resendCooldownInterval = setInterval(() => {
-            secondsLeft--;
-            document.getElementById('cooldownTimer');
-            localStorage.setItem('cooldownSecondsLeft', secondsLeft);
-            if (secondsLeft <= 0) {
-                clearInterval(resendCooldownInterval);
-                document.getElementById('resendBtn').innerText = 'Resend OTP';
-                document.getElementById('resendBtn').style.display = 'inline-block'; // Show resend button after cooldown
-                document.getElementById('cooldownTimer').innerText = '';
-                localStorage.removeItem('cooldownSecondsLeft');
-            }
-        }, 1000);
+  function validateOtp() {
+    const inputs = document.querySelectorAll('.otp-input');
+    let val = '';
+    inputs.forEach(i => val += i.value);
+    const err = document.getElementById("errmesg-otp");
+    if (!/^[\d]{6}$/.test(val)) {
+      err.innerText = 'OTP must be a 6-digit number';
+      inputs.forEach(i => { i.classList.add('is-invalid'); i.classList.remove('is-valid'); });
+      return false;
     }
+    err.innerText = '';
+    inputs.forEach(i => { i.classList.remove('is-invalid'); i.classList.add('is-valid'); });
+    return true;
+  }
 
-    function startOTPTimer() {
-        let secondsLeft = localStorage.getItem('otpExpirationTime') || otpExpirationTime;
+  function validateForm() {
+    if (!validateOtp()) { return false; }
+    return true;
+  }
 
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-        }
-
-        countdownInterval = setInterval(() => {
-            secondsLeft--;
-            let minutes = Math.floor(secondsLeft / 60);
-            let seconds = secondsLeft % 60;
-            document.getElementById('otpExpirationMessage').innerText = `OTP will expire in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            localStorage.setItem('otpExpirationTime', secondsLeft);
-            if (secondsLeft <= 0) {
-                clearInterval(countdownInterval);
-                document.getElementById('otpExpirationMessage').innerText = 'OTP has expired. Please resend OTP.';
-                localStorage.removeItem('otpExpirationTime');
-                document.getElementById('resendBtn').style.display = 'inline-block'; // Show resend button when OTP expires
-            }
-        }, 1000);
-    }
-
-    function resendOtp() {
-        if (!resendCooldownInterval) {
-            // Reset OTP timer
-            localStorage.removeItem('otpExpirationTime');
-            startOTPTimer();
-            startResendCooldown();
-        }
-    }
-
-    function validateOtp() {
-        const otpInputs = document.querySelectorAll('.otp-input');
-        let otpValue = '';
-        otpInputs.forEach(input => {
-            otpValue += input.value;
-        });
-
-        const OTP_REGEX = /^[\d]{6}$/;
-        const err = document.getElementById("errmesg-otp");
-
-        if (!OTP_REGEX.test(otpValue)) {
-            err.innerHTML = 'OTP must be a 6-digit number';
-            otpInputs.forEach(input => {
-                input.classList.add('is-invalid');
-                input.classList.remove('is-valid');
-            });
-            return false;
-        } else {
-            err.innerHTML = '';
-            otpInputs.forEach(input => {
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-            });
-            return true;
-        }
-    }
-
-    function validateForm() {
-        const isOtpValid = validateOtp();
-
-        if (!isOtpValid) {
-            alert('Enter a valid OTP');
-            return false;
-        }
-        return true;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        startOTPTimer();
-        startResendCooldown();
-    });
+  document.addEventListener('DOMContentLoaded', function() {
+    startOTPTimer();
+    startResendCooldown();
+  });
 </script>
+
 <%- include('../layout/footer') %>

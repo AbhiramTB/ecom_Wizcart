@@ -1,49 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Banned</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f8d7da;
-        }
-        .ban-card {
-            background-color: white;
-            border: 1px solid #f5c6cb;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .ban-card .fa-ban {
-            font-size: 100px;
-            color: #dc3545;
-        }
-        .ban-card h1 {
-            color: #dc3545;
-        }
-        .ban-card p {
-            color: #6c757d;
-        }
-        .btn-home {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="ban-card">
-        <i class="fa-solid fa-ban"></i>
-        <h1>User BLOCKED</h1>
-        <p>Your account has been blocked </p>
-        <p>If you believe this is a mistake, please contact Wizcart  support team.</p>
-        <a href="/" class="btn btn-danger btn-home">Return to Home</a>
-    </div>
-</body>
-</html>
+<%- include('../layout/header') %>
+
+<style>
+  .wz-ban-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    padding: var(--wz-space-4);
+  }
+  .wz-ban-card {
+    background: var(--wz-white);
+    border-radius: var(--wz-radius-xl);
+    padding: var(--wz-space-12);
+    text-align: center;
+    box-shadow: var(--wz-shadow-xl);
+    max-width: 480px;
+    width: 100%;
+  }
+  .wz-ban-card .wz-ban-icon {
+    font-size: 5rem;
+    color: var(--wz-danger);
+    margin-bottom: var(--wz-space-6);
+  }
+  .wz-ban-card h1 {
+    color: var(--wz-danger);
+    font-size: var(--wz-fs-2xl);
+    margin-bottom: var(--wz-space-3);
+  }
+  .wz-ban-card p {
+    color: var(--wz-text-secondary);
+    font-size: var(--wz-fs-sm);
+    margin-bottom: var(--wz-space-2);
+  }
+</style>
+
+<div class="wz-ban-page">
+  <div class="wz-ban-card">
+    <i class="fa-solid fa-ban wz-ban-icon"></i>
+    <h1>Account Blocked</h1>
+    <p>Your account has been blocked by the administrator.</p>
+    <p>If you believe this is a mistake, please contact the Wizcart support team.</p>
+    <a href="/" class="wz-btn wz-btn-danger wz-btn-lg" style="margin-top: var(--wz-space-6);">Return to Home</a>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

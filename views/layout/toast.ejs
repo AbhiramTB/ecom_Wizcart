@@ -1,0 +1,12 @@
+<% if (typeof toast !== 'undefined' && toast && toast.length > 0) { %>
+  <div id="wzToast" class="wz-toast show"><%= toast[0] %></div>
+<% } %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var t = document.getElementById('wzToast');
+    if (t) {
+      setTimeout(function() { t.classList.remove('show'); }, 3000);
+    }
+  });
+</script>
