@@ -12,7 +12,7 @@ adminRoute.get("/admin", isLogout, adminController.adminLogin);
 adminRoute.post("/adminLoginData", isLogout, adminController.adminLogindata);
 
 // HOME PAGE
-adminRoute.get("/dashboard", adminController.dashBord);
+adminRoute.get("/dashboard",isLogin, adminController.dashBord);
 
 // USER MANAGEMENT
 adminRoute.get("/userList", isLogin, adminController.userList);
@@ -39,11 +39,11 @@ adminRoute.post("/editcategory", isLogin, adminController.editCategory);
 adminRoute.get("/logout", isLogin, adminController.logout);
 
 //orderMangement
-adminRoute.get("/orderMangement", adminController.orderMangement);
-adminRoute.post("/update-status", adminController.updateStatus);
-adminRoute.get('/returnOrders',adminController.returnOrders)
-adminRoute.put('/acceptReturn', adminController.acceptAndRefund);
-adminRoute.put('/reject', adminController.rejectReturn);
+adminRoute.get("/orderMangement", isLogin,adminController.orderMangement);
+adminRoute.post("/update-status", isLogin, adminController.updateStatus);
+adminRoute.get('/returnOrders',isLogin,adminController.returnOrders)
+adminRoute.put('/acceptReturn', isLogin,adminController.acceptAndRefund);
+adminRoute.put('/reject', isLogin,adminController.rejectReturn);
 
 
 // COUPON MANGEMENT
@@ -69,7 +69,7 @@ adminRoute.post("/remove-offer", isLogin, adminController.removeOffer);
 adminRoute.get("/download/excel", isLogin, adminController.downloadExcel);
 adminRoute.get("/download/pdf", isLogin, adminController.downloadPdf);
 
-adminRoute.get('/ledger',adminController.ledger)
+adminRoute.get('/ledger',isLogin,adminController.ledger)
 
 
 module.exports = {

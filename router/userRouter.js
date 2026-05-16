@@ -42,7 +42,7 @@ userRoute.get("/home", isLogin, userController.homeLogin);
 userRoute.get("/shopmore",userController.shopmore);
 
 // SINGLE PRODUCT ---------------
-userRoute.get("/singleProduct:id", userController.singleProduct);
+userRoute.get("/singleProduct/:id", userController.singleProduct);
 
 // PROFILE-EDIT ------------------
 userRoute.get("/profile", isLogin, userController.profile);
@@ -99,8 +99,8 @@ userRoute.post('/api/payment/capture', paymentController.verifyPayment);
 
 
 // wishlist
-userRoute.get('/wishlist',userController.getWishlist)
-userRoute.put('/wishlist/remove/:id', userController.removeWishlist)
+userRoute.get('/wishlist',isLogin,userController.getWishlist)
+userRoute.put('/wishlist/remove/:id',isLogin, userController.removeWishlist)
   
 userRoute.post('/complete-Payment',paymentController.completePayment)
 
