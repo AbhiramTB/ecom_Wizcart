@@ -3,6 +3,7 @@ const app = express();
 const userRoute = require("./router/userRouter");
 const adminRoute = require("./router/adminRouter");
 const path = require("path");
+var morgan = require('morgan')
 
 const session = require("express-session");
 const mongoose = require("mongoose");
@@ -14,11 +15,9 @@ const productAddRoute = require("./controller/productAdding");
 const methodOverride = require("method-override");
 const cors = require('cors');
 
-require('dotenv').config()
+const env = require("./lib/env");
 
-const port = process.env.PORT||3000
-
-mongoose.connect(process.env.mongodbConnect);
+mongoose.connect(env.MONGODB_CONNECT);
 
 
 app.use(productAddRoute.productAddRoute);
@@ -28,23 +27,23 @@ app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
 const googleAuth = require("./auth/google");
 
-app.use(cookieParser("keyboard cat"));
+app.use(cookieParser(env.COOKIE_SECRET));
 app.use(flash());
-app.use(cors());
+app.use(cors({
+  origin:`http://localhost:${env.PORT}`,
+  credentials:true
+}));
 
 
 app.use(
   session({
-    secret:process.env.wizcartSecret,
+    secret: env.SESSION_SECRET,
     resave: true,
     saveUninitialized: false,
   })
 );
 
 
-app.get("/", (req, res) => {
-  res.send("Server Working");
-});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -53,6 +52,6 @@ app.use(express.static(path.join(__dirname,"public")));
 
 app.use(userRoute.userRoute);
 app.use(adminRoute.adminRoute);
-app.listen(process.env.PORT, () => console.log(`http://localhost:${process.env.PORT}`));
+app.listen(env.PORT, () => console.log(`http://localhost:${env.PORT}`));
 
 app.use(googleAuth.authRoute);
