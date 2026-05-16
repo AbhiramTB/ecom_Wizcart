@@ -1,3 +1,5 @@
+const { sanitizeUser } = require("../lib/userSanitizer");
+const { getCartQuantity } = require("../lib/cartHelper");
 const { log, error, Console } = require("console");
 const object_id = require('mongoose').Types.ObjectId;
 const WishList = require('../model/wishlistModel'); // Update the path to your WishList model
@@ -33,26 +35,12 @@ const homeLogin = async (req, res) => {
         const user = await User.findById(req.session.user_id);
 
         if (user) {
-          const cartQuantityResult = await Cart.aggregate([
-            {
-              $match: {
-                user_id: new mongoose.Types.ObjectId(req.session.user_id),
-              },
-            },
-            { $unwind: "$Product" },
-            { $group: { _id: null, productCount: { $sum: 1 } } },
-          ]);
-
-          const cartQuantity =
-            cartQuantityResult.length > 0
-              ? cartQuantityResult[0].productCount
-              : 0;
-
+          const cartQuantity = await getCartQuantity(req.session.user_id);
           console.log("This is the new cart quantity: " + cartQuantity);
 
           res.render("user/home", {
             products: products,
-            user: user,
+            user: sanitizeUser(user),
             toast,
             cartQuantity,
           });
@@ -60,7 +48,7 @@ const homeLogin = async (req, res) => {
           res.redirect("/login");
         }
       } else {
-        res.render("user/home", { products: products, toast });
+        res.render("user/home", { products: products, user: typeof user !== "undefined" ? sanitizeUser(user) : null, toast });
       }
     } else {
       res.status(404).render("404");
@@ -81,7 +69,7 @@ const home = async (req, res) => {
 
         if (user) {
           const toast = ["LOGIN SUCCESSFULLY ✅"];
-          res.render("user/home", { products: products, user: user, toast });
+          res.render("user/home", { products: products, user: sanitizeUser(user), toast });
         } else {
           res.redirect("/login");
         }
@@ -90,7 +78,7 @@ const home = async (req, res) => {
         if (toast.length === 0) {
           console.log("No toast messages");
           toast = [];
-          res.render("user/home", { products: products, toast });
+          res.render("user/home", { products: products, user: typeof user !== "undefined" ? sanitizeUser(user) : null, toast });
         }
       }
     } else {
@@ -182,17 +170,7 @@ const shopmore = async (req, res) => {
     if (req.session.user_id) {
       user = await User.findOne({ _id: req.session.user_id });
 
-      const cartQuantityResult = await Cart.aggregate([
-        {
-          $match: { user_id: new mongoose.Types.ObjectId(req.session.user_id) },
-        },
-        { $unwind: "$Product" },
-        { $group: { _id: null, productCount: { $sum: 1 } } },
-      ]);
-
-      if (cartQuantityResult && cartQuantityResult.length > 0) {
-        cartQuantity = cartQuantityResult[0].productCount;
-      }
+      cartQuantity = await getCartQuantity(req.session.user_id);
     }
 
     res.render("user/shopmore", {
@@ -207,7 +185,7 @@ const shopmore = async (req, res) => {
       sortOption,
       pageNum,
       totalPages,
-      user: user,
+      user: sanitizeUser(user),
       cartQuantity,
     });
   } catch (error) {
@@ -469,14 +447,24 @@ const otpData = async (req, res) => {
 
 const singleProduct = async (req, res) => {
   try {
+
     const singleId = req.params.id;
-   
-    const existingWishlist = await WishList.findOne({ user_id: req.session.user_id, productId: singleId });
-  
- 
+
+    console.log('-----------dfdfdf-fdfd-dfdf');
+
+    const existingWishlist = await WishList.findOne({
+      user_id: req.session.user_id,
+      productId: singleId
+    });
 
     console.log(singleId);
+
     const singleProduct = await Product.findOne({ _id: singleId });
+
+    if (!singleProduct) {
+      return res.status(404).send('Product not found');
+    }
+
     console.log(singleProduct.product_name);
 
     const cartExist = await Cart.findOne({
@@ -484,21 +472,36 @@ const singleProduct = async (req, res) => {
       "Product.productId": singleId,
     });
 
-    let isCartexist;
+    let isCartexist = 0;
+
     if (cartExist) {
       isCartexist = 1;
     }
 
     console.log(isCartexist);
 
-    res.render("user/singleProduct", {
-      singleProduct: singleProduct,
-      isCartexist,existingWishlist,
+    const user = await User.findOne({
+      _id: req.session.user_id
     });
+
+    const cartQuantity = await getCartQuantity(req.session.user_id);
+
+    res.render("user/singleProduct", {
+      singleProduct,
+      isCartexist,
+      existingWishlist,
+      user: sanitizeUser(user) || "",
+      cartQuantity: cartQuantity || 0,
+    });
+
   } catch (error) {
+
     console.log(error.message);
+
+    res.status(500).send(error.message);
   }
 };
+
 
 const logout = async (req, res) => {
   try {
@@ -520,7 +523,7 @@ const profile = async (req, res) => {
   try {
     if (req.session.user_id) {
       const userDetails = await User.findById(req.session.user_id);
-      res.render("user/Profile", { user: userDetails, toast: [] });
+      res.render("user/Profile", { user: sanitizeUser(userDetails), toast: [] });
     } else {
       req.flash("info", " 🚨 LOGIN FIRST ");
       res.redirect("/wizcart");
@@ -866,7 +869,7 @@ const manageaddress = async (req, res) => {
     const data = await User.findById({ _id: req.session.user_id });
     console.log();
     let toast = [];
-    res.render("user/manageAddress", { user: data, toast });
+    res.render("user/manageAddress", { user: sanitizeUser(data), toast });
   } catch (error) {}
 };
 
@@ -1131,10 +1134,10 @@ const cart = async (req, res) => {
       res.render("user/cart", {
         cartItems: result[0].items,
         totalAmount: result[0].totalAmount,
-        user,
+        user: sanitizeUser(user),
       });
     } else {
-      res.render("user/cart", { cartItems: [], totalAmount: 0 });
+      res.render("user/cart", { cartItems: [], totalAmount: 0, user: typeof user !== "undefined" ? sanitizeUser(user) : null });
     }
   } catch (error) {
     console.log(error.message);
@@ -1338,13 +1341,13 @@ const checkOut = async (req, res) => {
         discount: result[0].discount,
         finalPrice: result[0].finalPrice,
         couponDetails: result[0].couponDetails, // Include coupon details in the template
-        user,
+        user: sanitizeUser(user),
          key: RAZORPAY_ID_KEY ,
          coupon,
          wallet:wallet1
       });
     } else {
-      res.render("user/checkout", { cartItems: [], totalAmount: 0, discount: 0, couponDetails: {} });
+      res.render("user/checkout", { cartItems: [], totalAmount: 0, discount: 0, couponDetails: {}, user: typeof user !== "undefined" ? sanitizeUser(user) : null });
     }
   } catch (error) {
     console.error('Error during checkout:', error);
@@ -1475,7 +1478,7 @@ const getOrderHistory = async (req, res) => {
     }
 
     let toast = req.flash("info");
-    res.render("user/myOrders", { orders, toast, orderPayment });
+    res.render("user/myOrders", { orders, toast, orderPayment, user: typeof user !== "undefined" ? sanitizeUser(user) : null });
   } catch (error) {
     console.error("Error in getOrderHistory:", error);
     res.status(500).render("error", {
@@ -2048,9 +2051,11 @@ const getWishlist = async (req, res) => {
 
       // Log the first item for debugging
       console.log(wishlistItems[0]);
+      const user = await User.findOne({ _id: req.session.user_id });
+      const cartQuantity = await getCartQuantity(req.session.user_id);
 
       // Render the wishlist view with the aggregated wishlist items
-      res.render('user/wishlist', { wishlistItems });
+      res.render("user/wishlist", { wishlistItems, user:  sanitizeUser(user),cartQuantity });
 
   } catch (error) {
       console.error(error.message);
@@ -2065,7 +2070,7 @@ const getWallet = async (req, res) => {
       const wallet = await Wallet.findOne({ user_id: new object_id(req.session.user_id) });
       // If wallet is not found, return an error message or redirect
       if (!wallet) {
-        res.render('user/walletNotexist') 
+        res.render("user/walletNotexist", { user: typeof user !== "undefined" ? sanitizeUser(user) : null }) 
 
       }
       const user = await User.findOne({ _id: req.session.user_id });
@@ -2073,7 +2078,8 @@ const getWallet = async (req, res) => {
       // Render the wallet page with the wallet data
       res.render('user/wallet', {
           balance: wallet.balance,
-          transactions: wallet.transactions,user
+          transactions: wallet.transactions,
+          user: sanitizeUser(user)
       });
   } catch (error) {
       console.error(error);
@@ -2114,7 +2120,7 @@ const paymentPending= async (req,res)=>{
 
     const clearCart = await Cart.deleteOne({ user_id: new mongoose.Types.ObjectId(req.session.user_id)});
    if(clearCart){
-    res.render('user/orderPending')
+    res.render('user/orderPending', { user: typeof user !== "undefined" ? sanitizeUser(user) : null });
 
    }
   } catch (error) {
