@@ -26,11 +26,12 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
 const googleAuth = require("./auth/google");
+const e = require("express");
 
 app.use(cookieParser(env.COOKIE_SECRET));
 app.use(flash());
 app.use(cors({
-  origin:`http://localhost:${env.PORT}`,
+  origin:env.CORS_ORIGIN,
   credentials:true
 }));
 
