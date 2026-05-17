@@ -319,6 +319,7 @@
 }
 
 .wz-navbar-brand {
+  
   display: flex;
   align-items: center;
   gap: var(--wz-space-2);
