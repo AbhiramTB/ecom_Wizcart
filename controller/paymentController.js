@@ -250,7 +250,7 @@ const createOrder = async (req, res) => {
   }
 };
 
-console.log('======================================================================================================================');
+
 
 
 const verifyPayment = async (req, res) => {
@@ -437,15 +437,12 @@ const completePayment = async (req, res) => {
   
 
 
-  console.log('-------------------------------------------------------------------------------------------------------------------------------------------------------------------');
   
   const captureContinuePayment = async (req, res) => {
     try {
       const { payment_id, order_id, signature,orderObjid} = req.body;
   
-      console.log("============================"+orderObjid);
-      
-     console.log("order id ______:::____:::__::__::_::_:__:_::_::_::_"+order_id);
+  
      
 
 

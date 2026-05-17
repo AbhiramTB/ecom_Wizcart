@@ -2,16 +2,15 @@
 
 <style>
   .order-card {
-  background-color:#88c8bc8e;
-  border: none;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  background-color:var(--wz-bg-nav);
+   border: none;
   border-radius: 10px;
   overflow: hidden;
-  border: 2px solid#749690; /* Debugging border */
+  border: 2px solid#010714; /* Debugging border */
 }
 
 .product-cart {
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -71,10 +70,10 @@
           <div class="alert alert-info">No orders found.</div>
         <% } else { %>
           <% orders.forEach((order ,i)=> { %>
-            <div class="order-card mb-5 mt-5">
+            <div class="order-card mb-5 mt-5 bg-body-secondary text-dark">
               <div class="order-header">
                  <br>  
-                <p class="ps-3"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></p>
+                <p class="ps-3 text-light"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></p>
               </div>
              
              
@@ -641,7 +640,6 @@
 
 
    
-  <%- include('../layout/site-footer') %>
     </div>
        
 

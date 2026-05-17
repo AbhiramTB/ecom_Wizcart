@@ -171,8 +171,8 @@
         const el = document.getElementById("password");
         const err = document.getElementById("errmesg-password");
         
-        if (el.value.length < 6) {
-            err.innerText = 'Min 6 characters';
+        if (!/^(?=.*[!@#$%&*])[a-zA-Z0-9!@#$%&*]{6,}$/.test(el.value)) {
+            err.innerText = 'Min 6 chars, at least 1 special character (!@#$%&*)';
             el.classList.add('is-invalid');
         } else {
             err.innerText = '';

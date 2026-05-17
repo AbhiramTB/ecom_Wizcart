@@ -446,7 +446,8 @@ const singleProduct = async (req, res) => {
 
     const singleId = req.params.id;
 
-    console.log('-----------dfdfdf-fdfd-dfdf');
+
+
 
     const existingWishlist = await WishList.findOne({
       user_id: req.session.user_id,
@@ -1668,7 +1669,6 @@ const invoiceDownload = async (req, res) => {
 
 const cancellProductStatus = async (req, res) => {
   try {
-    console.log("____________________________________________________________________cancell______________________________________________________");
 
     const { object_id, product_id, product_name } = req.body;
     let product_price;
@@ -1882,10 +1882,8 @@ const applyCoupon = async (req, res) => {
 
     
       const coupon = req.body.couponCode;
-      console.log('::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::');
 
   console.log(coupon.Coupon_Code);
-  console.log('::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::');
   
   
 

@@ -949,10 +949,7 @@ const returnOrders = async (req, res) => {
 // refund
 const acceptAndRefund = async (req, res) => {
   try {
-    console.log(
-      "_________________________________________________________________________________"
-    );
-    console.log(req.body);
+
 
     const { orderId, productId, productPrice, productName, user_id } = req.body;
 
@@ -1046,11 +1043,7 @@ const acceptAndRefund = async (req, res) => {
 const rejectReturn = async (req, res) => {
   try {
     const { orderId, productId } = req.body;
-    console.log(
-      "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
-    );
 
-    console.log(orderId);
 
     const order = await Order.findOne({ _id: orderId });
     console.log(order);
@@ -1348,7 +1341,6 @@ const saleReport = async (req, res) => {
     const totalPages = 0; // Update based on your pagination logic
     const currentPage = 0; // Update based on your pagination logic
 
-  console.log("jkgrhyuilearhuyikgyh________________________________________"+totalProductDiscount);
   
 
     // Render the sales report with computed values

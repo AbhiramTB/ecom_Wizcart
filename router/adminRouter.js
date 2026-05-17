@@ -5,8 +5,11 @@ const { upload } = require("../config/imageResizing");
 const { isLogin, isLogout } = require("../auth/adminAuth");
 const session = require("express-session");
 const nocache = require("nocache");
-// const productAddRoute  = require("../controller/productAdding");
+
 adminRoute.use(nocache());
+
+require("../auth/google");
+var morgan = require('morgan')
 
 adminRoute.get("/admin", isLogout, adminController.adminLogin);
 adminRoute.post("/adminLoginData", isLogout, adminController.adminLogindata);

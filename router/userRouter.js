@@ -5,19 +5,19 @@ const passport = require("passport");
 const userController = require("../controller/userController");
 const { isLogin, isLogout } = require("../auth/userAuth");
 const nocache = require("nocache");
-const { log } = require("console");
-const { db, updateSearchIndex } = require("../model/userModel");
-const { block } = require("sharp");
 require("../auth/google");
+var morgan = require('morgan')
+
 
 userRoute.use(nocache());
+userRoute.use(morgan('dev'));
+
 userRoute.get("/", (req, res) => {
   res.redirect("/wizcart");
 });
 
 // paymentController
 const paymentController=require('../controller/paymentController');
-const wishlistModel = require("../model/wishlistModel");
 
 
 
@@ -53,13 +53,14 @@ userRoute.post("/ProfilUpdatePass", isLogin, userController.profilenewPass);
 
 
 // FORGOT PASSWORD AND RESET PASSWORD--
-userRoute.get("/forgetpassword",isLogin,userController.forgotPassword);
-userRoute.post("/forgotEmail",isLogin,userController.forgotEmail);
-userRoute.post("/resetPassword",isLogin,userController.forgetRestpassword);
-userRoute.post("/loadforgetpass",isLogin,userController.loadforgetpassword);
+userRoute.get("/forgetpassword",userController.forgotPassword);
+userRoute.post("/forgotEmail",userController.forgotEmail);
+userRoute.post("/resetPassword",userController.forgetRestpassword);
+userRoute.post("/loadforgetpass",userController.loadforgetpassword);
 
 // LOGOUT ------------------------
 userRoute.get("/logout", userController.logout);
+
 
 // MANAGE-ADDRESS ---------------
 userRoute.get("/manageaddress",isLogin,userController.manageaddress);
@@ -112,6 +113,8 @@ userRoute.post('/capture-payment',paymentController.captureContinuePayment)
 
 userRoute.post('/addtowishlist',userController.addToWishlist)
 userRoute.get('/invoiceDownload/:objectId/:productId', userController.invoiceDownload);
+
+
 module.exports = {
   userRoute,
 };

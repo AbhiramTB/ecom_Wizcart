@@ -135,8 +135,8 @@
   function vemail() {
     const el = document.getElementById("email");
     const err = document.getElementById("errmesg-email");
-    if (!/^[^\s@]+@gmail\.com$/i.test(el.value)) {
-      err.innerText = 'Invalid email address';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value)) {
+      err.innerText = 'Invalid email format';
       el.classList.add('is-invalid');
       el.classList.remove('is-valid');
     } else {
@@ -149,8 +149,8 @@
   function vpassword() {
     const el = document.getElementById("password");
     const err = document.getElementById("errmesg-password");
-    if (!/^[\w\d]{6,}$/.test(el.value)) {
-      err.innerText = 'Password must be at least 6 characters';
+    if (!/^(?=.*[!@#$%&*])[a-zA-Z0-9!@#$%&*]{6,}$/.test(el.value)) {
+      err.innerText = 'Min 6 chars, at least 1 special character (!@#$%&*)';
       el.classList.add('is-invalid');
       el.classList.remove('is-valid');
     } else {

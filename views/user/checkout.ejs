@@ -490,7 +490,7 @@
 							<input type="hidden" id="addressIndex" name="addressIndex">
 							
 							<div class="col-md-12">
-								<label class="form-label">Name</label>
+								<!-- <label class="form-label">Name</label> -->
 								<input type="text" class="form-control" name="editName"  id="editName" pattern="[A-Za-z\s]+" required>
 							   
 								<div class="invalid-feedback">
@@ -570,6 +570,7 @@
 							</div>
 						</form>
 					</div>
+          
 				</div>
 			</div>
 		</div>
@@ -599,7 +600,7 @@
 							<form class="row g-3 needs-validation"  novalidate id="addAddressForm" >
 								<div class="col-md-12">
 									<label for="name" class="form-label">Name</label>
-									<input type="text" id="addressIndex" name="addressIndex">
+									<input type="text" class="d-none" id="addressIndex" name="addressIndex">
 
 									<input type="text" class="form-control" name="name" id="name" pattern="[A-Za-z\s]+" required>
 									<div class="invalid-feedback">
