@@ -326,7 +326,7 @@ const dashBord = async (req, res) => {
     console.log('--- End of Debugging Data ---');
 
     let toast = [];
-    res.render("admin/adminDashbord", {
+    res.render("admin/adminDashboard", {
       toast,
       topProducts,
       topCategories,
@@ -793,7 +793,7 @@ const orderMangement = async (req, res) => {
       { $limit: limit },
     ]);
 
-    res.render("admin/oderMangement", {
+    res.render("admin/orderManagement", {
       orders,
       currentPage: page,
       totalPages: Math.ceil(totalOrders / limit),
@@ -862,7 +862,7 @@ const couponMangemnt = async (req, res) => {
     const coupon = await Coupons.find({});
     let toast = req.flash("info") || [];
 
-    res.render("admin/Coupons", { coupons: coupon, toast });
+    res.render("admin/coupons", { coupons: coupon, toast });
   } catch (error) {
     console.log(error.message);
   }
