@@ -47,7 +47,7 @@ const homeLogin = async (req, res) => {
         res.render("user/home", { products: products, user: typeof user !== "undefined" ? sanitizeUser(user) : null, toast });
       }
     } else {
-      res.status(404).render("404");
+      res.status(404).render("notFound");
     }
   } catch (error) {
     console.error(error.message);
@@ -78,7 +78,7 @@ const home = async (req, res) => {
         }
       }
     } else {
-      res.status(404).render("404");
+      res.status(404).render("notFound");
     }
   } catch (error) {
     console.error(error.message);
@@ -169,7 +169,7 @@ const shopmore = async (req, res) => {
       cartQuantity = await getCartQuantity(req.session.user_id);
     }
 
-    res.render("user/shopmore", {
+    res.render("user/shopMore", {
       products,
       category,
       brands,
@@ -277,7 +277,7 @@ const signupData = async (req, res) => {
     const unique = await User.findOne({ email: req.body.email });
 
     if (unique) {
-      res.render("user/signup", { message: "email is already exists" });
+      res.render("user/signUp", { message: "email is already exists" });
       return;
     }
     name = req.body.name;
@@ -387,7 +387,7 @@ const otpSending = (req, res) => {
 
       sendOtp();
     } else {
-      res.render("404");
+      res.render("notFound");
     }
   } catch (error) {
     console.log(error.message);
@@ -520,7 +520,7 @@ const profile = async (req, res) => {
   try {
     if (req.session.user_id) {
       const userDetails = await User.findById(req.session.user_id);
-      res.render("user/Profile", { user: sanitizeUser(userDetails), toast: [] });
+      res.render("user/profile", { user: sanitizeUser(userDetails), toast: [] });
     } else {
       req.flash("info", " 🚨 LOGIN FIRST ");
       res.redirect("/wizcart");
@@ -698,7 +698,7 @@ const profilenewPass = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   try {
-    res.render("user/ForgotPassword");
+    res.render("user/forgotPassword");
   } catch (error) {
     console.log(error.message);
   }
@@ -2029,11 +2029,11 @@ const getWishlist = async (req, res) => {
       const cartQuantity = await getCartQuantity(req.session.user_id);
 
       // Render the wishlist view with the aggregated wishlist items
-      res.render("user/wishlist", { wishlistItems, user:  sanitizeUser(user),cartQuantity });
+      res.render("user/wishList", { wishlistItems, user:  sanitizeUser(user),cartQuantity });
 
   } catch (error) {
       console.error(error.message);
-      res.status(500).render('user/wishlist', { wishlistItems: [] }); // Render with an empty array in case of an error
+      res.status(500).render('user/wishList', { wishlistItems: [] }); // Render with an empty array in case of an error
   }
 };
 
@@ -2044,7 +2044,7 @@ const getWallet = async (req, res) => {
       const wallet = await Wallet.findOne({ user_id: new object_id(req.session.user_id) });
       // If wallet is not found, return an error message or redirect
       if (!wallet) {
-        res.render("user/walletNotexist", { user: typeof user !== "undefined" ? sanitizeUser(user) : null }) 
+        res.render("user/walletNotExist", { user: typeof user !== "undefined" ? sanitizeUser(user) : null }) 
 
       }
       const user = await User.findOne({ _id: req.session.user_id });
