@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const { log } = require('console');
 const Product=require('../model/productModel');
+const { uploadToCloudinary } = require('../lib/cloudinary');
 
 
 
@@ -39,17 +40,12 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
     const croppedImages = req.files.filter(file => file.fieldname === 'croppedImages');
     let productImages = [];
 
-    croppedImages.forEach((file, index) => {
-        const fileName = `${Date.now()}_${index}.png`;
-        const filePath = path.join(uploadsDir, fileName);
-
-        fs.writeFileSync(filePath, file.buffer);
-        console.log(`File ${fileName} saved successfully.`);
-       
-
-        productImages.push(`imgUploads/${fileName}`);
-        console.log(productImages);
-    });
+    for (let i = 0; i < croppedImages.length; i++) {
+        const file = croppedImages[i];
+        const cloudinaryUrl = await uploadToCloudinary(file);
+        productImages.push(cloudinaryUrl);
+        console.log(`File uploaded to Cloudinary: ${cloudinaryUrl}`);
+    }
 
     const productDetails = new Product({
         product_name: productName,
@@ -87,16 +83,12 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
         const croppedImages = req.files.filter(file => file.fieldname === 'croppedImages');
         let productImages = [];
 
-        croppedImages.forEach((file, index) => {
-            const fileName = `${Date.now()}_${index}.png`;
-            const filePath = path.join(uploadsDir, fileName);
-
-            fs.writeFileSync(filePath, file.buffer);
-            console.log(`File ${fileName} saved successfully.`);
-
-            productImages.push(`imgUploads/${fileName}`);
-            console.log(productImages);
-        });
+        for (let i = 0; i < croppedImages.length; i++) {
+            const file = croppedImages[i];
+            const cloudinaryUrl = await uploadToCloudinary(file);
+            productImages.push(cloudinaryUrl);
+            console.log(`File uploaded to Cloudinary: ${cloudinaryUrl}`);
+        }
 
         const {
             productId,
