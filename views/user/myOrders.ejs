@@ -179,7 +179,7 @@
                                 actionProductPrice: order.newone[index].price
                               }) %>
                             }, "pending")'>
-                              <i class="fas fa-file-invoice"></i> Invoice
+                              <i class="fas fa-file-invoice"></i> view order details
                             </button>
                             
                              <input type="hidden" id="object_id" value="<%= order._id %>">
@@ -207,7 +207,7 @@
                                 actionProductPrice: order.newone[index].price
                               }) %>
                             }, "return")'>
-                              <i class="fas fa-file-invoice"></i> Invoice
+                              <i class="fas fa-file-invoice"></i> view order details
                             </button>
                      
 
@@ -229,7 +229,7 @@
                               actionProductPrice: order.newone[index].price
                             }) %>
                           }, "delivered")'>
-                            <i class="fas fa-file-invoice"></i> Invoice
+                            <i class="fas fa-file-invoice"></i> view order details
                           </button>
 
                         <% } else if (productItem.status === 'cancelled') { %>
@@ -248,7 +248,7 @@
                               actionProductPrice: order.newone[index].price
                             }) %>
                           }, "cancelled")'>
-                            <i class="fas fa-file-invoice"></i> Invoice
+                            <i class="fas fa-file-invoice"></i> view order details
                           </button>
                           <% } else if (productItem.status === 'Returned') { %>
                              
@@ -267,7 +267,7 @@
                                 actionProductPrice: order.newone[index].price
                               }) %>
                             }, "Returned")'>
-                              <i class="fas fa-file-invoice"></i> Invoice
+                              <i class="fas fa-file-invoice"></i> view order details
                             </button>
                    
 
@@ -290,7 +290,8 @@
                                   actionProductPrice: order.newone[index].price
                                 }) %>
                               }, "return pending")'>
-                                <i class="fas fa-file-invoice"></i> Invoice
+                                <i class="fas fa-file-invoice"></i> view order details
+                              
                               </button>
                       
                               <% } else if (productItem.status === 'return rejected') { %>
@@ -311,7 +312,7 @@
                                     actionProductPrice: order.newone[index].price
                                   }) %>
                                 }, "return rejected")'>
-                                  <i class="fas fa-file-invoice"></i> Invoice
+                                  <i class="fas fa-file-invoice"></i> view order details
                                 </button>
 
 
@@ -331,7 +332,7 @@
 
 
                              <!-- Full Screen Modal -->
-                             <div class="modal fade" id="fullScreenModal" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
+                             <!-- <div class="modal fade" id="fullScreenModal" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
                               <div class="modal-dialog modal-fullscreen">
                                   <div class="modal-content">
                                       
@@ -365,35 +366,7 @@
                                                                   </div>
                                                               </div>
                                                               <div class="col-sm-6 text-sm-end mt-5">
-                                                                <!-- <div class="table-responsive">
-                                                                  <table class="table table-hover">
-                                                                      <thead class="table-light">
-                                                                          <tr>
-                                                                              <th>Photo</th>
-                                                                              <th>Name</th>                                       
-                                                                              <th class="text-end">Quantity</th>
-                                                                              <th class="text-end">Price</th>
-                                                                              <th class="text-end">Total</th>
-                                                                          </tr>
-                                                                      </thead>
-                                                                      <tbody>
-                                                                          <tr>
-                                                                              <td><img src="placeholder.jpg" alt="Product 1" class="img-thumbnail" style="width: 50px;"></td>
-                                                                              <td>Description for Item 1</td>
-                                                                              <td class="text-end">1</td>
-                                                                              <td class="text-end">$100.00</td>
-                                                                              <td class="text-end">$100.00</td>
-                                                                          </tr>
-                                                                          <tr>
-                                                                              <td><img src="placeholder.jpg" alt="Product 2" class="img-thumbnail" style="width: 50px;"></td>
-                                                                              <td>Description for Item 2</td>
-                                                                              <td class="text-end">2</td>
-                                                                              <td class="text-end">$75.00</td>
-                                                                              <td class="text-end">$150.00</td>
-                                                                          </tr>
-                                                                      </tbody>
-                                                                  </table>
-                                                              </div> -->
+                                                            
   
   
                                                               <div class="col-md-12 col-lg-12">
@@ -531,9 +504,150 @@
                                      
                                   </div>
                               </div>
-                          </div>
+                          </div> -->
 
+<div class="modal fade" id="fullScreenModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
 
+      <!-- Header -->
+      <div class="modal-header bg-primary text-white">
+        <h4 class="modal-title">Invoice</h4>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <div class="row g-4">
+
+          <!-- Address -->
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-header">
+                <h5 class="mb-0">Shipping Address</h5>
+              </div>
+
+              <div class="card-body">
+                <p><strong id="invoiceName"></strong></p>
+                <p id="addressName"></p>
+                <p id="addressMobile"></p>
+                <p id="addressPincode"></p>
+                <p id="addressLocality"></p>
+                <p id="addressAddress"></p>
+                <p id="addressCity"></p>
+                <p id="addressState"></p>
+                <p id="addressLandmark"></p>
+                <p id="addressAltmobile"></p>
+                <p id="addressAddresstype"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product -->
+          <div class="col-lg-6">
+            <div class="card h-100">
+
+              <div class="card-header">
+                <h5 class="mb-0">Order Summary</h5>
+              </div>
+
+              <div class="card-body">
+
+                <div class="d-flex gap-3 mb-4">
+                  <img
+                    id="oderImg"
+                    class="img-thumbnail"
+                    style="width:120px;height:120px;object-fit:cover"
+                  >
+
+                  <div>
+                    <h5 id="productName"></h5>
+                    <p id="price"></p>
+                    <p id="InvoiceQuantity"></p>
+                  </div>
+                </div>
+
+                <table class="table">
+                  <tbody>
+                    <tr>
+                      <td>Subtotal</td>
+                      <td class="text-end" id="InvoiceTotal"></td>
+                    </tr>
+
+                    <tr class="table-success">
+                      <td><strong>Total</strong></td>
+                      <td class="text-end">
+                        <strong id="InvoiceLastTotol"></strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- Status Messages -->
+                <div id="PendingDIV" class="alert alert-warning d-none">
+                  Product delivery is in progress.
+                </div>
+
+                <div id="delivereDIV" class="alert alert-success d-none">
+                  Product delivered successfully.
+                </div>
+
+                <div id="cancelDIV" class="alert alert-danger d-none">
+                  Order cancelled. Refund credited to wallet.
+                </div>
+
+                <div id="returnDIV" class="alert alert-success d-none">
+                  Product returned successfully. Refund credited.
+                </div>
+
+                <div id="returnpending" class="alert alert-warning d-none">
+                  Return request pending.
+                </div>
+
+                <div id="returnrejected" class="alert alert-danger d-none">
+                  Return request rejected.
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+
+        <button
+          id="downloadInvoiceButton"
+          class="btn btn-primary"
+          style="display:none"
+          onclick="conformDownload()">
+          Download Invoice
+        </button>
+
+        <button
+          id="returnButton"
+          class="btn btn-warning"
+          style="display:none"
+          onclick="ConformOderReturn()">
+          Return
+        </button>
+
+        <button
+          id="cancellButton"
+          class="btn btn-danger"
+          onclick="confirmOrderCancell()">
+          Cancel Order
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+</div>
 
 
 

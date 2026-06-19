@@ -210,15 +210,16 @@
         <div class="col-md-6">
           <div class="wz-product-gallery">
             <div class="wz-product-main-img" id="mainImageWrap">
-              <img src="/<%= singleProduct.product_img[0] %>" alt="<%= singleProduct.product_name %>" id="mainImage">
+              <img src="<%= (singleProduct.product_img[0].startsWith('http://') || singleProduct.product_img[0].startsWith('https://') || singleProduct.product_img[0].startsWith('//')) ? singleProduct.product_img[0] : '/' + singleProduct.product_img[0] %>" alt="<%= singleProduct.product_name %>" id="mainImage">
             </div>
             <% if (singleProduct.product_img.length > 1) { %>
               <div class="wz-product-thumbs">
-                <% singleProduct.product_img.forEach((img, index) => { %>
-                  <div class="wz-product-thumb <%= index === 0 ? 'active' : '' %>" onclick="changeImage('/<%= img %>', this)">
-                    <img src="/<%= img %>" alt="Product image <%= index + 1 %>">
-                  </div>
-                <% }) %>
+             <% singleProduct.product_img.forEach((img, index) => { %>
+  <div class="wz-product-thumb <%= index === 0 ? 'active' : '' %>"
+       onclick="changeImage('<%= img %>', this)">
+    <img src="<%= img %>" alt="Product image <%= index + 1 %>">
+       </div>
+<% }) %>
               </div>
             <% } %>
           </div>
@@ -233,7 +234,7 @@
               <%
                 var difference = singleProduct.Maximum_Retail_Price - singleProduct.price;
                 var discountPercentage = (difference / singleProduct.Maximum_Retail_Price) * 100;
-              %>
+              %>  
               <% if (difference > 0) { %>
                 <span class="wz-product-mrp">₹<%= singleProduct.Maximum_Retail_Price %></span>
                 <span class="wz-product-discount"><%= discountPercentage.toFixed(0) %>% off</span>
