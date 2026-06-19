@@ -3,6 +3,7 @@ const userRoute = express();
 const path = require("path");
 const passport = require("passport");
 const userController = require("../controller/userController");
+const {errorPage} =require('../controller/errorController')
 const { isLogin, isLogout } = require("../auth/userAuth");
 const nocache = require("nocache");
 require("../auth/google");

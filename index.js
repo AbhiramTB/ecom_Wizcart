@@ -27,6 +27,7 @@ app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
 const googleAuth = require("./auth/google");
 const e = require("express");
+const { errorPage } = require("./controller/errorController");
 
 app.use(cookieParser(env.COOKIE_SECRET));
 app.use(flash());
@@ -51,8 +52,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname,"public")));
 
-app.use(userRoute.userRoute);
 app.use(adminRoute.adminRoute);
+app.use(userRoute.userRoute);
+app.use('*',errorPage)
+
 app.listen(env.PORT, () => console.log(`http://localhost:${env.PORT}`));
 
 app.use(googleAuth.authRoute);
