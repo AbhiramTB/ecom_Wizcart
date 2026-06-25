@@ -11,6 +11,8 @@ const object_id = require("mongoose").Types.ObjectId;
 const Wallet = require("../model/walletModel");
 const { cart } = require("./userController");
 const mongoose = require("mongoose");
+const { HttpStatus } = require("../constants/httpStatus");
+const { USER_MESSAGES, PAYMENT_MESSAGES, ERROR_MESSAGES } = require("../constants/messages");
 
 const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = env;
 
@@ -46,16 +48,16 @@ const createOrder = async (req, res) => {
         const userData = await User.findById(userId);
         if (!userData) {
           return res
-            .status(404)
-            .json({ success: false, message: "User not found" });
+            .status(HttpStatus.NOT_FOUND)
+            .json({ success: false, message: USER_MESSAGES.NOT_FOUND });
         }
 
         // Find cart for the user
         const cartProduct = await Cart.findOne({ user_id: userId });
         if (!cartProduct || cartProduct.Product.length === 0) {
           return res
-            .status(400)
-            .json({ success: false, message: "Cart is empty" });
+            .status(HttpStatus.BAD_REQUEST)
+            .json({ success: false, message: PAYMENT_MESSAGES.CART_EMPTY });
         }
 
         // Fetch products and calculate totalPrice for each item
@@ -129,38 +131,38 @@ const createOrder = async (req, res) => {
 
         await Cart.deleteOne({ user_id: userId });
 
-        return res.status(201).json({
+        return res.status(HttpStatus.CREATED).json({
           success: true,
-          message: "Order created successfully",
+          message: PAYMENT_MESSAGES.ORDER_CREATED,
           order: savedOrder,
         });
       } else {
         console.log("Insufficient balance");
-        return res.status(400).json({ message: "Insufficient balance" });
+        return res.status(HttpStatus.BAD_REQUEST).json({ message: PAYMENT_MESSAGES.INSUFFICIENT_BALANCE });
       }
     } else {
       // Assuming user ID is stored in session
 
       if (!userId) {
         return res
-          .status(401)
-          .json({ success: false, message: "User not authenticated" });
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ success: false, message: USER_MESSAGES.UNAUTHORIZED });
       }
 
       // Find user data
       const userData = await User.findById(userId);
       if (!userData) {
         return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
+          .status(HttpStatus.NOT_FOUND)
+          .json({ success: false, message: USER_MESSAGES.NOT_FOUND });
       }
 
       // Find cart for the user
       const cartProduct = await Cart.findOne({ user_id: userId });
       if (!cartProduct || cartProduct.Product.length === 0) {
         return res
-          .status(400)
-          .json({ success: false, message: "Cart is empty" });
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ success: false, message: PAYMENT_MESSAGES.CART_EMPTY });
       }
 
       // Fetch products and calculate totalPrice for each item
@@ -223,9 +225,9 @@ const createOrder = async (req, res) => {
         // Clear the cart
         await Cart.deleteOne({ user_id: userId });
 
-        res.status(201).json({
+        res.status(HttpStatus.CREATED).json({
           success: true,
-          message: "Order created successfully",
+          message: PAYMENT_MESSAGES.ORDER_CREATED,
           order: savedOrder,
         });
       } else if (PaymentMethod === "razorpay") {
@@ -237,7 +239,7 @@ const createOrder = async (req, res) => {
           payment_capture: "1",
         });
 
-        res.status(201).json({
+        res.status(HttpStatus.CREATED).json({
           success: true,
           order: savedOrder,
           razorpayOrder: razorpayOrder,
@@ -246,7 +248,7 @@ const createOrder = async (req, res) => {
     }
   } catch (error) {
     console.error("Error creating order:", error.stack); // Log the stack trace
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: ERROR_MESSAGES.SERVER_ERROR });
   }
 };
 
@@ -274,8 +276,8 @@ const verifyPayment = async (req, res) => {
     // Verify the signature
     if (generatedSignature !== signature) {
       console.log("Payment verification failed");
-      return res.status(400).json({
-        message: "Payment verification failed",
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: PAYMENT_MESSAGES.VERIFICATION_FAILED,
         status: "failure",
       });
     }
@@ -335,8 +337,8 @@ const verifyPayment = async (req, res) => {
     const cartProduct = await Cart.findOne({ user_id: req.session.user_id });
     if (!cartProduct || cartProduct.Product.length === 0) {
       console.log("Cart is empty");
-      return res.status(400).json({
-        message: "Cart is empty",
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: PAYMENT_MESSAGES.CART_EMPTY,
         status: "failure",
       });
     }
@@ -358,14 +360,14 @@ const verifyPayment = async (req, res) => {
     await Cart.deleteOne({ user_id: req.session.user_id });
 
     res.json({
-      message: "Payment verified successfully",
+      message: PAYMENT_MESSAGES.VERIFICATION_SUCCESS,
       status: "success",
       paymentDetails: paymentResponse.data,
     });
   } catch (error) {
     console.error("Error during payment verification:", error);
-    res.status(500).json({
-      message: "Error during payment verification",
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      message: PAYMENT_MESSAGES.VERIFICATION_ERROR,
       status: "failure",
     });
 
@@ -388,19 +390,19 @@ const completePayment = async (req, res) => {
   
       // Validate the orderId
       if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
-        return res.status(400).json({ message: "Invalid order ID" });
+        return res.status(HttpStatus.BAD_REQUEST).json({ message: PAYMENT_MESSAGES.INVALID_ORDER_ID });
       }
   
       // Fetch the order from the database
       const order = await Order.findById(orderId);
       if (!order) {
-        return res.status(404).json({ message: "Order not found" });
+        return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
       }
   
       // Validate order total amount
       const amountInPaise = Number(order.finalPrice) * 100;
       if (isNaN(amountInPaise) || amountInPaise <= 0) {
-        return res.status(400).json({ message: "Invalid order amount" });
+        return res.status(HttpStatus.BAD_REQUEST).json({ message: PAYMENT_MESSAGES.INVALID_ORDER_AMOUNT });
       }
   
       // Create a Razorpay order
@@ -414,7 +416,7 @@ const completePayment = async (req, res) => {
       });
   
       if (!razorpayOrder) {
-        return res.status(500).json({ message: "Failed to create Razorpay order" });
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: PAYMENT_MESSAGES.RAZORPAY_ORDER_FAILED });
       }
   
       // Update the order with the Razorpay order ID
@@ -422,7 +424,7 @@ const completePayment = async (req, res) => {
       await order.save();
   
       // Send response to client
-      res.status(200).json({
+      res.status(HttpStatus.OK).json({
         key: RAZORPAY_ID_KEY,
         order_id: razorpayOrder.id,
         amount: razorpayOrder.amount,
@@ -431,7 +433,7 @@ const completePayment = async (req, res) => {
     } catch (error) {
       console.error("Error completing payment:", error);
       console.log(error.message)
-      res.status(500).json({ message: "Internal server error" });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
     }
   };
   
@@ -454,8 +456,8 @@ const completePayment = async (req, res) => {
   
       // Verify the signature
       if (generatedSignature !== signature) {
-        return res.status(400).json({
-          message: "Payment verification failed",
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: PAYMENT_MESSAGES.VERIFICATION_FAILED,
           status: "failure",
         });
       }
@@ -503,14 +505,14 @@ const completePayment = async (req, res) => {
       );
   
       res.json({
-        message: "Payment verified successfully",
+        message: PAYMENT_MESSAGES.VERIFICATION_SUCCESS,
         status: "success",
         paymentDetails: paymentResponse.data,
       });
     } catch (error) {
       console.error("Error during payment verification:", error);
-      res.status(500).json({
-        message: "Error during payment verification",
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: PAYMENT_MESSAGES.VERIFICATION_ERROR,
         status: "failure",
       });
     }
