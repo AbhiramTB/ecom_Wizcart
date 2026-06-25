@@ -31,7 +31,23 @@
               </div>
               <div class="form-group">
                 <label for="category">Category</label>
-                <input type="text" class="form-control" id="category" name="editProductCategory" value="<%= product.category_name %>">
+                <select name="editProductCategory" id="category" class="form-control">
+                  <% category.forEach(element=> { %>
+                    <% 
+                      var isSelected = false;
+                      if (product.category_name) {
+                        var prodCatId = (product.category_name._id || product.category_name).toString();
+                        var prodCatName = (product.category_name.category_name || product.category_name).toString();
+                        if (prodCatId === element._id.toString() || prodCatName.toLowerCase() === element.category_name.toString().toLowerCase()) {
+                          isSelected = true;
+                        }
+                      }
+                    %>
+                    <option value="<%=element._id%>" <%= isSelected ? 'selected' : '' %>>
+                      <%=element.category_name%>
+                    </option>
+                  <% }) %>
+                </select>
               </div>
               <div class="form-group">
                 <label for="price">Price</label>
