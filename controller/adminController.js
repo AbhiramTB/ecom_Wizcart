@@ -11,6 +11,8 @@ const Coupons = require("../model/couponModel");
 const Wallet = require("../model/walletModel");
 require("passport");
 const mongoose = require("mongoose");
+const { HttpStatus } = require("../constants/httpStatus");
+const { USER_MESSAGES, PRODUCT_MESSAGES, CATEGORY_MESSAGES, COUPON_MESSAGES, PAYMENT_MESSAGES, ERROR_MESSAGES } = require("../constants/messages");
 
 // ADMIN LOGIN  //GET
 
@@ -20,7 +22,7 @@ const adminLogin = async (req, res) => {
     res.render("admin/adminLogin", { toast });
   } catch (error) {
     console.error("Error rendering admin login page:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -54,7 +56,7 @@ const adminLogindata = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res
-      .status(500)
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .render("admin/adminLogin", { toast: ["Server error"] });
   }
 };
@@ -193,6 +195,26 @@ const dashBord = async (req, res) => {
           count: 1,
           productDetails: { $arrayElemAt: ["$productDetails", 0] }
         }
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "productDetails.category_name",
+          foreignField: "_id",
+          as: "categoryDetails"
+        }
+      },
+      {
+        $project: {
+          productId: 1,
+          count: 1,
+          productDetails: {
+            $mergeObjects: [
+              "$productDetails",
+              { category_name: { $arrayElemAt: ["$categoryDetails.category_name", 0] } }
+            ]
+          }
+        }
       }
     ]);
 
@@ -214,8 +236,17 @@ const dashBord = async (req, res) => {
       },
       { $unwind: "$productDetails" },
       {
+        $lookup: {
+          from: "categories",
+          localField: "productDetails.category_name",
+          foreignField: "_id",
+          as: "categoryDetails"
+        }
+      },
+      { $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true } },
+      {
         $group: {
-          _id: "$productDetails.category_name",
+          _id: { $ifNull: ["$categoryDetails.category_name", "Unknown"] },
           count: { $sum: "$product.quantity" }
         }
       },
@@ -346,7 +377,7 @@ const dashBord = async (req, res) => {
 
   } catch (error) {
     console.error('Error:', error.message);
-    res.status(500).send('Internal Server Error');
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -383,7 +414,7 @@ const userList = async (req, res) => {
     res.render("admin/userList", { users: allUser, toast });
   } catch (error) {
     console.error(error);
-    res.status(500).render("admin/userList", { message: "Server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).render("admin/userList", { message: ERROR_MESSAGES.SERVER_ERROR });
   }
 };
 
@@ -415,7 +446,7 @@ const blockUser = async (req, res) => {
 
 const products = async (req, res) => {
   try {
-    const productData = await Product.find({});
+    const productData = await Product.find({}).populate('category_name');
     if (productData) {
       const toast = req.flash("info");
       res.render("admin/allProduct", { Product: productData, toast });
@@ -504,9 +535,10 @@ const editProduct = async (req, res) => {
 
 const editProductForm = async (req, res) => {
   try {
-    const productData = await Product.findById({ _id: id });
+    const productData = await Product.findById({ _id: id }).populate('category_name');
+    const category = await Category.find({});
     if (productData) {
-      res.render("admin/editProduct", { product: productData, id: id });
+      res.render("admin/editProduct", { product: productData, id: id, category: category });
       id = null;
     }
   } catch (error) {}
@@ -529,7 +561,7 @@ const deleteImg = async (req, res) => {
     );
 
     if (unsetResult.modifiedCount === 0) {
-      return res.status(404).send("Image not found");
+      return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.IMAGE_NOT_FOUND);
     }
 
     const pullResult = await Product.updateOne(
@@ -552,11 +584,11 @@ const deleteImg = async (req, res) => {
       req.flash("info", " 🗑️ image delete successfully ");
       res.redirect("/Products");
     } else {
-      res.status(404).send("Image not found");
+      res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.IMAGE_NOT_FOUND);
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).send("An error occurred");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
   }
 };
 
@@ -626,7 +658,7 @@ const category = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send("Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -641,11 +673,11 @@ const deleteCategory = async (req, res) => {
       req.flash("info", " 🗑️  Category Delete succesfully ");
       res.redirect("/category");
     } else {
-      res.status(404).send("Category not found");
+      res.status(HttpStatus.NOT_FOUND).send(CATEGORY_MESSAGES.NOT_FOUND);
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).send("Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -677,11 +709,11 @@ const addCategory = async (req, res) => {
       req.flash("info", `${newCategory} was added successfully ✅`);
       res.redirect("/category");
     } else {
-      res.status(404).send("Category not found");
+      res.status(HttpStatus.NOT_FOUND).send(CATEGORY_MESSAGES.NOT_FOUND);
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).send("Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -700,11 +732,11 @@ const hideCategory = async (req, res) => {
 
       res.redirect("/category");
     } else {
-      res.status(404).send("Category not found");
+      res.status(HttpStatus.NOT_FOUND).send(CATEGORY_MESSAGES.NOT_FOUND);
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).send("Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -722,11 +754,11 @@ const showCategory = async (req, res) => {
       req.flash("info", ` Category was Unhide  succesfully ✅`);
       res.redirect("/category");
     } else {
-      res.status(404).send("Category not found");
+      res.status(HttpStatus.NOT_FOUND).send(CATEGORY_MESSAGES.NOT_FOUND);
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).send("Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -818,8 +850,8 @@ const updateStatus = async (req, res) => {
 
     if (productIndex === -1) {
       return res
-        .status(404)
-        .json({ message: "Product not found in the order" });
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: PRODUCT_MESSAGES.NOT_FOUND_IN_ORDER });
     }
 
     const quantity = order.product[productIndex].quantity;
@@ -831,7 +863,7 @@ const updateStatus = async (req, res) => {
     });
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(HttpStatus.NOT_FOUND).json({ message: PRODUCT_MESSAGES.NOT_FOUND });
     }
 
     product.in_stock += quantity;
@@ -884,7 +916,7 @@ const createCoupon = async (req, res) => {
 
     const result = await newcoupon.save();
     if (result) {
-      res.status(200).json({ message: "Coupon created successfully!" });
+      res.status(HttpStatus.OK).json({ message: COUPON_MESSAGES.CREATED });
     }
     console.log(result);
   } catch (error) {
@@ -942,7 +974,7 @@ const returnOrders = async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching return orders:", error); // Detailed error logging
-    res.status(500).send("Server error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -957,14 +989,14 @@ const acceptAndRefund = async (req, res) => {
 
     const price = parseFloat(productPrice);
     if (isNaN(price)) {
-      return res.status(400).json({ message: "Invalid product price" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: PRODUCT_MESSAGES.INVALID_PRICE });
     }
 
     const order = await Order.findOne({ _id: orderId });
     console.log(order);
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
     }
     console.log("Order found:", order);
 
@@ -973,8 +1005,8 @@ const acceptAndRefund = async (req, res) => {
     );
     if (productIndex === -1) {
       return res
-        .status(404)
-        .json({ message: "Product not found in the order" });
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: PRODUCT_MESSAGES.NOT_FOUND_IN_ORDER });
     }
     console.log("Product Index:", productIndex);
 
@@ -985,7 +1017,7 @@ const acceptAndRefund = async (req, res) => {
       _id: order.product[productIndex].productId,
     });
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(HttpStatus.NOT_FOUND).json({ message: PRODUCT_MESSAGES.NOT_FOUND });
     }
     console.log("Product found:", product);
 
@@ -1030,13 +1062,13 @@ const acceptAndRefund = async (req, res) => {
       );
     }
 
-    res.status(200).json({
+    res.status(HttpStatus.OK).json({
       success: true,
-      message: "The return request has been accepted and the payment refunded.",
+      message: PAYMENT_MESSAGES.RETURN_ACCEPTED,
     });
   } catch (error) {
     console.error("Error updating product status:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -1049,7 +1081,7 @@ const rejectReturn = async (req, res) => {
     console.log(order);
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
     }
     console.log("Order found:", order);
 
@@ -1058,8 +1090,8 @@ const rejectReturn = async (req, res) => {
     );
     if (productIndex === -1) {
       return res
-        .status(404)
-        .json({ message: "Product not found in the order" });
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: PRODUCT_MESSAGES.NOT_FOUND_IN_ORDER });
     }
     console.log("Product Index:", productIndex);
 
@@ -1069,9 +1101,9 @@ const rejectReturn = async (req, res) => {
     await order.save(); // Ensure order is saved
     console.log("Order and product updated");
 
-    res.status(200).json({
+    res.status(HttpStatus.OK).json({
       success: true,
-      message: "The return request has been reject.",
+      message: PAYMENT_MESSAGES.RETURN_REJECTED,
     });
   } catch (error) {
     console.log(error.message);
@@ -1085,9 +1117,9 @@ const deleteCoupon = async (req, res) => {
     const isDelete = await Coupons.findByIdAndDelete(id);
 
     if (isDelete) {
-      res.status(200).json({ message: "Coupon deleted successfully" });
+      res.status(HttpStatus.OK).json({ message: COUPON_MESSAGES.DELETED });
     } else {
-      res.status(500).json({ error: "Coupon deleted successfully" });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: COUPON_MESSAGES.DELETED });
     }
   } catch (error) {
     console.log(error);
@@ -1105,13 +1137,13 @@ const unhideCoupon = async (req, res) => {
     );
 
     if (isShow) {
-      res.status(200).json({ message: "Coupon unhidden successfully" });
+      res.status(HttpStatus.OK).json({ message: COUPON_MESSAGES.UNHIDDEN });
     }
   } catch (error) {
     console.error("Error:", error);
     res
-      .status(500)
-      .json({ message: "An error occurred while unhiding the coupon" });
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: COUPON_MESSAGES.UNHIDE_ERROR });
   }
 };
 
@@ -1127,13 +1159,13 @@ const hideCoupon = async (req, res) => {
     );
 
     if (isShow) {
-      res.status(200).json({ message: "Coupon hidden successfully" });
+      res.status(HttpStatus.OK).json({ message: COUPON_MESSAGES.HIDDEN });
     }
   } catch (error) {
     console.error("Error:", error);
     res
-      .status(500)
-      .json({ message: "An error occurred while hiding the coupon" });
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: COUPON_MESSAGES.HIDE_ERROR });
   }
 };
 
@@ -1360,8 +1392,7 @@ const saleReport = async (req, res) => {
       endDate: endDate,
     });
   } catch (error) {
-    console.error("Error fetching sales report:", error.message);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -1606,8 +1637,7 @@ const downloadExcel = async (req, res) => {
     await workbook.xlsx.write(res);
     res.end();
   } catch (error) {
-    console.error("Error generating Excel:", error);
-    res.status(500).send("Error generating Excel");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.EXCEL_ERROR);
   }
 };
 
@@ -1655,8 +1685,7 @@ const downloadPdf = async (req, res) => {
 
     doc.end();
   } catch (error) {
-    console.error("Error generating PDF:", error);
-    res.status(500).send("Error generating PDF");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.PDF_ERROR);
   }
 };
 
