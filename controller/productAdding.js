@@ -7,6 +7,8 @@ const fs = require('fs');
 const { log } = require('console');
 const Product=require('../model/productModel');
 const { uploadToCloudinary } = require('../lib/cloudinary');
+const { HttpStatus } = require("../constants/httpStatus");
+const { PRODUCT_MESSAGES, ERROR_MESSAGES } = require("../constants/messages");
 
 
 
@@ -68,7 +70,7 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
 
     } catch (error) {
         console.error('Error saving product details:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 });
 
@@ -126,13 +128,13 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            return res.status(404).send("Product update failed");
+            return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.UPDATE_FAILED);
         }
         req.flash('info', 'PRODUCT WAS SUCCESSFULLY EDITED ');
         res.redirect('/Products');
     } catch (error) {
         console.error(error.message);
-        res.status(500).send("An error occurred");
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
     }
 });
 
