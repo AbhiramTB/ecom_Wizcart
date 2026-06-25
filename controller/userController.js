@@ -13,6 +13,8 @@ const { render } = require("ejs");
 const { set } = require("mongoose");
 const mongoose = require("mongoose");
 const Order = require("../model/orders.model");
+const { HttpStatus } = require("../constants/httpStatus");
+const { USER_MESSAGES, PRODUCT_MESSAGES, CATEGORY_MESSAGES, COUPON_MESSAGES, PAYMENT_MESSAGES, ERROR_MESSAGES } = require("../constants/messages");
 const Category = require("../model/categoryModel");
 const Coupons=require('../model/couponModel')
 const wishlist=require('../model/wishlistModel');
@@ -22,6 +24,7 @@ const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = env;
 const Wallet=require('../model/walletModel')
 const PDFDocument = require('pdfkit');
 const fs=require('fs')
+
 const homeLogin = async (req, res) => {
   try {
     const products = await Product.find({}).limit(8);
@@ -119,7 +122,12 @@ const shopmore = async (req, res) => {
     }
 
     if (queryCategory) {
-      query.category_name = queryCategory;
+      const categoryDoc = await Category.findOne({ category_name: queryCategory });
+      if (categoryDoc) {
+        query.category_name = categoryDoc._id;
+      } else {
+        query.category_name = null;
+      }
     }
 
     const productCount = await Product.countDocuments(query);
@@ -149,7 +157,8 @@ const shopmore = async (req, res) => {
     const products = await Product.find(query)
       .sort(sort)
       .skip((pageNum - 1) * perpage)
-      .limit(perpage);
+      .limit(perpage)
+      .populate('category_name');
 
     const category = await Category.find({ Hide_category: 0 });
 
@@ -185,8 +194,8 @@ const shopmore = async (req, res) => {
       cartQuantity,
     });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send("Server Error");
+    console.error("Error in otpSending:", error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -197,7 +206,7 @@ const login = async (req, res) => {
     res.render("user/login", { toast });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -210,20 +219,20 @@ const loginData = async (req, res) => {
     const userValid = await User.findOne({ email: email });
 
     if (!userValid) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      return res.status(HttpStatus.UNAUTHORIZED).json({ message: USER_MESSAGES.INVALID_EMAIL_OR_PASSWORD });
     }
 
     // Check if user is banned
     if (userValid.is_ban === 1) {
       return res
-        .status(200)
+        .status(HttpStatus.OK)
         .json({ redirectUrl: "user-block", message: "Login successful!" });
     }
 
     // Check if user has a Google account
     if (userValid.googleId > 0) {
       return res
-        .status(200)
+        .status(HttpStatus.OK)
         .json({ redirectUrl: "/signup/google", message: "Login successful!" });
     }
 
@@ -235,16 +244,16 @@ const loginData = async (req, res) => {
       console.log(req.session.user_id);
       req.flash("info", "✅ login successful");
       return res
-        .status(200)
+        .status(HttpStatus.OK)
         .json({ redirectUrl: "/home", message: "Login successful!" });
     } else {
-      return res.status(401).json({ message: "Invalid email or password." });
+      return res.status(HttpStatus.UNAUTHORIZED).json({ message: USER_MESSAGES.INVALID_EMAIL_OR_PASSWORD });
     }
   } catch (err) {
     console.error(err.message);
     res
-      .status(500)
-      .render("user/login", { message: "Server Error", toast: [] });
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .render("user/login", { message: ERROR_MESSAGES.SERVER_ERROR, toast: [] });
   }
 };
 
@@ -459,7 +468,7 @@ const singleProduct = async (req, res) => {
     const singleProduct = await Product.findOne({ _id: singleId });
 
     if (!singleProduct) {
-      return res.status(404).send('Product not found');
+      return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.NOT_FOUND);
     }
 
     console.log(singleProduct.product_name);
@@ -495,7 +504,7 @@ const singleProduct = async (req, res) => {
 
     console.log(error.message);
 
-    res.status(500).send(error.message);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error.message);
   }
 };
 
@@ -506,13 +515,13 @@ const logout = async (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         console.error("Error destroying session during logout:", err.message);
-        return res.status(500).send("An error occurred while logging out.");
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(USER_MESSAGES.LOGOUT_ERROR);
       }
       res.redirect("/wizcart");
     });
   } catch (error) {
     console.log(error.message);
-    res.status(500).send("Server Error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -667,8 +676,8 @@ const profilenewPass = async (req, res) => {
 
     if (!userData.password) {
       console.error(`User (${userData._id}) does not have a password`);
-      return res.status(400).json({
-        error: "User does not have a password you signUp with google",
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        error: USER_MESSAGES.NO_PASSWORD_GOOGLE,
       });
     }
 
@@ -685,11 +694,11 @@ const profilenewPass = async (req, res) => {
       if (isPasswordChanged) {
         console.log("passwordChanged");
         return res
-          .status(200)
-          .json({ message: "Password updated successfully" });
+          .status(HttpStatus.OK)
+          .json({ message: USER_MESSAGES.PASSWORD_UPDATED });
       }
     } else {
-      return res.status(401).json({ error: "Current password does not match" });
+      return res.status(HttpStatus.UNAUTHORIZED).json({ error: USER_MESSAGES.PASSWORD_MISMATCH });
     }
   } catch (error) {}
 };
@@ -770,7 +779,7 @@ const forgotEmail = async (req, res) => {
           .sendMail(message)
           .then(() => {
             const toast = [`OTP has been sent to ${forgetpasswordEmail} ✅`];
-            res.status(200).json({
+            res.status(HttpStatus.OK).json({
               success: true,
               message: `OTP has been sent to ${forgetpasswordEmail}`,
               otp: otp,
@@ -798,9 +807,9 @@ const forgotEmail = async (req, res) => {
           })
           .catch((err) => {
             console.error(err.message);
-            res.status(500).json({
+            res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
               success: false,
-              message: "Failed to send OTP email",
+              message: USER_MESSAGES.OTP_SEND_FAILED,
             });
           });
       };
@@ -808,16 +817,16 @@ const forgotEmail = async (req, res) => {
       sendOtp();
     } else {
       console.log("Email not registered");
-      res.status(400).json({
+      res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
-        message: "Email not registered, please sign up",
+        message: USER_MESSAGES.EMAIL_NOT_REGISTERED,
       });
     }
   } catch (error) {
     console.error(`Error in forgotEmail function: ${error.message}`);
-    res.status(500).json({
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "An error occurred",
+      message: ERROR_MESSAGES.AN_ERROR_OCCURRED,
     });
   }
 };
@@ -899,7 +908,7 @@ const newaddress = async (req, res) => {
       is_active: 0,
     };
 
-    res.status(200).json({ message: "Address successfully added!" });
+    res.status(HttpStatus.OK).json({ message: USER_MESSAGES.ADDRESS_ADDED });
     console.log("Received address:", newaddress);
 
     console.log(req.session.user_id);
@@ -966,7 +975,7 @@ const addressDelete = async (req, res) => {
     const user = await User.findById(req.session.user_id);
 
     if (addressIndex < 0 || addressIndex >= user.address.length) {
-      return res.status(400).send({ error: "Invalid address index" });
+      return res.status(HttpStatus.BAD_REQUEST).send({ error: USER_MESSAGES.INVALID_ADDRESS_INDEX });
     }
 
     user.address.splice(addressIndex, 1);
@@ -975,13 +984,13 @@ const addressDelete = async (req, res) => {
     if (deleteStatus) {
       return res.redirect("/manageaddress");
     } else {
-      return res.status(500).send({ error: "Failed to delete address" });
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: USER_MESSAGES.DELETE_ADDRESS_FAILED });
     }
   } catch (error) {
     console.error(error);
     return res
-      .status(500)
-      .send({ error: "An error occurred while deleting the address" });
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .send({ error: USER_MESSAGES.DELETE_ADDRESS_ERROR });
   }
 };
 
@@ -1060,10 +1069,10 @@ const addTocart = async (req, res) => {
 
     await cart.save();
 
-    return res.status(200)
+    return res.status(HttpStatus.OK)
   } catch (error) {
     console.error("Error adding to cart:", error);
-    res.status(500).send("An error occurred");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
   }
 };
 
@@ -1138,7 +1147,7 @@ const cart = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).send("An error occurred while fetching cart items");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(PAYMENT_MESSAGES.CART_FETCH_ERROR);
   }
 };
 
@@ -1153,7 +1162,7 @@ const quantityUpdate = async (req, res) => {
     } else if (currentQuantity === "dec") {
       updateQuery = { $inc: { "Product.$.quantity": -1 } };
     } else {
-      return res.status(400).send("Invalid quantity update operation");
+      return res.status(HttpStatus.BAD_REQUEST).send(PAYMENT_MESSAGES.INVALID_QUANTITY_UPDATE);
     }
 
     const updateResult = await Cart.updateOne(
@@ -1165,14 +1174,14 @@ const quantityUpdate = async (req, res) => {
     );
 
     if (updateResult.modifiedCount === 0) {
-      return res.status(404).send("Product not found in cart");
+      return res.status(HttpStatus.NOT_FOUND).send(PAYMENT_MESSAGES.PRODUCT_NOT_IN_CART);
     }
 
     // Fetch the updated cart to recalculate the total price
     const cart = await Cart.findOne({ user_id: req.session.user_id }).populate('Product.productId');
 
     if (!cart) {
-      return res.status(404).send("Cart not found");
+      return res.status(HttpStatus.NOT_FOUND).send(PAYMENT_MESSAGES.CART_NOT_FOUND);
     }
 
     // Recalculate the total price
@@ -1194,10 +1203,10 @@ const quantityUpdate = async (req, res) => {
 
     await cart.save();
 
-    return res.status(200).send("Product quantity updated successfully");
+    return res.status(HttpStatus.OK).send(PAYMENT_MESSAGES.QUANTITY_UPDATED);
   } catch (error) {
     console.error("Error updating product quantity:", error);
-    res.status(500).send("An error occurred");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
   }
 };
 
@@ -1223,7 +1232,7 @@ const removeItem = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.SERVER_ERROR });
   }
 };
 
@@ -1348,7 +1357,7 @@ const checkOut = async (req, res) => {
     }
   } catch (error) {
     console.error('Error during checkout:', error);
-    res.status(500).send('An error occurred during checkout.');
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(PAYMENT_MESSAGES.CHECKOUT_ERROR);
   }
 };
 
@@ -1422,7 +1431,7 @@ const orderSuccess = async (req, res) => {
     res.render("user/orderComplete");
   } catch (error) {
     console.error("Error rendering order success page:", error.message);
-    res.status(500).send("Server error");
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
@@ -1444,14 +1453,14 @@ const getOrderHistory = async (req, res) => {
 
     if (!userId) {
       return res
-        .status(401)
-        .render("error", { message: "User not authenticated" });
+        .status(HttpStatus.UNAUTHORIZED)
+        .render("error", { message: USER_MESSAGES.UNAUTHORIZED });
     }
 
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).render("error", { message: "User not found" });
+      return res.status(HttpStatus.NOT_FOUND).render("error", { message: USER_MESSAGES.NOT_FOUND });
     }
 
     const orders = await Order.aggregate([
@@ -1478,8 +1487,8 @@ const getOrderHistory = async (req, res) => {
     res.render("user/myOrders", { orders, toast, orderPayment, user: typeof user !== "undefined" ? sanitizeUser(user) : null });
   } catch (error) {
     console.error("Error in getOrderHistory:", error);
-    res.status(500).render("error", {
-      message: "An error occurred while fetching order history",
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).render("error", {
+      message: PAYMENT_MESSAGES.ORDER_HISTORY_ERROR,
     });
   }
 };
@@ -1499,7 +1508,7 @@ const invoiceDownload = async (req, res) => {
     );
 
     if (productIndex === -1) {
-      return res.status(404).send('Product not found in the order');
+      return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.NOT_FOUND_IN_ORDER);
     }
 
     const Orderproduct = order.product[productIndex];
@@ -1644,7 +1653,7 @@ const invoiceDownload = async (req, res) => {
 
   } catch (error) {
     console.error('Error generating PDF:', error);
-    res.status(500).send('Error generating PDF');
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.PDF_ERROR);
   }
 };
 
@@ -1677,7 +1686,7 @@ const cancellProductStatus = async (req, res) => {
     const order = await Order.findOne({ _id: object_id });
 
     if (!order) {
-      return res.status(404).json({ status: 'error', message: "Order not found" });
+      return res.status(HttpStatus.NOT_FOUND).json({ status: 'error', message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
     }
 
     const productIndex = order.product.findIndex(
@@ -1685,7 +1694,7 @@ const cancellProductStatus = async (req, res) => {
     );
 
     if (productIndex === -1) {
-      return res.status(404).json({ status: 'error', message: "Product not found in the order" });
+      return res.status(HttpStatus.NOT_FOUND).json({ status: 'error', message: PRODUCT_MESSAGES.NOT_FOUND_IN_ORDER });
     }
 
     const quantity = order.product[productIndex].quantity;
@@ -1703,7 +1712,7 @@ const cancellProductStatus = async (req, res) => {
     });
 
     if (!product) {
-      return res.status(404).json({ status: 'error', message: "Product not found" });
+      return res.status(HttpStatus.NOT_FOUND).json({ status: 'error', message: PRODUCT_MESSAGES.NOT_FOUND });
     }
 
     product.in_stock += quantity;
@@ -1753,13 +1762,13 @@ const cancellProductStatus = async (req, res) => {
         if (walletUpdate.modifiedCount > 0) {
           return res.redirect('/getOrderHistory');
         } else {
-          return res.status(500).json({ status: 'error', message: "Failed to update wallet" });
+          return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ status: 'error', message: USER_MESSAGES.WALLET_UPDATE_FAILED });
         }
       }
     }
   } catch (error) {
     console.error("Error updating product status:", error);
-    res.status(500).json({ status: 'error', message: "Internal server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ status: 'error', message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 
@@ -1780,7 +1789,7 @@ const orderReturn = async (req, res) => {
     const order = await Order.findOne({ _id: object_id });
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
     }
 
     const productIndex = order.product.findIndex(
@@ -1788,7 +1797,7 @@ const orderReturn = async (req, res) => {
     );
 
     if (productIndex === -1) {
-      return res.status(404).json({ message: "Product not found in the order" });
+      return res.status(HttpStatus.NOT_FOUND).json({ message: PRODUCT_MESSAGES.NOT_FOUND_IN_ORDER });
     }
 
     const quantity = order.product[productIndex].quantity;
@@ -1815,7 +1824,7 @@ const orderReturn = async (req, res) => {
 
   } catch (error) {
     console.error("Error updating product status:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
  
@@ -1839,15 +1848,15 @@ const Coupon = async (req, res) => {
     if (couponIsexist) {
       if (couponIsexist.is_active == false) {
         return res
-          .status(500)
-          .json({ message: "the coupon has temporary unavailable" });
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ message: COUPON_MESSAGES.UNAVAILABLE });
       }
 
       const currentDate = new Date();
       const expiryDate = new Date(couponIsexist.expiry_Date);
 
       if (expiryDate < currentDate) {
-        return res.status(500).json({ message: "Coupon has expired" });
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: COUPON_MESSAGES.EXPIRED });
       }
 
       
@@ -1863,15 +1872,15 @@ const Coupon = async (req, res) => {
         { new: true }  // Return the updated document
       );
             
-      res.status(200).json({ Coupon: couponIsexist });
+      res.status(HttpStatus.OK).json({ Coupon: couponIsexist });
         
 
     } else {
-      res.status(500).json({ message: 'Coupon not found' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: COUPON_MESSAGES.NOT_FOUND });
     }
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ message: 'An error occurred while applying the coupon' });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: COUPON_MESSAGES.APPLY_ERROR });
   }
 }
 
@@ -1906,14 +1915,14 @@ const applyCoupon = async (req, res) => {
       
 
       if (update.nModified === 0) {
-          return res.status(400).json({ message: 'Failed to update cart' });
+          return res.status(HttpStatus.BAD_REQUEST).json({ message: PAYMENT_MESSAGES.CART_UPDATE_FAILED });
       }
 
-      res.status(200)
+      res.status(HttpStatus.OK)
 
   } catch (error) {
       console.error('Error applying coupon:', error);
-      res.status(500).json({ message: 'An error occurred while applying the coupon' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: COUPON_MESSAGES.APPLY_ERROR });
   }
 };
 
@@ -1926,7 +1935,7 @@ const removeCoupon = async (req, res) => {
     const cart = await Cart.findOne({ user_id: new mongoose.Types.ObjectId(req.session.user_id) });
 
     if (!cart) {
-      return res.status(404).json({ message: 'Cart not found' });
+      return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.CART_NOT_FOUND });
     }
 
     // Update the cart to remove the coupon and set the final price
@@ -1943,13 +1952,13 @@ const removeCoupon = async (req, res) => {
 
     // Check if the update was successful
     if (updatedCart) {
-      res.status(200).json({ message: 'Coupon removed successfully' });
+      res.status(HttpStatus.OK).json({ message: COUPON_MESSAGES.REMOVED });
     } else {
-      res.status(500).json({ message: 'Failed to remove coupon' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: COUPON_MESSAGES.REMOVE_FAILED });
     }
   } catch (error) {
     // Handle any errors that occur during the operation
-    res.status(500).json({ message: 'An error occurred', error: error.message });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.AN_ERROR_OCCURRED, error: error.message });
   }
 };
 
@@ -1965,7 +1974,7 @@ const addToWishlist = async (req, res) => {
         const existingItem = await WishList.findOne({ user_id: userId, productId: productId });
 
         if (existingItem) {
-            return res.status(400).json({ message: "Product is already in your wishlist" });
+            return res.status(HttpStatus.BAD_REQUEST).json({ message: USER_MESSAGES.WISHLIST_ALREADY_EXISTS });
         }
 
         // Create a new wishlist entry
@@ -1976,11 +1985,11 @@ const addToWishlist = async (req, res) => {
 
         await newWishlistItem.save();
 
-        return res.status(200).json({ message: "Product added to wishlist successfully" });
+        return res.status(HttpStatus.OK).json({ message: USER_MESSAGES.WISHLIST_ADDED });
 
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: "An error occurred while adding the product to your wishlist" });
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: USER_MESSAGES.WISHLIST_ADD_FAILED });
     }
 };
 
@@ -2033,7 +2042,7 @@ const getWishlist = async (req, res) => {
 
   } catch (error) {
       console.error(error.message);
-      res.status(500).render('user/wishList', { wishlistItems: [] }); // Render with an empty array in case of an error
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).render('user/wishList', { wishlistItems: [] }); // Render with an empty array in case of an error
   }
 };
 
@@ -2078,11 +2087,11 @@ const removeWishlist = async (req, res) => {
       if (result) {
           res.json({ success: true });
       } else {
-          res.status(400).json({ success: false, message: 'Product not found in wishlist' });
+          res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: USER_MESSAGES.WISHLIST_NOT_FOUND });
       }
   } catch (error) {
       console.error('Failed to remove item from wishlist:', error);
-      res.status(500).json({ success: false, message: 'Failed to remove item from wishlist' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: USER_MESSAGES.WISHLIST_REMOVE_FAILED });
   }
 };
 
