@@ -262,7 +262,7 @@
                     <span id="discountBadge<%= product._id %>" class="badge bg-secondary">Enter discount to see the percentage</span>
                     
                     
-                    <div id="error<%= product._id %>" class="text-danger mt-2" style="display:none;">The discount amount cannot exceed the MRP.</div>
+                    <div id="error<%= product._id %>" class="text-danger mt-2" style="display:none;">The discount amount cannot exceed or equal the MRP.</div>
                     
                   </div>
                 </div>
@@ -298,8 +298,8 @@
             if (!isNaN(discountValue) && discountValue > 0) {
               var discountPercentage = ((sellingPrice - finalPrice) / mrp) * 100;
     
-              // Check if discount amount exceeds the MRP
-              if (discountValue > mrp) {
+              // Check if discount amount exceeds or equals the MRP
+              if (discountValue >= mrp) {
                 errorDiv.style.display = "block";
                 discountBadge.textContent = "Invalid Discount";
                 discountBadge.className = "badge bg-danger";
@@ -341,8 +341,8 @@
               if (result.isConfirmed) {
                 var discountValue = parseFloat(discountInput.value);
     
-                // Prevent form submission if the discount is greater than MRP
-                if (discountValue > mrp) {
+                // Prevent form submission if the discount is greater than or equal to MRP
+                if (discountValue >= mrp) {
                   errorDiv.style.display = "block";
                 } else {
                   errorDiv.style.display = "none";
