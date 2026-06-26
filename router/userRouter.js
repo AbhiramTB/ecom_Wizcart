@@ -81,6 +81,8 @@ userRoute.post("/confirmOrder",isLogin,paymentController.createOrder);
 userRoute.get("/orderSuccess",isLogin,userController.orderSuccess);
 userRoute.post("/ordercancellation",isLogin,userController.cancellProductStatus);
 userRoute.get("/getOrderHistory",isLogin,userController.getOrderHistory);
+userRoute.get("/myOrderDetails",isLogin,userController.myOrderDetails);
+userRoute.post("/submitReview",isLogin,userController.submitReview);
 userRoute.put("/quantityUpdate",isLogin,userController.quantityUpdate);
 userRoute.delete("/removeItem/id:id",isLogin,userController.removeItem);
 userRoute.post('/orderreturn',userController.orderReturn)

@@ -239,6 +239,10 @@ const createOrder = async (req, res) => {
           payment_capture: "1",
         });
 
+        // Save the Razorpay order ID to the order
+        savedOrder.razorpayOrderId = razorpayOrder.id;
+        await savedOrder.save();
+
         res.status(HttpStatus.CREATED).json({
           success: true,
           order: savedOrder,
@@ -257,6 +261,7 @@ const createOrder = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
   const { payment_id, order_id, signature } = req.body;
+  let order;
 
   try {
     // Generate the expected signature
@@ -278,6 +283,16 @@ const verifyPayment = async (req, res) => {
       console.log("Payment verification failed");
       return res.status(HttpStatus.BAD_REQUEST).json({
         message: PAYMENT_MESSAGES.VERIFICATION_FAILED,
+        status: "failure",
+      });
+    }
+
+    // Find the order by Razorpay order ID
+    order = await Order.findOne({ razorpayOrderId: order_id });
+    if (!order) {
+      console.log("Order not found for Razorpay order_id:", order_id);
+      return res.status(HttpStatus.NOT_FOUND).json({
+        message: "Order not found",
         status: "failure",
       });
     }
@@ -322,7 +337,7 @@ const verifyPayment = async (req, res) => {
 
     // Update order with payment method and source
     const updateOrder = await Order.updateOne(
-      { _id: savedOrder._id },
+      { _id: order._id },
       {
         $set: {
           paymentMethod: razorpayPaymentMethod,
@@ -371,16 +386,19 @@ const verifyPayment = async (req, res) => {
       status: "failure",
     });
 
-    const updateOrder = await Order.updateOne(
-      { _id: savedOrder._id },
-      {
-        $set: {
-          paymentMethod: razorpayPaymentMethod,
-          paymentSource: paymentSource,
-          payment: "Failed",
-        },
-      }
-    );
+    const targetId = order ? order._id : (typeof savedOrder !== 'undefined' && savedOrder ? savedOrder._id : null);
+    if (targetId) {
+      await Order.updateOne(
+        { _id: targetId },
+        {
+          $set: {
+            paymentMethod: razorpayPaymentMethod || "razorpay",
+            paymentSource: paymentSource || null,
+            payment: "Failed",
+          },
+        }
+      );
+    }
   }
 };
 

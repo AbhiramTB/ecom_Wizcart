@@ -681,3 +681,34 @@
 @keyframes wz-spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── Offer Badges ── */
+.wz-offer-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, var(--wz-accent, #e94560), #ff6b6b);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(233, 69, 96, 0.4);
+  letter-spacing: 0.5px;
+}
+
+.wz-offer-badge-inline {
+  background: linear-gradient(135deg, var(--wz-accent, #e94560), #ff6b6b);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  box-shadow: 0 2px 6px rgba(233, 69, 96, 0.2);
+  display: inline-block;
+  vertical-align: middle;
+}
+

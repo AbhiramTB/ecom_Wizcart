@@ -52,6 +52,8 @@ const COUPON_MESSAGES = {
   APPLY_ERROR: "An error occurred while applying the coupon",
   REMOVED: "Coupon removed successfully",
   REMOVE_FAILED: "Failed to remove coupon",
+  DISCOUNT_EXCEEDS_CART: "Coupon discount price cannot exceed or equal the cart total price",
+  DISCOUNT_EXCEEDS_MIN_PURCHASE: "Discount price cannot exceed or equal the minimum purchase amount",
 };
 
 const PAYMENT_MESSAGES = {

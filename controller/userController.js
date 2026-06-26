@@ -22,6 +22,7 @@ const wishlistModel = require("../model/wishlistModel");
 const env = require("../lib/env");
 const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = env;
 const Wallet=require('../model/walletModel')
+const Review = require("../model/reviewModel");
 const PDFDocument = require('pdfkit');
 const fs=require('fs')
 
@@ -465,7 +466,7 @@ const singleProduct = async (req, res) => {
 
     console.log(singleId);
 
-    const singleProduct = await Product.findOne({ _id: singleId });
+    const singleProduct = await Product.findOne({ _id: singleId }).populate('category_name');
 
     if (!singleProduct) {
       return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.NOT_FOUND);
@@ -492,10 +493,13 @@ const singleProduct = async (req, res) => {
 
     const cartQuantity = await getCartQuantity(req.session.user_id);
 
+    const reviews = await Review.find({ productId: singleId }).populate('userId');
+
     res.render("user/singleProduct", {
       singleProduct,
       isCartexist,
       existingWishlist,
+      reviews,
       user: sanitizeUser(user) || "",
       cartQuantity: cartQuantity || 0,
     });
@@ -1493,6 +1497,77 @@ const getOrderHistory = async (req, res) => {
   }
 };
 
+const myOrderDetails = async (req, res) => {
+  try {
+    const userId = req.session.user_id;
+    const { id, productId } = req.query;
+
+    if (!userId) {
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .render("error", { message: USER_MESSAGES.UNAUTHORIZED });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).render("error", { message: USER_MESSAGES.NOT_FOUND });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(HttpStatus.BAD_REQUEST).render("error", { message: "Invalid request parameters" });
+    }
+
+    const orderData = await Order.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: "products",
+          localField: "product.productId",
+          foreignField: "_id",
+          as: "newone",
+        },
+      },
+    ]);
+
+    if (!orderData || orderData.length === 0) {
+      return res.status(HttpStatus.NOT_FOUND).render("error", { message: "Order not found" });
+    }
+
+    const order = orderData[0];
+
+    const productIndex = order.product.findIndex(
+      (p) => p._id.toString() === productId
+    );
+
+    if (productIndex === -1) {
+      return res.status(HttpStatus.NOT_FOUND).render("error", { message: "Product not found in this order" });
+    }
+
+    const productItem = order.product[productIndex];
+    const productInfo = order.newone[productIndex];
+
+    const existingReview = await Review.findOne({
+      orderId: id,
+      productId: productInfo._id,
+      userId: req.session.user_id
+    });
+
+    res.render("user/myOrderDetails", {
+      order,
+      productItem,
+      productInfo,
+      existingReview,
+      user: typeof user !== "undefined" ? sanitizeUser(user) : null
+    });
+  } catch (error) {
+    console.error("Error in myOrderDetails:", error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).render("error", {
+      message: "An error occurred while fetching order details",
+    });
+  }
+};
+
   
 
 
@@ -1528,6 +1603,7 @@ const invoiceDownload = async (req, res) => {
       { $unwind: '$productFullDetails' },
       {
         $project: {
+          orderNumber: 1,
           product: 1,
           productFullDetails: 1
         }
@@ -1567,7 +1643,8 @@ const invoiceDownload = async (req, res) => {
 
     doc.fontSize(12)
       .text(`Invoice Date: ${new Date().toLocaleDateString()}`, 50, 225)
-      .text(`OrderID: ${objectId}`, 50, 240)
+      .text(`Order Number: ${order.orderNumber || 'N/A'}`, 50, 240)
+      .text(`OrderID: ${objectId}`, 50, 255)
       .moveDown();
 
     // Line Items Header
@@ -1699,7 +1776,7 @@ const cancellProductStatus = async (req, res) => {
 
     const quantity = order.product[productIndex].quantity;
     product_price = order.product[productIndex].productPrice;
-    order.product[productIndex].status = "canceled";
+    order.product[productIndex].status = "cancelled";
 
     if (order.paymentMethod === 'COD') {
       order.product[productIndex].refund = "no refund";
@@ -1859,7 +1936,14 @@ const Coupon = async (req, res) => {
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: COUPON_MESSAGES.EXPIRED });
       }
 
-      
+      const cart = await Cart.findOne({ user_id: req.session.user_id });
+      if (!cart) {
+        return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.CART_NOT_FOUND });
+      }
+
+      if (couponIsexist.discount_Price >= cart.totalPrice) {
+        return res.status(HttpStatus.BAD_REQUEST).json({ message: COUPON_MESSAGES.DISCOUNT_EXCEEDS_CART });
+      }
 
       const applyCoupon = await Cart.findOneAndUpdate(
         { user_id: req.session.user_id },  // Filter to find the document
@@ -1900,10 +1984,17 @@ const applyCoupon = async (req, res) => {
 
     console.log(cart);
     
-      
-      
-      const finalPrice = cart.finalPrice;
+      if (!cart) {
+          return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.CART_NOT_FOUND });
+      }
+
       const discountPrice = coupon.discount_Price;
+
+      if (discountPrice >= cart.totalPrice) {
+          return res.status(HttpStatus.BAD_REQUEST).json({ message: COUPON_MESSAGES.DISCOUNT_EXCEEDS_CART });
+      }
+
+      const finalPrice = cart.finalPrice;
       const final = finalPrice - discountPrice;
       console.log(finalPrice);
 
@@ -1918,7 +2009,7 @@ const applyCoupon = async (req, res) => {
           return res.status(HttpStatus.BAD_REQUEST).json({ message: PAYMENT_MESSAGES.CART_UPDATE_FAILED });
       }
 
-      res.status(HttpStatus.OK)
+      res.status(HttpStatus.OK).json({ success: true });
 
   } catch (error) {
       console.error('Error applying coupon:', error);
@@ -2050,14 +2141,16 @@ const getWishlist = async (req, res) => {
 const getWallet = async (req, res) => {
   try {
       // Fetch the wallet for the logged-in user
+      const user = await User.findOne({ _id: req.session.user_id });
+
+      console.log(req.session.user_id,'--------------------')
       const wallet = await Wallet.findOne({ user_id: new object_id(req.session.user_id) });
       // If wallet is not found, return an error message or redirect
       if (!wallet) {
         res.render("user/walletNotExist", { user: typeof user !== "undefined" ? sanitizeUser(user) : null }) 
 
       }
-      const user = await User.findOne({ _id: req.session.user_id });
-
+       console.log(user)
       // Render the wallet page with the wallet data
       res.render('user/wallet', {
           balance: wallet.balance,
@@ -2111,6 +2204,43 @@ const paymentPending= async (req,res)=>{
   }
 }
 
+const submitReview = async (req, res) => {
+  try {
+    const { productId, orderId, userReview } = req.body;
+    const userId = req.session.user_id;
+
+    if (!productId || !orderId || !userReview) {
+      return res.status(HttpStatus.BAD_REQUEST).send("Missing review details");
+    }
+
+    // Verify order exists for this user
+    const order = await Order.findOne({ _id: orderId, user_id: userId });
+    if (!order) {
+      return res.status(HttpStatus.NOT_FOUND).send("Order not found");
+    }
+
+    // Find the specific product subdocument
+    const productItem = order.product.find(p => p.productId.toString() === productId);
+    if (!productItem || (productItem.status !== 'delivered' && productItem.status !== 'Returned')) {
+      return res.status(HttpStatus.BAD_REQUEST).send("Product not delivered yet");
+    }
+
+    // Save the review
+    const newReview = new Review({
+      productId,
+      orderId,
+      userId,
+      userReview
+    });
+
+    await newReview.save();
+
+    res.redirect(`/myOrderDetails?id=${orderId}&productId=${productItem._id}`);
+  } catch (error) {
+    console.error("Error submitting review:", error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send("Error submitting review");
+  }
+};
 
 
 module.exports = {
@@ -2159,4 +2289,6 @@ module.exports = {
   // getOrderHistory
   invoiceDownload,
   paymentPending,
+  myOrderDetails,
+  submitReview,
 };

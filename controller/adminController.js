@@ -9,6 +9,7 @@ const fs = require("fs");
 const { log, error } = require("console");
 const Coupons = require("../model/couponModel");
 const Wallet = require("../model/walletModel");
+const Review = require("../model/reviewModel");
 require("passport");
 const mongoose = require("mongoose");
 const { HttpStatus } = require("../constants/httpStatus");
@@ -855,25 +856,66 @@ const updateStatus = async (req, res) => {
     }
 
     const quantity = order.product[productIndex].quantity;
+    const previousStatus = order.product[productIndex].status;
 
     order.product[productIndex].status = status;
 
-    const product = await Product.findOne({
-      _id: order.product[productIndex].productId,
-    });
-
-    if (!product) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: PRODUCT_MESSAGES.NOT_FOUND });
+    if (status === 'delivered') {
+      order.payment = 'success';
+      order.Payment = 'success';
     }
 
-    product.in_stock += quantity;
+    if ((status === 'cancelled' || status === 'canceled') && 
+        previousStatus !== 'cancelled' && previousStatus !== 'canceled') {
+      const product = await Product.findOne({
+        _id: order.product[productIndex].productId,
+      });
+
+      if (!product) {
+        return res.status(HttpStatus.NOT_FOUND).json({ message: PRODUCT_MESSAGES.NOT_FOUND });
+      }
+
+      product.in_stock += quantity;
+      await product.save();
+    }
 
     await order.save();
-    await product.save();
 
-    res.redirect("/orderMangement");
+    res.redirect(req.header('Referer') || "/orderMangement");
   } catch (error) {
     console.log(error.message);
+  }
+};
+
+const orderDetails = async (req, res) => {
+  try {
+    const orderId = req.query.id;
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(HttpStatus.BAD_REQUEST).send("Invalid Order ID");
+    }
+
+    const orderData = await Order.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
+      {
+        $lookup: {
+          from: "products",
+          localField: "product.productId",
+          foreignField: "_id",
+          as: "newone",
+        },
+      },
+    ]);
+
+    if (orderData.length === 0) {
+      return res.status(HttpStatus.NOT_FOUND).send("Order not found");
+    }
+
+    const reviews = await Review.find({ orderId: orderId });
+
+    res.render("admin/orderDetails", { order: orderData[0], reviews });
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -904,6 +946,13 @@ const createCoupon = async (req, res) => {
   try {
     const { couponCode, discount, expiryDate, description, minPurchaseAmount } =
       req.body;
+
+    const discountVal = parseInt(discount, 10);
+    const minPurchaseVal = parseInt(minPurchaseAmount, 10);
+
+    if (discountVal >= minPurchaseVal) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: COUPON_MESSAGES.DISCOUNT_EXCEEDS_MIN_PURCHASE });
+    }
 
     const newcoupon = new Coupons({
       Coupon_Code: couponCode,
@@ -1180,6 +1229,14 @@ const updateCoupon = async (req, res) => {
       Edit_description,
     } = req.body;
 
+    const discountVal = parseInt(Edit_discount, 10);
+    const minPurchaseVal = parseInt(Edit_minPurchaseAmount, 10);
+
+    if (discountVal >= minPurchaseVal) {
+      req.flash("info", "⚠️ Discount price cannot exceed or equal the minimum purchase amount");
+      return res.redirect("/couponMangement");
+    }
+
     const edit = await Coupons.updateOne(
       { _id: edit_id },
       {
@@ -1415,6 +1472,11 @@ const newOffer = async (req, res) => {
 
     const offerProduct_mrp = parseInt(req.body.offerProduct_mrp, 10);
     const discount = parseInt(req.body.discount, 10);
+
+    if (discount >= offerProduct_mrp) {
+      return res.status(HttpStatus.BAD_REQUEST).send("Discount price cannot exceed or equal the product MRP");
+    }
+
     const lastPrice = offerProduct_mrp - discount;
 
     console.log(lastPrice);
@@ -1734,6 +1796,7 @@ module.exports = {
   acceptAndRefund,
   rejectReturn,
   updateStatus,
+  orderDetails,
   singelOderhistory,
   createCoupon,
   couponMangemnt,
