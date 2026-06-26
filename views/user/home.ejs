@@ -93,12 +93,21 @@
           <% if (element.Hide_product === 0) { %>
             <div class="col-lg-3 mb-4 text-center">
               <div class="product-entry border">
-                <a href="/singleProduct/<%= element.id %>" class="prod-img">
+                <a href="/singleProduct/<%= element.id %>" class="prod-img" style="position: relative; display: block;">
                   <img src="<%= element.product_img[0] %>" class="img-fluid" alt="<%= element.product_name %>">
+                  <% if (element.Maximum_Retail_Price && element.Maximum_Retail_Price > element.price) { %>
+                    <% var discount = ((element.Maximum_Retail_Price - element.price) / element.Maximum_Retail_Price) * 100; %>
+                    <span class="wz-offer-badge"><%= discount.toFixed(0) %>% OFF</span>
+                  <% } %>
                 </a>
                 <div class="desc">
                   <h2><a href="/singleProduct/<%= element.id %>"><%= element.product_name %></a></h2>
-                  <span class="price">₹<%= element.price %></span>
+                  <div class="price-container d-flex justify-content-center align-items-center gap-2">
+                    <span class="price text-danger font-weight-bold" style="font-size: 1.15rem; font-weight: 600;">₹<%= element.price %></span>
+                    <% if (element.Maximum_Retail_Price && element.Maximum_Retail_Price > element.price) { %>
+                      <span class="price-old text-muted" style="font-size: 0.9rem; text-decoration: line-through;">₹<%= element.Maximum_Retail_Price %></span>
+                    <% } %>
+                  </div>
                 </div>
               </div>
             </div>

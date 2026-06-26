@@ -72,7 +72,7 @@
           <% orders.forEach((order ,i)=> { %>
             <div class="order-card mb-5 mt-5 bg-body-secondary text-dark">
               <div class="order-header">
-                 <br>  
+                <p class="ps-3 text-light"><strong>Order Number:</strong> <%= order.orderNumber || 'N/A' %></p>
                 <p class="ps-3 text-light"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></p>
               </div>
              
@@ -160,170 +160,46 @@
                         
                           <% } else { %>
                            
-
-
                         <% if (productItem.status === 'pending') { %>
                           <div class="text-center mb-2">
                             <span class="status-badge bg-warning text-dark">Pending</span>
                           </div>
-                          <div class="d-flex justify-content-center">
-                            <button class="btn btn-custom btn-primary" onclick='invoicePage({
-                              invoicData: <%= JSON.stringify(order.newone[index]) %>,
-                              order: <%= JSON.stringify(order.shipment_address) %>,
-                              iamge: <%= JSON.stringify(order.newone[index].product_img[0]) %>,
-                              quantity: <%= JSON.stringify(productItem.quantity) %>,
-                              action: <%= JSON.stringify({
-                                actionObj_id: order._id,
-                                actionObjProduct_id: productItem._id,
-                                actionProductName: order.newone[index].product_name,
-                                actionProductPrice: order.newone[index].price
-                              }) %>
-                            }, "pending")'>
-                              <i class="fas fa-file-invoice"></i> view order details
-                            </button>
-                            
-                             <input type="hidden" id="object_id" value="<%= order._id %>">
-                              <input type="hidden" id="product_id" value="<%= productItem._id %>">
-                              <input type="text" id="product_price" hidden value="<%= order.newone[index].price %>">
-                             
-
-                            
+                        <% } else if (productItem.status === 'return') { %>
+                          <div class="text-center mb-2">
+                            <span class="status-badge text-white " style="background-color: rgb(255, 123, 0);"> <i class="fa-solid fa-rotate-left" style="color: #ffffff;"></i> return</span>
                           </div>
-                                        
-
-                          <% } else if (productItem.status === 'return') { %>
-                            <div class="text-center mb-2">
-                              <span class="status-badge text-white " style="background-color: rgb(255, 123, 0);"> <i class="fa-solid fa-rotate-left" style="color: #ffffff;"></i> return</span>
-                            </div>
-                            <button class="btn btn-custom btn-primary" onclick='invoicePage({
-                              invoicData: <%= JSON.stringify(order.newone[index]) %>,
-                              order: <%= JSON.stringify(order.shipment_address) %>,
-                              iamge: <%= JSON.stringify(order.newone[index].product_img[0]) %>,
-                              quantity: <%= JSON.stringify(productItem.quantity) %>,
-                              action: <%= JSON.stringify({
-                                actionObj_id: order._id,
-                                actionObjProduct_id: productItem._id,
-                                actionProductName: order.newone[index].product_name,
-                                actionProductPrice: order.newone[index].price
-                              }) %>
-                            }, "return")'>
-                              <i class="fas fa-file-invoice"></i> view order details
-                            </button>
-                     
-
-
-                         
                         <% } else if (productItem.status === 'delivered') { %>
                           <div class="text-center mb-2">
                             <span class="status-badge bg-success">Delivered</span>
                           </div>
-                          <button class="btn btn-custom btn-primary" onclick='invoicePage({
-                            invoicData: <%= JSON.stringify(order.newone[index]) %>,
-                            order: <%= JSON.stringify(order.shipment_address) %>,
-                            iamge: <%= JSON.stringify(order.newone[index].product_img[0]) %>,
-                            quantity: <%= JSON.stringify(productItem.quantity) %>,
-                            action: <%= JSON.stringify({
-                              actionObj_id: order._id,
-                              actionObjProduct_id: productItem._id,
-                              actionProductName: order.newone[index].product_name,
-                              actionProductPrice: order.newone[index].price
-                            }) %>
-                          }, "delivered")'>
-                            <i class="fas fa-file-invoice"></i> view order details
-                          </button>
-
-                        <% } else if (productItem.status === 'cancelled') { %>
+                        <% } else if (productItem.status === 'shipped') { %>
+                          <div class="text-center mb-2">
+                            <span class="status-badge bg-info text-dark">Shipped</span>
+                          </div>
+                        <% } else if (productItem.status === 'cancelled' || productItem.status === 'canceled') { %>
                           <div class="text-center mb-2">
                             <span class="status-badge bg-danger">&nbsp cancel &nbsp</span>
                           </div>
-                          <button class="btn btn-custom btn-primary" onclick='invoicePage({
-                            invoicData: <%= JSON.stringify(order.newone[index]) %>,
-                            order: <%= JSON.stringify(order.shipment_address) %>,
-                            iamge: <%= JSON.stringify(order.newone[index].product_img[0]) %>,
-                            quantity: <%= JSON.stringify(productItem.quantity) %>,
-                            action: <%= JSON.stringify({
-                              actionObj_id: order._id,
-                              actionObjProduct_id: productItem._id,
-                              actionProductName: order.newone[index].product_name,
-                              actionProductPrice: order.newone[index].price
-                            }) %>
-                          }, "cancelled")'>
+                        <% } else if (productItem.status === 'Returned') { %>
+                          <div class="text-center mb-2">
+                            <span class="status-badge " style="background-color: rgba(143, 255, 128, 0.534)">Return successful</span>
+                          </div>
+                        <% } else if (productItem.status === 'return pending') { %>
+                          <div class="text-center mb-2">
+                            <span class="status-badge text-dark" style="background-color: #e8fd00;">Return Pending  </span>
+                          </div>
+                        <% } else if (productItem.status === 'return rejected') { %>
+                          <div class="text-center mb-2">
+                            <span class="status-badge text-dark" style="background-color: #f8712d;"> return request rejected  </span>
+                          </div>
+                        <% } %>
+                        
+                        <div class="d-flex justify-content-center">
+                          <a href="/myOrderDetails?id=<%= order._id %>&productId=<%= productItem._id %>" class="btn btn-custom btn-primary mt-2">
                             <i class="fas fa-file-invoice"></i> view order details
-                          </button>
-                          <% } else if (productItem.status === 'Returned') { %>
-                             
-                            <div class="text-center mb-2">
-                              <span class="status-badge " style="background-color: rgba(143, 255, 128, 0.534)">Return successful</span>
-                            </div>
-                            <button class="btn btn-custom btn-primary" onclick='invoicePage({
-                              invoicData: <%= JSON.stringify(order.newone[index]) %>,
-                              order: <%= JSON.stringify(order.shipment_address) %>,
-                              iamge: <%= JSON.stringify(order.newone[index].product_img[0]) %>,
-                              quantity: <%= JSON.stringify(productItem.quantity) %>,
-                              action: <%= JSON.stringify({
-                                actionObj_id: order._id,
-                                actionObjProduct_id: productItem._id,
-                                actionProductName: order.newone[index].product_name,
-                                actionProductPrice: order.newone[index].price
-                              }) %>
-                            }, "Returned")'>
-                              <i class="fas fa-file-invoice"></i> view order details
-                            </button>
-                   
-
-
-                            <% } else if (productItem.status === 'return pending') { %>
-
- 
-                              <div class="text-center mb-2">
-                                <span class="status-badge text-dark" style="background-color: #e8fd00;">Return Pending  </span>
-                              </div>
-                              <button class="btn btn-custom btn-primary" onclick='invoicePage({
-                                invoicData: <%= JSON.stringify(order.newone[index]) %>,
-                                order: <%= JSON.stringify(order.shipment_address) %>,
-                                iamge: <%= JSON.stringify(order.newone[index].product_img[0]) %>,
-                                quantity: <%= JSON.stringify(productItem.quantity) %>,
-                                action: <%= JSON.stringify({
-                                  actionObj_id: order._id,
-                                  actionObjProduct_id: productItem._id,
-                                  actionProductName: order.newone[index].product_name,
-                                  actionProductPrice: order.newone[index].price
-                                }) %>
-                              }, "return pending")'>
-                                <i class="fas fa-file-invoice"></i> view order details
-                              
-                              </button>
-                      
-                              <% } else if (productItem.status === 'return rejected') { %>
-
-
-                                <div class="text-center mb-2">
-                                  <span class="status-badge text-dark" style="background-color: #f8712d;"> return request rejected  </span>
-                                </div>
-                                <button class="btn btn-custom btn-primary" onclick='invoicePage({
-                                  invoicData: <%= JSON.stringify(order.newone[index]) %>,
-                                  order: <%= JSON.stringify(order.shipment_address) %>,
-                                  iamge: <%= JSON.stringify(order.newone[index].product_img[0]) %>,
-                                  quantity: <%= JSON.stringify(productItem.quantity) %>,
-                                  action: <%= JSON.stringify({
-                                    actionObj_id: order._id,
-                                    actionObjProduct_id: productItem._id,
-                                    actionProductName: order.newone[index].product_name,
-                                    actionProductPrice: order.newone[index].price
-                                  }) %>
-                                }, "return rejected")'>
-                                  <i class="fas fa-file-invoice"></i> view order details
-                                </button>
-
-
-
-
-
-
-
-
-                        <% } %>
-                        <% } %>
+                          </a>
+                        </div>
+                        <% } %>%>
                       </div>
                     </div>
                   <% } %>
@@ -412,6 +288,10 @@
                                                               
                                                               <div id="PendingDIV" class="alert alert-warning" role="alert" style="width: 100%; max-width: 400px; margin: 10px auto; padding: 15px; box-sizing: border-box; display: none;">
                                                                 <p><strong><i class="fa-solid fa-clock" style="color: #000000;"></i>pending:</strong> product delivered at soon as possible.</p>
+                                                              </div>
+                                                              
+                                                              <div id="shippedDIV_2" class="alert alert-info" role="alert" style="width: 100%; max-width: 400px; margin: 10px auto; padding: 15px; box-sizing: border-box; display: none;">
+                                                                <p><strong><i class="fas fa-truck" style="color: #17a2b8;"></i> Shipped:</strong> The product has been shipped and is on the way.</p>
                                                               </div>
 
 
@@ -587,6 +467,10 @@
                 <!-- Status Messages -->
                 <div id="PendingDIV" class="alert alert-warning d-none">
                   Product delivery is in progress.
+                </div>
+
+                <div id="shippedDIV" class="alert alert-info d-none">
+                  Product has been shipped.
                 </div>
 
                 <div id="delivereDIV" class="alert alert-success d-none">
@@ -915,6 +799,8 @@ document.getElementById('InvoiceLastTotol').innerHTML=`₹ ${data.invoicData.pri
   
 if (status === 'pending') {
   document.getElementById('PendingDIV').style.display = 'block';
+  if (document.getElementById('shippedDIV')) document.getElementById('shippedDIV').style.display = 'none';
+  if (document.getElementById('shippedDIV_2')) document.getElementById('shippedDIV_2').style.display = 'none';
   document.getElementById('returnrejected').style.display = 'none';
   document.getElementById('delivereDIV').style.display = 'none';
   document.getElementById('downloadInvoiceButton').style.display = 'none';
@@ -923,7 +809,21 @@ if (status === 'pending') {
   document.getElementById('returnDIV').style.display = 'none';
   document.getElementById('returnpending').style.display = 'none';
   document.getElementById('cancelDIV').style.display = 'none';
+} else if (status === 'shipped') {
+  if (document.getElementById('shippedDIV')) document.getElementById('shippedDIV').style.display = 'block';
+  if (document.getElementById('shippedDIV_2')) document.getElementById('shippedDIV_2').style.display = 'block';
+  document.getElementById('PendingDIV').style.display = 'none';
+  document.getElementById('returnrejected').style.display = 'none';
+  document.getElementById('delivereDIV').style.display = 'none';
+  document.getElementById('downloadInvoiceButton').style.display = 'none';
+  document.getElementById('returnButton').style.display = 'none';
+  document.getElementById('cancellButton').style.display = 'none';
+  document.getElementById('returnDIV').style.display = 'none';
+  document.getElementById('returnpending').style.display = 'none';
+  document.getElementById('cancelDIV').style.display = 'none';
 } else if (status === 'delivered') {
+  if (document.getElementById('shippedDIV')) document.getElementById('shippedDIV').style.display = 'none';
+  if (document.getElementById('shippedDIV_2')) document.getElementById('shippedDIV_2').style.display = 'none';
   document.getElementById('downloadInvoiceButton').style.display = 'block';
   document.getElementById('delivereDIV').style.display = 'block';
   document.getElementById('returnButton').style.display = 'block';
@@ -934,6 +834,8 @@ if (status === 'pending') {
   document.getElementById('returnpending').style.display = 'none';
   document.getElementById('cancelDIV').style.display = 'none';
 } else if (status === 'cancelled') {
+  if (document.getElementById('shippedDIV')) document.getElementById('shippedDIV').style.display = 'none';
+  if (document.getElementById('shippedDIV_2')) document.getElementById('shippedDIV_2').style.display = 'none';
   document.getElementById('cancelDIV').style.display = 'block';
   document.getElementById('cancellButton').style.display = 'none';
   document.getElementById('PendingDIV').style.display = 'none';
@@ -944,6 +846,8 @@ if (status === 'pending') {
   document.getElementById('returnDIV').style.display = 'none';
   document.getElementById('returnpending').style.display = 'none';
 } else if (status === 'Returned') {
+  if (document.getElementById('shippedDIV')) document.getElementById('shippedDIV').style.display = 'none';
+  if (document.getElementById('shippedDIV_2')) document.getElementById('shippedDIV_2').style.display = 'none';
   document.getElementById('returnDIV').style.display = 'block';
   document.getElementById('cancellButton').style.display = 'none';
   document.getElementById('PendingDIV').style.display = 'none';
@@ -954,6 +858,8 @@ if (status === 'pending') {
   document.getElementById('returnpending').style.display = 'none';
   document.getElementById('cancelDIV').style.display = 'none';
 } else if (status === 'return pending') {
+  if (document.getElementById('shippedDIV')) document.getElementById('shippedDIV').style.display = 'none';
+  if (document.getElementById('shippedDIV_2')) document.getElementById('shippedDIV_2').style.display = 'none';
   document.getElementById('returnpending').style.display = 'block';
   document.getElementById('cancellButton').style.display = 'none';
   document.getElementById('returnrejected').style.display = 'none';
@@ -964,6 +870,8 @@ if (status === 'pending') {
   document.getElementById('returnDIV').style.display = 'none';
   document.getElementById('cancelDIV').style.display = 'none';
 } else if (status === 'return rejected') {
+  if (document.getElementById('shippedDIV')) document.getElementById('shippedDIV').style.display = 'none';
+  if (document.getElementById('shippedDIV_2')) document.getElementById('shippedDIV_2').style.display = 'none';
   document.getElementById('returnrejected').style.display = 'block';
   document.getElementById('cancellButton').style.display = 'none';
   document.getElementById('returnDIV').style.display = 'none';

@@ -208,7 +208,11 @@
     <div class="container">
       <div class="row">
         <div class="col-md-6">
-          <div class="wz-product-gallery">
+          <div class="wz-product-gallery" style="position: relative;">
+            <% if (singleProduct.Maximum_Retail_Price && singleProduct.Maximum_Retail_Price > singleProduct.price) { %>
+              <% var discountPercentage = ((singleProduct.Maximum_Retail_Price - singleProduct.price) / singleProduct.Maximum_Retail_Price) * 100; %>
+              <span class="wz-offer-badge"><%= discountPercentage.toFixed(0) %>% OFF</span>
+            <% } %>
             <div class="wz-product-main-img" id="mainImageWrap">
               <img src="<%= (singleProduct.product_img[0].startsWith('http://') || singleProduct.product_img[0].startsWith('https://') || singleProduct.product_img[0].startsWith('//')) ? singleProduct.product_img[0] : '/' + singleProduct.product_img[0] %>" alt="<%= singleProduct.product_name %>" id="mainImage">
             </div>
@@ -237,7 +241,7 @@
               %>  
               <% if (difference > 0) { %>
                 <span class="wz-product-mrp">₹<%= singleProduct.Maximum_Retail_Price %></span>
-                <span class="wz-product-discount"><%= discountPercentage.toFixed(0) %>% off</span>
+                <span class="wz-offer-badge-inline"><%= discountPercentage.toFixed(0) %>% OFF</span>
               <% } %>
             </div>
 
@@ -251,7 +255,9 @@
               </div>
             <% } %>
 
-            <% if (singleProduct.product_discription) { %>
+            <% if (singleProduct.product_description) { %>
+              <p class="wz-product-desc"><%= singleProduct.product_description %></p>
+            <% } else if (singleProduct.product_discription) { %>
               <p class="wz-product-desc"><%= singleProduct.product_discription %></p>
             <% } %>
 
@@ -288,7 +294,9 @@
             </div>
 
             <div class="wz-product-meta">
-              <% if (singleProduct.category) { %>
+              <% if (singleProduct.category_name) { %>
+                <p>Category: <span><%= (singleProduct.category_name && singleProduct.category_name.category_name) ? singleProduct.category_name.category_name : singleProduct.category_name %></span></p>
+              <% } else if (singleProduct.category) { %>
                 <p>Category: <span><%= singleProduct.category %></span></p>
               <% } %>
               <% if (singleProduct.brands) { %>
@@ -296,6 +304,35 @@
               <% } %>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <hr style="border-top: 1px solid var(--wz-gray-200); margin-bottom: 2rem;">
+          <h3 class="mb-4" style="font-weight: var(--wz-fw-semibold); color: var(--wz-text-primary);">Customer Reviews</h3>
+          
+          <% if (typeof reviews !== 'undefined' && reviews && reviews.length > 0) { %>
+            <div class="wz-reviews-list">
+              <% reviews.forEach(review => { %>
+                <div class="wz-review-item p-3 mb-3" style="background: var(--wz-gray-50); border-radius: var(--wz-radius-md); border-left: 4px solid var(--wz-accent);">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span style="font-weight: var(--wz-fw-semibold); color: var(--wz-text-primary);">
+                      <%= (review.userId && review.userId.name) ? review.userId.name : 'Verified Customer' %>
+                    </span>
+                    <small class="text-muted"><%= new Date(review.createdAt).toLocaleDateString() %></small>
+                  </div>
+                  <p class="mb-0 text-secondary" style="font-size: var(--wz-fs-sm); line-height: 1.6;"><%= review.userReview %></p>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="p-4 text-center rounded" style="background: var(--wz-gray-50); border: 1px dashed var(--wz-gray-300);">
+              <i class="far fa-comments mb-2" style="font-size: 2rem; color: var(--wz-gray-400);"></i>
+              <p class="mb-0 text-muted">No reviews yet for this product. Be the first to review it after purchase!</p>
+            </div>
+          <% } %>
         </div>
       </div>
     </div>

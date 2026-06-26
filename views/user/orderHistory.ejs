@@ -20,7 +20,7 @@
         <% orders.forEach(order => { %>
           <div class="wz-card mb-4">
             <div class="wz-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <span style="font-size: var(--wz-fs-sm);">Order ID: <strong><%= order._id %></strong></span>
+              <span style="font-size: var(--wz-fs-sm);">Order Number: <strong><%= order.orderNumber || 'N/A' %></strong> (ID: <%= order._id %>)</span>
               <span class="wz-badge wz-badge-accent"><%= order.status %></span>
             </div>
             <div class="wz-card-body">

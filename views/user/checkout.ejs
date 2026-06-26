@@ -1623,7 +1623,17 @@ async function applyCoupon() {
         if (response.ok) {
             let totalAmount = parseInt(document.getElementById("pd-Total").textContent);
             let minPurchaseAmount = parseInt(data.Coupon.minPurchaseAmount);
+            let discountAmount = parseInt(data.Coupon.discount_Price);
             
+            if (discountAmount >= totalAmount) {
+                Swal.fire({
+                    title: 'Invalid Coupon Discount',
+                    text: 'The coupon discount amount cannot exceed or equal the cart total amount.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
 
             if (totalAmount >= minPurchaseAmount) {
                 Swal.fire({
