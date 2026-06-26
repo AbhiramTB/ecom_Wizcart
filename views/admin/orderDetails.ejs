@@ -1,0 +1,248 @@
+<%- include('./adminLayout/header') %>
+<body id="page-top">
+  <div id="wrapper">
+    <%- include('./adminLayout/sidebar') %>
+    <div id="content-wrapper" class="d-flex flex-column">
+      <div id="content">
+        <!-- Main Content -->
+        <div class="container-fluid mt-4">
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Order Details</h1>
+            <a href="/orderMangement" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+              <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Orders
+            </a>
+          </div>
+
+          <div class="row">
+            <!-- Left side details -->
+            <div class="col-lg-8">
+              <!-- Order Header Card -->
+              <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary text-white d-flex justify-content-between align-items-center">
+                  <h6 class="m-0 font-weight-bold">Order <%= order.orderNumber || 'N/A' %></h6>
+                  <span class="badge badge-light"><%= order.status.toUpperCase() %></span>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <p class="mb-1 text-muted">Order Date</p>
+                      <h5><%= new Date(order.orderDate).toLocaleString() %></h5>
+                    </div>
+                    <div class="col-sm-6">
+                      <p class="mb-1 text-muted">Payment Method</p>
+                      <h5><%= order.paymentMethod.toUpperCase() %></h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Products Card -->
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Ordered Products</h6>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Image</th>
+                          <th>Product Name</th>
+                          <th>Quantity</th>
+                          <th>Price</th>
+                          <th>Status</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% order.product.forEach((prod, idx) => { %>
+                          <% if (order.newone[idx]) { %>
+                            <tr>
+                              <td>
+                                <img src="<%= order.newone[idx].product_img && order.newone[idx].product_img[0] ? order.newone[idx].product_img[0] : '/images/placeholder.png' %>" alt="<%= order.newone[idx].product_name %>" style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px;">
+                              </td>
+                              <td class="font-weight-bold"><%= order.newone[idx].product_name %></td>
+                              <td><%= prod.quantity %></td>
+                              <td>₹<%= order.newone[idx].price %></td>
+                              <td>
+                                <span class="badge <%= prod.status === 'delivered' ? 'badge-success' : prod.status === 'cancelled' ? 'badge-danger' : prod.status === 'shipped' ? 'badge-info' : 'badge-warning' %>">
+                                  <%= prod.status %>
+                                </span>
+                              </td>
+                              <td>
+                                <% if (prod.status === 'Returned' || prod.status === 'return pending' || prod.status === 'return rejected') { %>
+                                  <div class="text-xs font-weight-bold text-uppercase text-info mb-1">
+                                    <%= prod.status %>
+                                    <br>
+                                    <a href="/returnOrders" class="btn btn-sm btn-outline-info mt-1">Manage Return</a>
+                                  </div>
+                                <% } else { %>
+                                  <form action="/update-status" method="POST" id="statusUpdate-<%= prod._id %>" class="d-flex align-items-center">
+                                    <input type="hidden" name="product_id" value="<%= prod._id %>">
+                                    <input type="hidden" name="object_id" value="<%= order._id %>">
+                                    <select name="status" class="form-control form-control-sm mr-2" style="width: 110px;">
+                                      <option value="pending" <%= prod.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                                      <option value="shipped" <%= prod.status === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                                      <option value="delivered" <%= prod.status === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                                      <option value="cancelled" <%= prod.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    </select>
+                                    <button type="button" onclick="editStatus('<%= prod._id %>', '<%= order.paymentMethod %>', '<%= order.payment || order.Payment || 'pending' %>', '<%= order.finalPrice %>')" class="btn btn-sm btn-primary">Update</button>
+                                  </form>
+                                <% } %>
+                              </td>
+                            </tr>
+                          <% } %>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reviews Card -->
+              <% if (typeof reviews !== 'undefined' && reviews && reviews.length > 0) { %>
+                <div class="card shadow mb-4">
+                  <div class="card-header py-3 bg-info text-white">
+                    <h6 class="m-0 font-weight-bold text-white"><i class="fas fa-comments"></i> Product Reviews</h6>
+                  </div>
+                  <div class="card-body">
+                    <% reviews.forEach(review => { %>
+                      <div class="mb-3 p-3 bg-light rounded text-dark">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                          <strong class="text-primary">
+                            <% 
+                              const matchedProd = order.newone.find(p => p._id.toString() === review.productId.toString());
+                              const prodName = matchedProd ? matchedProd.product_name : 'Unknown Product';
+                            %>
+                            <%= prodName %>
+                          </strong>
+                          <small class="text-muted"><%= new Date(review.createdAt).toLocaleDateString() %></small>
+                        </div>
+                        <p class="mb-0 text-gray-800">"<%= review.userReview %>"</p>
+                      </div>
+                    <% }) %>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Right side summary cards -->
+            <div class="col-lg-4">
+              <!-- Customer details card -->
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Customer & Shipping</h6>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <p class="mb-0 text-muted text-xs">Customer Name</p>
+                    <span class="font-weight-bold text-gray-800"><%= order.name %></span>
+                  </div>
+                  <div class="mb-3">
+                    <p class="mb-0 text-muted text-xs">Email</p>
+                    <span class="font-weight-bold text-gray-800"><%= order.email %></span>
+                  </div>
+                  <hr>
+                  <h6 class="font-weight-bold text-gray-800 mb-2">Shipping Address</h6>
+                  <p class="text-dark mb-1"><strong>Name:</strong> <%= order.shipment_address.name %></p>
+                  <p class="text-dark mb-1"><strong>Mobile:</strong> <%= order.shipment_address.mobile %></p>
+                  <p class="text-dark mb-1"><strong>Address:</strong> <%= order.shipment_address.address %></p>
+                  <p class="text-dark mb-1"><strong>Locality:</strong> <%= order.shipment_address.locality %></p>
+                  <p class="text-dark mb-1"><strong>City:</strong> <%= order.shipment_address.city %></p>
+                  <p class="text-dark mb-1"><strong>State:</strong> <%= order.shipment_address.state %> - <%= order.shipment_address.pincode %></p>
+                  <% if (order.shipment_address.landmark) { %>
+                    <p class="text-dark mb-1"><strong>Landmark:</strong> <%= order.shipment_address.landmark %></p>
+                  <% } %>
+                  <p class="text-dark mb-0"><strong>Type:</strong> <span class="badge badge-secondary"><%= order.shipment_address.addresstype %></span></p>
+                </div>
+              </div>
+
+              <!-- Price Card -->
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Payment & Pricing</h6>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Payment Status:</span>
+                    <span class="font-weight-bold text-dark"><%= order.payment || order.Payment || 'N/A' %></span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Payment Source:</span>
+                    <span class="font-weight-bold text-dark"><%= order.paymentSource || 'N/A' %></span>
+                  </div>
+                  <hr>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal:</span>
+                    <span class="text-dark">₹<%= order.totalPrice %></span>
+                  </div>
+                  <% if (order.coupon) { %>
+                    <div class="d-flex justify-content-between mb-2 text-success">
+                      <span>Coupon Discount (<%= order.coupon %>):</span>
+                      <span>-₹<%= order.discount %></span>
+                    </div>
+                  <% } %>
+                  <hr>
+                  <div class="d-flex justify-content-between">
+                    <span class="font-weight-bold text-gray-800">Grand Total:</span>
+                    <span class="font-weight-bold text-primary h4">₹<%= order.finalPrice %></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function editStatus(productId, paymentMethod, paymentStatus, finalPrice) {
+      const form = document.getElementById(`statusUpdate-${productId}`);
+      const selectedStatus = form.querySelector('select[name="status"]').value;
+
+      if (selectedStatus === 'delivered' && paymentStatus.toLowerCase() !== 'success') {
+        Swal.fire({
+          title: "Confirm Payment Receipt",
+          text: `Payment method is ${paymentMethod}. Has the customer completed the payment of ₹${finalPrice}?`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, Payment Received!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: "Updated",
+              text: "Status and payment status have been updated.",
+              icon: "success"
+            }).then(() => {
+              form.submit();        
+            });
+          }
+        });
+      } else {
+        Swal.fire({
+          title: "Are you sure?",
+          text: "Are you sure to edit the status of this product?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, Update!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: "Updated",
+              text: "Product status has been updated.",
+              icon: "success"
+            }).then(() => {
+              form.submit();        
+            });
+          }
+        });
+      }
+    }
+  </script>
+<%- include('./adminLayout/footer') %>

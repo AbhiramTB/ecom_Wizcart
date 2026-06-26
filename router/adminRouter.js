@@ -44,6 +44,7 @@ adminRoute.get("/logout", isLogin, adminController.logout);
 //orderMangement
 adminRoute.get("/orderMangement", isLogin,adminController.orderMangement);
 adminRoute.post("/update-status", isLogin, adminController.updateStatus);
+adminRoute.get("/orderDetails", isLogin, adminController.orderDetails);
 adminRoute.get('/returnOrders',isLogin,adminController.returnOrders)
 adminRoute.put('/acceptReturn', isLogin,adminController.acceptAndRefund);
 adminRoute.put('/reject', isLogin,adminController.rejectReturn);
