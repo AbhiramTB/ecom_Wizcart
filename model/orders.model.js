@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema({
+  orderNumber: {
+    type: String,
+    unique: true,
+    sparse: true,
+    default: () => `ORD-${Date.now().toString().slice(-2)}${Math.floor(10 + Math.random() * 90)}`
+  },
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -16,7 +22,7 @@ const OrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'success', 'failed' ,'return',"paymentPending"],
+    enum: ['pending', 'success', 'failed' ,'return',"paymentPending",'canceled', 'cancelled'],
     default: 'pending'
   },
   shipment_address: {
@@ -77,7 +83,7 @@ const OrderSchema = new mongoose.Schema({
     },
     status: {
       type: String,
-      enum: ['pending', 'shipped', 'delivered', 'cancelled',"return pending",'Returned',"return rejected","paymentPending"],
+      enum: ['pending', 'shipped', 'delivered', 'cancelled', 'canceled', "return pending",'Returned',"return rejected","paymentPending"],
       default: 'pending'
     },
     refund: {
@@ -91,6 +97,9 @@ const OrderSchema = new mongoose.Schema({
     default: Date.now
   },
   paymentSource:{
+    type: String,
+  },
+  razorpayOrderId: {
     type: String,
   },
   paymentMethod: {
