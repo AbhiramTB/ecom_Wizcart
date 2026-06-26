@@ -42,16 +42,16 @@
           <table class="table table-striped">
 
             <thead>
-              <tr>
-                <th scope="col">Coupon Code</th>
-                <th scope="col">discount_Price</th>
-                <th cope="col">minPurchaseAmount</th>
-                <th scope="col">Expiry Date</th>
-                <th scope="col">Description</th>
-                <th scope="col">Delete</th>
-                <th scope="col">Edit</th>
-                <th scope="col">Hide/Unhide</th>
-              </tr>
+          <tr>
+  <th scope="col">Coupon code</th>
+  <th scope="col">Discount price</th>
+  <th scope="col">Minimum purchase amount</th>
+  <th scope="col">Expiry date</th>
+  <th scope="col">Description</th>
+  <th scope="col">Delete</th>
+  <th scope="col">Edit</th>
+  <th scope="col">Hide/Unhide</th>
+</tr>
             </thead>
             <tbody>
               <% if (coupons.length === 0) { %>
@@ -384,6 +384,11 @@
               return false;
             }
 
+            if (parseFloat(discount) >= parseFloat(minPurchaseAmount)) {
+              alert("Discount price cannot exceed or equal the minimum purchase amount.");
+              return false;
+            }
+
             const response = await fetch('/createCoupon', {
               method: 'POST',
               headers: {
@@ -538,6 +543,19 @@ function editCoupon(id, code, discount, expiryDate, description,minPurchaseAmoun
 }
 async function updateCoupon() {
   try {
+    const Edit_discount = parseFloat(document.getElementById('edit_discount').value);
+    const Edit_minPurchaseAmount = parseFloat(document.getElementById('Edit_minPurchaseAmount').value);
+
+    if (Edit_discount >= Edit_minPurchaseAmount) {
+      Swal.fire({
+        title: 'Invalid Discount',
+        text: 'Discount amount cannot exceed or equal the minimum purchase amount.',
+        icon: 'warning',
+        confirmButtonColor: '#3085d6'
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: 'Do you want to save the changes?',
       text: "You won't be able to revert this!",
