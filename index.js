@@ -54,8 +54,8 @@ app.use(express.static(path.join(__dirname,"public")));
 
 app.use(adminRoute.adminRoute);
 app.use(userRoute.userRoute);
+app.use(googleAuth.authRoute);
 app.use('*',errorPage)
 
 app.listen(env.PORT, () => console.log(`http://localhost:${env.PORT}`));
 
-app.use(googleAuth.authRoute);
