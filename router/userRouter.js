@@ -13,9 +13,9 @@ var morgan = require('morgan')
 userRoute.use(nocache());
 userRoute.use(morgan('dev'));
 
-userRoute.get("/", (req, res) => {
-  res.redirect("/wizcart");
-});
+// userRoute.get("/", (req, res) => {
+//   res.redirect("/wizcart");
+// });
 
 // paymentController
 const paymentController=require('../controller/paymentController');
@@ -24,7 +24,7 @@ const paymentController=require('../controller/paymentController');
 
 // LOGIN ------------------------ 
 userRoute.get("/login", isLogout, userController.login);
-userRoute.post("/loginData", isLogout, userController.loginData);
+userRoute.post("/loginData",  isLogout, userController.loginData);
 
 // SIGNUP ----------------------
 userRoute.get("/signup", isLogout, userController.signup);
@@ -36,7 +36,8 @@ userRoute.post("/otpData", isLogout, userController.otpData);
 userRoute.get("/user-block", userController.userBlocked);
 
 // HOME ---------------------------
-userRoute.get("/wizcart", isLogout, userController.home);
+userRoute.get("/", isLogout, userController.home);
+
 userRoute.get("/home", isLogin, userController.homeLogin);
 
 // SHOP MORE --------------------
