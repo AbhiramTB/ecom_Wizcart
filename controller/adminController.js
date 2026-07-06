@@ -420,9 +420,19 @@ const dashBord = async (req, res) => {
 
 const userList = async (req, res) => {
   try {
-    const allUser = await User.find({});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const totalUsers = await User.countDocuments();
+    const allUser = await User.find({}).skip(skip).limit(limit);
     const toast = req.flash("info");
-    res.render("admin/userList", { users: allUser, toast });
+    res.render("admin/userList", {
+      users: allUser,
+      toast,
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      limit,
+    });
   } catch (error) {
     console.error(error);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).render("admin/userList", { message: ERROR_MESSAGES.SERVER_ERROR });
@@ -457,11 +467,19 @@ const blockUser = async (req, res) => {
 
 const products = async (req, res) => {
   try {
-    const productData = await Product.find({}).populate('category_name').populate('brand');
-    if (productData) {
-      const toast = req.flash("info");
-      res.render("admin/allProduct", { Product: productData, toast });
-    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 3;
+    const skip = (page - 1) * limit;
+    const totalProducts = await Product.countDocuments();
+    const productData = await Product.find({}).populate('category_name').populate('brand').skip(skip).limit(limit);
+    const toast = req.flash("info");
+    res.render("admin/allProduct", {
+      Product: productData,
+      toast,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit),
+      limit,
+    });
   } catch (error) {
     console.log(error.message);
   }
@@ -983,10 +1001,19 @@ const singelOderhistory = async (req, res) => {
 
 const couponMangemnt = async (req, res) => {
   try {
-    const coupon = await Coupons.find({});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+    const totalCoupons = await Coupons.countDocuments();
+    const coupon = await Coupons.find({}).sort({createdAt: -1}).skip(skip).limit(limit);
     let toast = req.flash("info") || [];
-
-    res.render("admin/coupons", { coupons: coupon, toast });
+    res.render("admin/coupons", {
+      coupons: coupon,
+      toast,
+      currentPage: page,
+      totalPages: Math.ceil(totalCoupons / limit),
+      limit,
+    });
   } catch (error) {
     console.log(error.message);
   }
@@ -1520,8 +1547,21 @@ const saleReport = async (req, res) => {
 
 
 const offerManagemanent1 = async (req, res) => {
-  const products = await Product.find({});
-  res.render("admin/offerManagement", { products });
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+    const totalProducts = await Product.countDocuments();
+    const products = await Product.find({}).skip(skip).limit(limit);
+    res.render("admin/offerManagement", {
+      products,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit),
+      limit,
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 
 const ExcelJS = require("exceljs");
@@ -1815,25 +1855,23 @@ const downloadPdf = async (req, res) => {
   }
 };
 
-const ledger=async (req,res)=>{
+const ledger = async (req, res) => {
   try {
-    
-    const orders = await Order.find({
-      paymentMethod: { $ne: "razorpay" },
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 2;
+    const skip = (page - 1) * limit;
+    const totalOrders = await Order.countDocuments({ paymentMethod: { $ne: 'razorpay' } });
+    const orders = await Order.find({ paymentMethod: { $ne: 'razorpay' } }).skip(skip).limit(limit);
+    res.render('admin/ledger', {
+      orders,
+      currentPage: page,
+      totalPages: Math.ceil(totalOrders / limit),
+      limit,
     });
-    
-    
-    console.log(orders);
-    
- 
-    res.render('admin/ledger', { orders });
- 
- 
   } catch (error) {
-   console.log(error.message);
-   
+    console.log(error.message);
   }
- }
+}
 
 module.exports = {
   adminLogin,

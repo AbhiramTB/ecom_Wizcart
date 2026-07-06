@@ -31,7 +31,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <table class="table table-bordered" id="productsTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
                                             <th>product_images</th>
@@ -45,19 +45,7 @@
                                             <th>HIDE</th>
                                         </tr>
                                     </thead>
-                                    <tfoot>
-                                        <tr>
-                                            <th>product_images</th>
-                                            <th>product_name</th>
-                                            <th>category_name</th>
-                                            <th>brand</th>
-                                            <th>price</th>
-                                            <th>stock</th>
-                                            <th>Edit</th>
-                                            <th>Delete</th>
-                                            <th>HIDE</th>
-                                        </tr>
-                                    </tfoot>
+                                    <tfoot></tfoot>
                                     <tbody>
                                         <% Product.forEach(e => { %>
                                             
@@ -118,6 +106,27 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Pagination -->
+                    <nav>
+                        <ul class="pagination">
+                            <% if (currentPage > 1) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="/Products?page=<%= currentPage - 1 %>&limit=<%= limit %>">Previous</a>
+                                </li>
+                            <% } %>
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                    <a class="page-link" href="/Products?page=<%= i %>&limit=<%= limit %>"><%= i %></a>
+                                </li>
+                            <% } %>
+                            <% if (currentPage < totalPages) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="/Products?page=<%= currentPage + 1 %>&limit=<%= limit %>">Next</a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
 
                 </div>
                 
@@ -267,19 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    
     <script src="js/sb-admin-2.min.js"></script>
-
-    
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-    
-    <script src="js/demo/datatables-demo.js"></script>
 
     <%- include('./adminLayout/footer') %>
 
