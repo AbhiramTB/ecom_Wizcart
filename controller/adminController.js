@@ -4,6 +4,7 @@ const { resizeImages } = require("../config/imageResizing");
 const Product = require("../model/productModel");
 const Order = require("../model/orders.model");
 const Category = require("../model/categoryModel");
+const Brand = require("../model/brandModel");
 const path = require("path");
 const fs = require("fs");
 const { log, error } = require("console");
@@ -15,7 +16,7 @@ const mongoose = require("mongoose");
 const { HttpStatus } = require("../constants/httpStatus");
 const { USER_MESSAGES, PRODUCT_MESSAGES, CATEGORY_MESSAGES, COUPON_MESSAGES, PAYMENT_MESSAGES, ERROR_MESSAGES } = require("../constants/messages");
 
-// ADMIN LOGIN  //GET
+
 
 const adminLogin = async (req, res) => {
   try {
@@ -62,7 +63,7 @@ const adminLogindata = async (req, res) => {
   }
 };
 
-// DASHBORD // GET
+
 
 const dashBord = async (req, res) => {
   try {
@@ -273,8 +274,17 @@ const dashBord = async (req, res) => {
       },
       { $unwind: "$productDetails" },
       {
+        $lookup: {
+          from: "brands",
+          localField: "productDetails.brand",
+          foreignField: "_id",
+          as: "brandDetails"
+        }
+      },
+      { $unwind: { path: "$brandDetails", preserveNullAndEmptyArrays: true } },
+      {
         $group: {
-          _id: "$productDetails.brands",
+          _id: { $ifNull: ["$brandDetails.brand_name", "Unknown"] },
           count: { $sum: "$product.quantity" }
         }
       },
@@ -406,7 +416,7 @@ const dashBord = async (req, res) => {
 
 
 
-// USERMANGMENT:  ALL USER LIST // GET
+
 
 const userList = async (req, res) => {
   try {
@@ -419,7 +429,7 @@ const userList = async (req, res) => {
   }
 };
 
-// USERMANGMENT:  BLOCK // POST
+
 
 const blockUser = async (req, res) => {
   try {
@@ -443,11 +453,11 @@ const blockUser = async (req, res) => {
   }
 };
 
-// PRODUCTSMANGMENT :ALL PRODUCTS LIST //GET
+
 
 const products = async (req, res) => {
   try {
-    const productData = await Product.find({}).populate('category_name');
+    const productData = await Product.find({}).populate('category_name').populate('brand');
     if (productData) {
       const toast = req.flash("info");
       res.render("admin/allProduct", { Product: productData, toast });
@@ -457,13 +467,14 @@ const products = async (req, res) => {
   }
 };
 
-// PRODUCTSMANGMENT :ADD PRODUCTS  //GET
+
 
 const addProduct = async (req, res) => {
   try {
     const category = await Category.find({});
+    const brands = await Brand.find({ isBlocked: false }).sort({ brand_name: 1 });
 
-    res.render("admin/addProduct", { category: category });
+    res.render("admin/addProduct", { category, brands });
   } catch (error) {
     console.log(error.message);
   }
@@ -532,22 +543,20 @@ const editProduct = async (req, res) => {
   }
 };
 
-// PRODUCTSMANGMENT :EDIT PRODUCTS  //GET
 
 const editProductForm = async (req, res) => {
   try {
-    const productData = await Product.findById({ _id: id }).populate('category_name');
+    const productData = await Product.findById({ _id: id }).populate('category_name').populate('brand');
     const category = await Category.find({});
+    const brands = await Brand.find({ isBlocked: false }).sort({ brand_name: 1 });
     if (productData) {
-      res.render("admin/editProduct", { product: productData, id: id, category: category });
+      res.render("admin/editProduct", { product: productData, id: id, category, brands });
       id = null;
     }
   } catch (error) {}
 };
 
-// PRODUCTSMANGMENT :EDITED DATA // POST
 
-// PRODUCTSMANGEMENT:  DELETE IMAGE IN EDITING PAGE  //POST
 
 const deleteImg = async (req, res) => {
   try {
@@ -593,7 +602,7 @@ const deleteImg = async (req, res) => {
   }
 };
 
-// PRODUCTSMANGEMENT: HIDE (SOFTDELETE)  //POST
+
 
 const hideProduct = async (req, res) => {
   try {
@@ -614,7 +623,7 @@ const hideProduct = async (req, res) => {
   }
 };
 
-// PRODUCTSMANGEMENT: UNHIDE (REMOVE SOFTDELETE)  //POST
+
 
 const unHide = async (req, res) => {
   try {
@@ -634,7 +643,7 @@ const unHide = async (req, res) => {
   }
 };
 
-// PRODUCTSMANGEMENT: UNHIDE (REMOVE SOFTDELETE)  //POST
+
 
 const deleteProduct = async (req, res) => {
   try {
@@ -648,7 +657,7 @@ const deleteProduct = async (req, res) => {
   } catch (error) {}
 };
 
-// CATEGORYMANGEMENT :SHOW CATEGORY //GET
+
 
 const category = async (req, res) => {
   try {
@@ -663,7 +672,7 @@ const category = async (req, res) => {
   }
 };
 
-// CATEGORYMANGEMENT :DELETE CATEGORY //GET
+
 
 const deleteCategory = async (req, res) => {
   try {
@@ -682,12 +691,12 @@ const deleteCategory = async (req, res) => {
   }
 };
 
-// CATEGORYMANGEMENT :ADD NEW CATEGORY //POST
+
 const addCategory = async (req, res) => {
   try {
     const { newCategory } = req.body;
 
-    // Create a regular expression for case-insensitive match
+
     const regex = new RegExp(`^${newCategory}$`, "i");
 
     const is_exist = await Category.findOne({ category_name: regex });
@@ -718,7 +727,7 @@ const addCategory = async (req, res) => {
   }
 };
 
-// CATEGORYMANGEMENT :HIDE CATEGORY (SOFT DELETE) //POST
+
 
 const hideCategory = async (req, res) => {
   try {
@@ -741,7 +750,7 @@ const hideCategory = async (req, res) => {
   }
 };
 
-// CATEGORYMANGEMENT :UNHIDE CATEGORY (REMOVE SOFT DELETE) //POST
+
 
 const showCategory = async (req, res) => {
   try {
@@ -763,7 +772,7 @@ const showCategory = async (req, res) => {
   }
 };
 
-// categoryEdit
+
 
 const editCategory = async (req, res) => {
   try {
@@ -791,7 +800,7 @@ const editCategory = async (req, res) => {
   }
 };
 
-// LOGOUT
+
 
 const logout = async (req, res) => {
   try {
@@ -977,14 +986,17 @@ const returnOrders = async (req, res) => {
   try {
     const returnRequests = await Order.aggregate([
       {
-        $unwind: "$product", // Unwind the product array
+        $unwind: "$product",
+
       },
       {
-        $match: { "product.status": "return pending" }, // Match only delivered products
+        $match: { "product.status": "return pending" }, 
+
       },
       {
         $lookup: {
-          from: "products", // Ensure this matches your actual collection name
+          from: "products", 
+
           localField: "product.productId",
           foreignField: "_id",
           as: "productDetails",
@@ -993,7 +1005,8 @@ const returnOrders = async (req, res) => {
       {
         $unwind: {
           path: "$productDetails",
-          preserveNullAndEmptyArrays: true, // Keeps documents where no match is found
+          preserveNullAndEmptyArrays: true,
+
         },
       },
       {
@@ -1013,7 +1026,8 @@ const returnOrders = async (req, res) => {
           coupon: 1,
           finalPrice: 1,
           orderDate: 1,
-          productDetails: 1, // Include product details from the lookup
+          productDetails: 1, 
+
         },
       },
     ]);
@@ -1022,12 +1036,13 @@ const returnOrders = async (req, res) => {
       res.render("admin/returnOrder", { returnRequests: returnRequests });
     }
   } catch (error) {
-    console.error("Error fetching return orders:", error); // Detailed error logging
+    console.error("Error fetching return orders:", error); 
+
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.SERVER_ERROR);
   }
 };
 
-// refund
+
 const acceptAndRefund = async (req, res) => {
   try {
 
@@ -1071,9 +1086,11 @@ const acceptAndRefund = async (req, res) => {
     console.log("Product found:", product);
 
     product.in_stock += quantity;
-    await product.save(); // Ensure product is saved
+    await product.save();
 
-    await order.save(); // Ensure order is saved
+
+    await order.save(); 
+
     console.log("Order and product updated");
 
     let wallet = await Wallet.findOne({
@@ -1093,7 +1110,8 @@ const acceptAndRefund = async (req, res) => {
           },
         ],
       });
-      await wallet.save(); // Save new wallet
+      await wallet.save(); 
+
     } else {
       const updatedBalance = wallet.balance + price;
       await Wallet.updateOne(
@@ -1147,7 +1165,8 @@ const rejectReturn = async (req, res) => {
     const quantity = order.product[productIndex].quantity;
     order.product[productIndex].status = "return rejected";
 
-    await order.save(); // Ensure order is saved
+    await order.save();
+
     console.log("Order and product updated");
 
     res.status(HttpStatus.OK).json({
@@ -1265,7 +1284,7 @@ const saleReport = async (req, res) => {
       endDate = new Date(`${endDate}T23:59:59.999Z`);
     }
 
-    // Set date range based on filter
+
     if (filter === "today") {
       startDate = new Date();
       startDate.setHours(0, 0, 0, 0);
@@ -1288,7 +1307,6 @@ const saleReport = async (req, res) => {
       endDate.setHours(23, 59, 59, 999);
     }
 
-    // Aggregation to group orders and lookup product details excluding razorpay
     const groupedOrders = await Order.aggregate([
       {
         $match: {
@@ -1331,19 +1349,21 @@ const saleReport = async (req, res) => {
       },
     ]);
 
-    // Aggregation to count valid coupons excluding razorpay
+
     const couponCounts = await Order.aggregate([
       {
         $match: {
           orderDate: { $gte: startDate, $lt: endDate },
           paymentMethod: { $ne: "razorpay" },
-          coupon: { $ne: null, $ne: "" }, // Filter out null or empty coupons
+          coupon: { $ne: null, $ne: "" }, 
+
         },
       },
       {
         $group: {
           _id: "$coupon",
-          count: { $sum: 1 }, // Count occurrences of each coupon
+          count: { $sum: 1 }, 
+
         },
       },
       {
@@ -1355,12 +1375,12 @@ const saleReport = async (req, res) => {
       },
     ]);
 
-    // Format coupon counts to the desired output
+
     const formattedCouponCounts = couponCounts.map((entry) => ({
       [entry.coupon]: entry.count,
     }));
 
-    // Calculate total product MRP excluding razorpay
+
     const totalSales = groupedOrders
       .reduce((sum, order) => {
         return (
@@ -1372,7 +1392,7 @@ const saleReport = async (req, res) => {
       }, 0)
       .toFixed(2);
 
-    // Calculate total product discount excluding razorpay
+
     const totalProductDiscount = groupedOrders
       .reduce((sum, order) => {
         return (
@@ -1386,12 +1406,12 @@ const saleReport = async (req, res) => {
       }, 0)
       .toFixed(2);
 
-    // Calculate total discount excluding razorpay
+
     const totalDiscount = groupedOrders
       .reduce((sum, order) => sum + order.discount, 0)
       .toFixed(2);
 
-    // Calculate total ordered product count excluding razorpay
+
     const totalOrderedProductCount = groupedOrders.reduce((sum, order) => {
       return (
         sum +
@@ -1402,7 +1422,7 @@ const saleReport = async (req, res) => {
       );
     }, 0);
 
-    // Flatten the orders to create a list of transactions with all products excluding razorpay
+
     const transactions = groupedOrders.flatMap((order) =>
       order.products.map((product) => ({
         date: order.orderDate
@@ -1419,20 +1439,22 @@ const saleReport = async (req, res) => {
       }))
     );
 
-    // Compute total profit excluding razorpay
+
     const totalProfit = groupedOrders
       .reduce((sum, order) => {
         return sum + order.finalPrice;
       }, 0)
       .toFixed(2);
 
-    // Pagination logic (if applicable)
-    const totalPages = 0; // Update based on your pagination logic
-    const currentPage = 0; // Update based on your pagination logic
+
+    const totalPages = 0;
+
+    const currentPage = 0; 
+
 
   
 
-    // Render the sales report with computed values
+
     res.render("admin/salesReport", {
       Coupons: formattedCouponCounts,
       filterOption: filter,
@@ -1441,7 +1463,8 @@ const saleReport = async (req, res) => {
       totalDiscount: totalDiscount,
       totalProfit: totalProfit,
       totalOrderedProductCount: totalOrderedProductCount,
-      totalProductDiscount: totalProductDiscount, // Include the total product discount
+      totalProductDiscount: totalProductDiscount, 
+
       transactions: transactions,
       totalPages: totalPages,
       currentPage: currentPage,
@@ -1453,7 +1476,7 @@ const saleReport = async (req, res) => {
   }
 };
 
-// http://localhost:3200/salesReport?startDate=2024-08-12&endDate=2024-08-14
+
 
 const offerManagemanent1 = async (req, res) => {
   const products = await Product.find({});
@@ -1463,7 +1486,7 @@ const offerManagemanent1 = async (req, res) => {
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
 
-// offerProduct_id ,offerProduct_mrp,discount
+
 
 const newOffer = async (req, res) => {
   try {
@@ -1516,7 +1539,7 @@ const removeOffer = async (req, res) => {
     }
   } catch (error) {}
 };
-// =======================================================
+
 
 const generateReportData = async (startDate, endDate, filter) => {
   try {
@@ -1723,7 +1746,7 @@ const downloadPdf = async (req, res) => {
 
     doc.pipe(res);
 
-    // Add report data to PDF
+
     doc.fontSize(16).text("Sales Report", { align: "center" });
     doc.fontSize(12).text(`Filter: ${filter || "All Time"}`);
     doc.fontSize(12).text(`Total Sales: ₹${reportData.totalSales}`);

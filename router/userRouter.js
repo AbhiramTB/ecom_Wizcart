@@ -3,6 +3,7 @@ const userRoute = express();
 const path = require("path");
 const passport = require("passport");
 const userController = require("../controller/userController");
+const brandController = require("../controller/brandController");
 const {errorPage} =require('../controller/errorController')
 const { isLogin, isLogout } = require("../auth/userAuth");
 const nocache = require("nocache");
@@ -117,6 +118,9 @@ userRoute.post('/capture-payment',paymentController.captureContinuePayment)
 
 userRoute.post('/addtowishlist',userController.addToWishlist)
 userRoute.get('/invoiceDownload/:objectId/:productId', userController.invoiceDownload);
+
+// Brands API (used for shop filter)
+userRoute.get('/api/brands', brandController.getActiveBrands);
 
 
 module.exports = {

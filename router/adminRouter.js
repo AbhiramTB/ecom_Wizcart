@@ -1,6 +1,7 @@
 const express = require("express");
 const adminRoute = express();
 const adminController = require("../controller/adminController");
+const brandController = require("../controller/brandController");
 const { upload } = require("../config/imageResizing");
 const { isLogin, isLogout } = require("../auth/adminAuth");
 const session = require("express-session");
@@ -74,6 +75,14 @@ adminRoute.get("/download/excel", isLogin, adminController.downloadExcel);
 adminRoute.get("/download/pdf", isLogin, adminController.downloadPdf);
 
 adminRoute.get('/ledger',isLogin,adminController.ledger)
+
+// BRAND MANAGEMENT
+adminRoute.get("/brands", isLogin, brandController.getBrands);
+adminRoute.post("/addBrand", isLogin, brandController.addBrand);
+adminRoute.post("/editBrand", isLogin, brandController.editBrand);
+adminRoute.post("/blockBrand", isLogin, brandController.blockBrand);
+adminRoute.post("/unblockBrand", isLogin, brandController.unblockBrand);
+adminRoute.post("/deleteBrand", isLogin, brandController.deleteBrand);
 
 
 module.exports = {

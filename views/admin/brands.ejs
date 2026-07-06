@@ -1,0 +1,296 @@
+<%- include('./adminLayout/header') %>
+<link rel="stylesheet" href="css/mystyle.css">
+<body id="page-top">
+
+  <div id="wrapper">
+
+    <%- include('./adminLayout/sidebar') %>
+
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <div id="content">
+
+        <div class="container-fluid">
+
+          <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+              <h6 class="m-0 font-weight-bold text-primary">Brand Management</h6>
+              <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addBrandModal">
+                <i class="fas fa-plus mr-1"></i> Add Brand
+              </button>
+            </div>
+            <div class="card-body">
+
+              <!-- Search -->
+              <div class="mb-3">
+                <input type="text" id="brandSearch" class="form-control" placeholder="Search brands..." style="max-width: 300px;">
+              </div>
+
+              <% if (brands.length === 0) { %>
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                  <i class="fas fa-trademark fa-3x text-muted mb-3"></i>
+                  <h5 class="text-muted">No brands found</h5>
+                  <p class="text-muted">Add your first brand to get started.</p>
+                  <button class="btn btn-primary" data-toggle="modal" data-target="#addBrandModal">
+                    <i class="fas fa-plus mr-1"></i> Add Brand
+                  </button>
+                </div>
+              <% } else { %>
+              <div class="table-responsive">
+                <table class="table table-bordered" id="brandTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Brand Name</th>
+                      <th>Status</th>
+                      <th>Created At</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tfoot>
+                    <tr>
+                      <th>#</th>
+                      <th>Brand Name</th>
+                      <th>Status</th>
+                      <th>Created At</th>
+                      <th>Actions</th>
+                    </tr>
+                  </tfoot>
+                  <tbody id="brandTableBody">
+                    <% brands.forEach((brand, index) => { %>
+                      <tr class="brand-row">
+                        <td><%= index + 1 %></td>
+                        <td class="brand-name-cell"><%= brand.brand_name %></td>
+                        <td>
+                          <% if (brand.isBlocked) { %>
+                            <span class="badge badge-danger">Blocked</span>
+                          <% } else { %>
+                            <span class="badge badge-success">Active</span>
+                          <% } %>
+                        </td>
+                        <td><%= new Date(brand.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+                        <td>
+                          <!-- Edit -->
+                          <button class="btn btn-secondary btn-sm mr-1"
+                            data-id="<%= brand._id %>"
+                            data-name="<%= brand.brand_name %>"
+                            onclick="openEditModal(this.dataset.id, this.dataset.name)"
+                            title="Edit">
+                            <i class="fas fa-edit"></i>
+                          </button>
+
+                          <!-- Block / Unblock -->
+                          <% if (brand.isBlocked) { %>
+                            <form action="/unblockBrand" method="post" style="display:inline;" onsubmit="return confirmAction(event, 'Unblock', '<%= brand.brand_name %>')">
+                              <input type="hidden" name="id" value="<%= brand._id %>">
+                              <button type="submit" class="btn btn-success btn-sm mr-1" title="Unblock">
+                                <i class="fas fa-unlock"></i>
+                              </button>
+                            </form>
+                          <% } else { %>
+                            <form action="/blockBrand" method="post" style="display:inline;" onsubmit="return confirmAction(event, 'Block', '<%= brand.brand_name %>')">
+                              <input type="hidden" name="id" value="<%= brand._id %>">
+                              <button type="submit" class="btn btn-warning btn-sm mr-1" title="Block">
+                                <i class="fas fa-ban"></i>
+                              </button>
+                            </form>
+                          <% } %>
+
+                          <!-- Delete -->
+                          <form action="/deleteBrand" method="post" style="display:inline;" onsubmit="return confirmDelete(event, '<%= brand.brand_name %>')">
+                            <input type="hidden" name="id" value="<%= brand._id %>">
+                            <button type="submit" class="btn btn-danger btn-sm" title="Delete">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+              <% } %>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── ADD BRAND MODAL ─── -->
+  <div class="modal fade" id="addBrandModal" tabindex="-1" role="dialog" aria-labelledby="addBrandModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form action="/addBrand" method="post" onsubmit="return validateAddForm()">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addBrandModalLabel"><i class="fas fa-plus-circle mr-2"></i>Add New Brand</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="newBrand">Brand Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="newBrand" name="newBrand"
+                placeholder="Enter brand name (min. 2 characters)"
+                oninput="validateAddField()">
+              <small id="addBrandHelp" class="form-text text-danger"></small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="addBrandSubmitBtn">
+              <span id="addBrandSpinner" class="spinner-border spinner-border-sm mr-1" role="status" style="display:none;"></span>
+              Add Brand
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── EDIT BRAND MODAL ─── -->
+  <div class="modal fade" id="editBrandModal" tabindex="-1" role="dialog" aria-labelledby="editBrandModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form action="/editBrand" method="post" onsubmit="return validateEditForm()">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editBrandModalLabel"><i class="fas fa-edit mr-2"></i>Edit Brand</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit_id" name="edit_id">
+            <div class="form-group">
+              <label for="editBrandName">Brand Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="editBrandName" name="editBrandName"
+                placeholder="Enter brand name"
+                oninput="validateEditField()">
+              <small id="editBrandHelp" class="form-text text-danger"></small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="editBrandSubmitBtn">
+              <span id="editBrandSpinner" class="spinner-border spinner-border-sm mr-1" role="status" style="display:none;"></span>
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <% if (toast.length > 0) { %>
+    <div id="toast" class="toast-black toast show"><%= toast[0] %></div>
+  <% } %>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    // ─── Open edit modal with pre-filled data ───
+    function openEditModal(id, name) {
+      document.getElementById('edit_id').value = id;
+      document.getElementById('editBrandName').value = name;
+      document.getElementById('editBrandHelp').textContent = '';
+      $('#editBrandModal').modal('show');
+    }
+
+    // ─── Validate Add form ───
+    function validateAddField() {
+      const val = document.getElementById('newBrand').value.trim();
+      const help = document.getElementById('addBrandHelp');
+      if (!val) { help.textContent = 'Brand name is required.'; return false; }
+      if (val.length < 2) { help.textContent = 'Brand name must be at least 2 characters.'; return false; }
+      help.textContent = '';
+      return true;
+    }
+    function validateAddForm() {
+      if (!validateAddField()) return false;
+      document.getElementById('addBrandSpinner').style.display = 'inline-block';
+      document.getElementById('addBrandSubmitBtn').disabled = true;
+      return true;
+    }
+
+    // ─── Validate Edit form ───
+    function validateEditField() {
+      const val = document.getElementById('editBrandName').value.trim();
+      const help = document.getElementById('editBrandHelp');
+      if (!val) { help.textContent = 'Brand name is required.'; return false; }
+      if (val.length < 2) { help.textContent = 'Brand name must be at least 2 characters.'; return false; }
+      help.textContent = '';
+      return true;
+    }
+    function validateEditForm() {
+      if (!validateEditField()) return false;
+      document.getElementById('editBrandSpinner').style.display = 'inline-block';
+      document.getElementById('editBrandSubmitBtn').disabled = true;
+      return true;
+    }
+
+    // ─── SweetAlert confirms ───
+    function confirmAction(event, action, brandName) {
+      event.preventDefault();
+      Swal.fire({
+        title: `${action} "${brandName}"?`,
+        text: action === 'Block'
+          ? 'This brand will be hidden from users.'
+          : 'This brand will be visible to users again.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: action === 'Block' ? '#e6a817' : '#28a745',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: `Yes, ${action.toLowerCase()} it!`
+      }).then((result) => {
+        if (result.isConfirmed) event.target.submit();
+      });
+      return false;
+    }
+
+    function confirmDelete(event, brandName) {
+      event.preventDefault();
+      Swal.fire({
+        title: `Delete "${brandName}"?`,
+        text: "This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) event.target.submit();
+      });
+      return false;
+    }
+
+    // ─── Client-side search filter ───
+    document.getElementById('brandSearch').addEventListener('input', function () {
+      const term = this.value.toLowerCase();
+      document.querySelectorAll('.brand-row').forEach(row => {
+        const name = row.querySelector('.brand-name-cell').textContent.toLowerCase();
+        row.style.display = name.includes(term) ? '' : 'none';
+      });
+    });
+
+    // ─── Auto-hide toast ───
+    document.addEventListener('DOMContentLoaded', function () {
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 7000);
+      }
+    });
+  </script>
+
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+  <script src="js/sb-admin-2.min.js"></script>
+
+  <%- include('./adminLayout/footer') %>

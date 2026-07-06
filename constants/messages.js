@@ -91,11 +91,25 @@ const ERROR_MESSAGES = {
   PDF_ERROR: "Error generating PDF",
 };
 
+const BRAND_MESSAGES = {
+  CREATED: "Brand added successfully",
+  UPDATED: "Brand updated successfully",
+  DELETED: "Brand deleted successfully",
+  NOT_FOUND: "Brand not found",
+  ALREADY_EXISTS: "Brand name already exists. Please enter a different name.",
+  BLOCKED: "Brand has been blocked successfully",
+  UNBLOCKED: "Brand has been unblocked successfully",
+  NAME_REQUIRED: "Brand name is required",
+  NAME_TOO_SHORT: "Brand name must be at least 2 characters",
+};
+
 module.exports = {
   USER_MESSAGES,
   PRODUCT_MESSAGES,
   CATEGORY_MESSAGES,
   COUPON_MESSAGES,
   PAYMENT_MESSAGES,
-  ERROR_MESSAGES
+  ERROR_MESSAGES,
+  BRAND_MESSAGES,
 };
+

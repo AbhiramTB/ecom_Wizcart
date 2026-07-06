@@ -127,7 +127,11 @@
                 <ul>
                   <% brands.forEach(brand => { %>
                     <% if (brand) { %>
-                      <li><a href="/shopmore?pageNum=1&category=<%= queryCategory %>&search=<%= searchQuery %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&brand=<%= brand %>"><%= brand %></a></li>
+                      <li>
+                        <a href="/shopmore?pageNum=1&category=<%= queryCategory %>&search=<%= searchQuery %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&brand=<%= brand._id %>">
+                          <%= brand.brand_name %>
+                        </a>
+                      </li>
                     <% } %>
                   <% }) %>
                 </ul>

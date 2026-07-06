@@ -189,7 +189,7 @@
                       <div id="couponCodeError" class="error-message"></div>
                     </div>
                     <div class="mb-3">
-                      <label for="discount" class="form-label">Discount (%)</label>
+                      <label for="discount" class="form-label">Discount Amount(₹)</label>
                       <input type="number" class="form-control" id="discount" name="discount" min="0" required onkeyup="validateDiscount()">
                       <div id="discountError" class="error-message"></div>
                     </div>
@@ -197,8 +197,8 @@
 
                     <div class="mb-3">
                       <label for="discount" class="form-label">MIN PURCHASE AMOUNT</label>
-                      <input type="number" class="form-control" id="minPurchase" name="minPurchase" min="0" required onkeyup="validateDiscount()">
-                      <div id="discountError" class="error-message"></div>
+                      <input type="number" class="form-control" id="minPurchase" name="minPurchase" min="0" required onkeyup="validateMinPurchase()">
+                      <div id="minPurchaseError" class="error-message"></div>
                     </div>
 
 
@@ -244,7 +244,6 @@
   toasts.forEach(function(toast) {
     toast.classList.add('show');
     
-    // Hide the toast message after 7 seconds (7000 milliseconds)
     setTimeout(function() {
       toast.classList.remove('show');
     }, 7000);
@@ -283,7 +282,7 @@
                       icon: 'success',
                       confirmButtonColor: '#3085d6',
                     }).then(() => {
-                      location.reload(); // Reload the page to reflect the changes
+                      location.reload(); 
                     });
                   } else {
                     Swal.fire({
@@ -309,24 +308,9 @@
 
           function conformAddnewCoupon() {
 
-
-            Swal.fire({
-              title: "add new coupon ?",
-
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "add new coupon ",
-              imageUrl: "https://media.tenor.com/uYAFdAfKa7sAAAAi/shopbackshopfest-shopback.gif",
-              imageWidth: 100,
-              imageHeight: 100,
-
-
-            }).then((result) => {
-              if (result.isConfirmed) {
                 document.getElementById('addCouponModel').click()
-              }
-            });
+
+           
           }
 
           const descriptionPattern = /[a-zA-Z]{3,}/;
@@ -353,6 +337,17 @@
             }
           }
 
+           function validateMinPurchase() {
+            const minPurchase = document.getElementById('minPurchase').value;
+            const errorDiv = document.getElementById('minPurchaseError');
+            if (!discountPattern.test(minPurchase)) {
+              errorDiv.textContent = "Minimum purchase must contain a number.";
+            } else {
+              errorDiv.textContent = "";
+            }
+          }
+
+
           function validateDescription() {
             const description = document.getElementById('description').value;
             const errorDiv = document.getElementById('descriptionError');
@@ -370,22 +365,28 @@
             const description = document.getElementById('description').value;
             const  minPurchaseAmount=document.getElementById('minPurchase').value
             if (!descriptionPattern.test(description)) {
-              alert("Description must have at least 3 letters.");
+
+              validationErrors("Description must have at least 3 letters.")
               return false;
             }
 
             if (!couponCodePattern.test(couponCode)) {
-              alert("Coupon Code must have at least 3 letters.");
+              validationErrors("Coupon Code must have at least 3 letters.");
               return false;
             }
 
             if (!discountPattern.test(discount)) {
-              alert("Discount must contain a number.");
+              validationErrors("Discount must contain a number.");
+              return false;
+            }
+
+            if(!discountPattern.test(minPurchaseAmount)){
+              validationErrors("Minimum purchase amount must contain a number.");
               return false;
             }
 
             if (parseFloat(discount) >= parseFloat(minPurchaseAmount)) {
-              alert("Discount price cannot exceed or equal the minimum purchase amount.");
+              validationErrors("Discount price cannot exceed or equal the minimum purchase amount.");
               return false;
             }
 
@@ -415,7 +416,11 @@
               })
              
             } else {
-              alert('Failed to create coupon');
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to create coupon',
+              });
             }
           }
 
@@ -526,6 +531,15 @@ async function hideCoupon(hide_id) {
       }
     }
   });
+}
+
+
+function validationErrors(message){
+ Swal.fire({
+              icon: "error",
+              title: "oops...",
+              text: message,
+            });
 }
 
 

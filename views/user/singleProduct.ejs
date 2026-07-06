@@ -299,8 +299,8 @@
               <% } else if (singleProduct.category) { %>
                 <p>Category: <span><%= singleProduct.category %></span></p>
               <% } %>
-              <% if (singleProduct.brands) { %>
-                <p>Brand: <span><%= singleProduct.brands %></span></p>
+              <% if (singleProduct.brand && singleProduct.brand.brand_name) { %>
+                <p>Brand: <span><%= singleProduct.brand.brand_name %></span></p>
               <% } %>
             </div>
           </div>
@@ -378,7 +378,14 @@
   function addtoWishlist() {
     const productId = document.getElementById('wishlist_id').value;
     const button = document.getElementById('wishListBTN');
-    if (!productId) { alert('Product ID is missing'); return; }
+    if (!productId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Product ID is missing'
+      });
+      return;
+    }
     button.style.display = 'none';
     document.getElementById('afterClick').style.display = 'block';
     button.style.pointerEvents = 'none';

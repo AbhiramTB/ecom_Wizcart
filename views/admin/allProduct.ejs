@@ -37,6 +37,7 @@
                                             <th>product_images</th>
                                             <th>product_name</th>
                                             <th>category_name</th>
+                                            <th>brand</th>
                                             <th>price</th>
                                             <th>stock</th>
                                             <th>Edit</th>
@@ -49,6 +50,7 @@
                                             <th>product_images</th>
                                             <th>product_name</th>
                                             <th>category_name</th>
+                                            <th>brand</th>
                                             <th>price</th>
                                             <th>stock</th>
                                             <th>Edit</th>
@@ -67,6 +69,7 @@
                                                 </td>
                                                 <td><%= e.product_name %></td>
                                                 <td><%= e.category_name ? e.category_name.category_name : '' %></td>
+                                                <td><%= e.brand ? e.brand.brand_name : '—' %></td>
                                                 <td><%= e.price %></td>
                                                 <td><%= e.in_stock %></td>
                                                 <td>

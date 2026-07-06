@@ -59,8 +59,21 @@
               </div>
               <div class="form-group">
                 <label for="brand">Brand</label>
-                <input type="text" class="form-control" id="brand" name="editBrand" value="<%= product.brands %>">
-                <input type="text"  name="productId" value="<%=product.id%>">
+                <select class="form-control" id="brand" name="editBrand">
+                  <option value="">-- Select Brand --</option>
+                  <% brands.forEach(b => {
+                    var isSelected = false;
+                    if (product.brand) {
+                      var prodBrandId = (product.brand._id || product.brand).toString();
+                      if (prodBrandId === b._id.toString()) isSelected = true;
+                    }
+                  %>
+                    <option value="<%= b._id %>" <%= isSelected ? 'selected' : '' %>>
+                      <%= b.brand_name %>
+                    </option>
+                  <% }) %>
+                </select>
+                <input type="hidden" name="productId" value="<%= product.id %>">
               </div>
               <div class="form-group">
                 <label for="description">Description</label>

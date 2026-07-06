@@ -18,7 +18,7 @@ const upload = multer({ storage: storage });
 
 
 const uploadsDir = path.join(__dirname, "../", "public", "imgUploads");
-// const uploadsDir = path.join(__dirname, 'public', 'uploads');
+
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -52,13 +52,13 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
     const productDetails = new Product({
         product_name: productName,
         product_description: ProductDescription,
-        category_name:productCategory,
-        brands: Brand,
+        category_name: productCategory,
+        brand: Brand,
         price: productPrice,
         in_stock: Stock,
         product_img: productImages,
         Hide_product: 0,
-        Maximum_Retail_Price:productPrice
+        Maximum_Retail_Price: productPrice
     });
 
     
@@ -102,7 +102,7 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
             editProductDescription,
         } = req.body;
 
-        // const resizedPaths = await resizeImages(croppedImages); // Adjust if needed
+
           
         const productData = await Product.findById({_id:productId})
 
@@ -117,12 +117,12 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
                     product_name: editProductName,
                     product_description: editProductDescription,
                     category_name: editProductCategory,
-                    brands: editBrand,
+                    brand: editBrand,
                     price: editProductPrice,
                     in_stock: editStock,
-                    product_img: updateImg, // Ensure this is an array if you store multiple images
+                    product_img: updateImg,
                     Hide_product: 0,
-                    Maximum_Retail_Price:editProductPrice
+                    Maximum_Retail_Price: editProductPrice
                 },
             }
         );

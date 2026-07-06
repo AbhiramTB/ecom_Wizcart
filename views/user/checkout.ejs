@@ -1230,7 +1230,11 @@ function entercaptcha() {
       
       if (paymentMethod) {
         // Handle the payment method as needed
-        alert('Payment Method:', PaymentMethod);
+        Swal.fire({
+          icon: 'info',
+          title: 'Payment Method',
+          text: 'Selected payment method: ' + paymentMethod
+        });
         
         // Example: you can submit the form programmatically if needed
         // document.getElementById('payment-form').submit();
@@ -1441,12 +1445,10 @@ function orderPlaced() {
       },
       body: JSON.stringify(orderData)
     })
-    .then(response => {
+    .then(async response => {
       if (!response.ok) {
-                  
-         alert(data.message)
-        
-        
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'An error occurred while confirming your order.');
       }
       return response.json();
     })
@@ -1459,23 +1461,34 @@ function orderPlaced() {
       }
     })
     .catch(error => {
-      Swal.fire({
-  title: 'Insufficient Balance',
-  html: `
-    <div style="text-align: center; color: #333;">
-      <i class="fas fa-exclamation-circle" style="font-size: 48px; color: #ffc107; margin-bottom: 20px;"></i>
-      <p style="font-size: 18px; margin-bottom: 15px;">Oops! You don't have enough funds to complete this purchase.</p>
-      
-    </div>
-  `,
-  confirmButtonText: 'OK',
-  confirmButtonColor: '#3085d6',
-  customClass: {
-    popup: 'custom-popup-class'
-  }
-}).then(()=>{
-  window.location.reload()
-})
+      if (error.message && error.message.toLowerCase() === 'insufficient balance') {
+        Swal.fire({
+          title: 'Insufficient Balance',
+          html: `
+            <div style="text-align: center; color: #333;">
+              <i class="fas fa-exclamation-circle" style="font-size: 48px; color: #ffc107; margin-bottom: 20px;"></i>
+              <p style="font-size: 18px; margin-bottom: 15px;">Oops! You don't have enough funds to complete this purchase.</p>
+            </div>
+          `,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'custom-popup-class'
+          }
+        }).then(()=>{
+          window.location.reload();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Order Failed',
+          text: error.message || 'An error occurred while confirming your order.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#3085d6'
+        }).then(()=>{
+          window.location.reload();
+        });
+      }
     });
   }
 
@@ -1682,10 +1695,20 @@ async function applyCoupon() {
                     .then(data => {
                         if (data.success) {
                             console.log('Coupon applied successfully:', data);
-                            alert('Coupon applied successfully!');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Coupon applied successfully!'
+                            }).then(() => {
+                                window.location.reload();
+                            });
                         } else {
                             console.log('Failed to apply coupon:', data);
-                            alert('Failed to apply coupon: ' + data.message);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Failed to apply coupon: ' + data.message
+                            });
                         }
                     })
                     .catch(error => {
