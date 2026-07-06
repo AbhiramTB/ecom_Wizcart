@@ -816,7 +816,7 @@ const logout = async (req, res) => {
 const orderMangement = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 3;
     const skip = (page - 1) * limit;
 
     const totalOrders = await Order.countDocuments();
@@ -849,10 +849,20 @@ const orderMangement = async (req, res) => {
 const updateStatus = async (req, res) => {
   try {
     const { product_id, object_id, status } = req.body;
-    console.log(object_id);
 
-    console.log("hello");
+    // ── 1. Allowed status transitions (backend source of truth) ──
+    const ALLOWED_TRANSITIONS = {
+      pending:   ['shipped', 'cancelled'],
+      shipped:   ['delivered', 'cancelled'],
+      delivered: [],
+      cancelled: [],
+      canceled:  [],
+    };
+
     const order = await Order.findOne({ _id: object_id });
+    if (!order) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: 'Order not found' });
+    }
 
     const productIndex = order.product.findIndex(
       (p) => p._id.toString() === product_id
@@ -864,17 +874,39 @@ const updateStatus = async (req, res) => {
         .json({ message: PRODUCT_MESSAGES.NOT_FOUND_IN_ORDER });
     }
 
+    const previousStatus = order.product[productIndex].status.toLowerCase();
+    const newStatus = status.toLowerCase();
+
+    // ── 2. Validate transition ──
+    const allowed = ALLOWED_TRANSITIONS[previousStatus] || [];
+    if (!allowed.includes(newStatus)) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: `Invalid status transition: cannot move from "${previousStatus}" to "${newStatus}".`,
+      });
+    }
+
+    // ── 3. Payment check: Pending → Shipped for non-COD orders ──
+    if (previousStatus === 'pending' && newStatus === 'shipped') {
+      const isCOD = (order.paymentMethod || '').toLowerCase() === 'cod';
+      const paymentDone = (order.payment || '').toLowerCase() === 'success';
+      if (!isCOD && !paymentDone) {
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          message: `Payment not completed. Cannot ship a ${order.paymentMethod} order until payment is confirmed.`,
+        });
+      }
+    }
+
     const quantity = order.product[productIndex].quantity;
-    const previousStatus = order.product[productIndex].status;
 
-    order.product[productIndex].status = status;
+    order.product[productIndex].status = newStatus;
 
-    if (status === 'delivered') {
+    // ── 4. Existing business logic (unchanged) ──
+    if (newStatus === 'delivered') {
       order.payment = 'success';
       order.Payment = 'success';
     }
 
-    if ((status === 'cancelled' || status === 'canceled') && 
+    if ((newStatus === 'cancelled' || newStatus === 'canceled') &&
         previousStatus !== 'cancelled' && previousStatus !== 'canceled') {
       const product = await Product.findOne({
         _id: order.product[productIndex].productId,
@@ -890,9 +922,18 @@ const updateStatus = async (req, res) => {
 
     await order.save();
 
+    // If request came from an AJAX call (fetch), return JSON
+    if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+      return res.status(HttpStatus.OK).json({ success: true, message: 'Status updated successfully.' });
+    }
+
     res.redirect(req.header('Referer') || "/orderMangement");
   } catch (error) {
     console.log(error.message);
+    if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
+    }
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
   }
 };
 

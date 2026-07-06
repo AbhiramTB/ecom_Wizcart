@@ -21,13 +21,9 @@
             </div>
             <div class="card-body">
 
-              <!-- Search -->
-              <div class="mb-3">
-                <input type="text" id="brandSearch" class="form-control" placeholder="Search brands..." style="max-width: 300px;">
-              </div>
+            
 
-              <% if (brands.length === 0) { %>
-                <!-- Empty State -->
+              <% if (brands?.length === 0) { %>
                 <div class="text-center py-5">
                   <i class="fas fa-trademark fa-3x text-muted mb-3"></i>
                   <h5 class="text-muted">No brands found</h5>
@@ -71,7 +67,6 @@
                         </td>
                         <td><%= new Date(brand.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
                         <td>
-                          <!-- Edit -->
                           <button class="btn btn-secondary btn-sm mr-1"
                             data-id="<%= brand._id %>"
                             data-name="<%= brand.brand_name %>"
@@ -80,7 +75,6 @@
                             <i class="fas fa-edit"></i>
                           </button>
 
-                          <!-- Block / Unblock -->
                           <% if (brand.isBlocked) { %>
                             <form action="/unblockBrand" method="post" style="display:inline;" onsubmit="return confirmAction(event, 'Unblock', '<%= brand.brand_name %>')">
                               <input type="hidden" name="id" value="<%= brand._id %>">
@@ -97,7 +91,6 @@
                             </form>
                           <% } %>
 
-                          <!-- Delete -->
                           <form action="/deleteBrand" method="post" style="display:inline;" onsubmit="return confirmDelete(event, '<%= brand.brand_name %>')">
                             <input type="hidden" name="id" value="<%= brand._id %>">
                             <button type="submit" class="btn btn-danger btn-sm" title="Delete">
@@ -121,7 +114,6 @@
     </div>
   </div>
 
-  <!-- ─── ADD BRAND MODAL ─── -->
   <div class="modal fade" id="addBrandModal" tabindex="-1" role="dialog" aria-labelledby="addBrandModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -153,8 +145,7 @@
     </div>
   </div>
 
-  <!-- ─── EDIT BRAND MODAL ─── -->
-  <div class="modal fade" id="editBrandModal" tabindex="-1" role="dialog" aria-labelledby="editBrandModalLabel" aria-hidden="true">
+]  <div class="modal fade" id="editBrandModal" tabindex="-1" role="dialog" aria-labelledby="editBrandModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <form action="/editBrand" method="post" onsubmit="return validateEditForm()">
@@ -186,7 +177,6 @@
     </div>
   </div>
 
-  <!-- Toast -->
   <% if (toast.length > 0) { %>
     <div id="toast" class="toast-black toast show"><%= toast[0] %></div>
   <% } %>
@@ -194,7 +184,6 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
-    // ─── Open edit modal with pre-filled data ───
     function openEditModal(id, name) {
       document.getElementById('edit_id').value = id;
       document.getElementById('editBrandName').value = name;
@@ -202,7 +191,6 @@
       $('#editBrandModal').modal('show');
     }
 
-    // ─── Validate Add form ───
     function validateAddField() {
       const val = document.getElementById('newBrand').value.trim();
       const help = document.getElementById('addBrandHelp');
@@ -218,7 +206,6 @@
       return true;
     }
 
-    // ─── Validate Edit form ───
     function validateEditField() {
       const val = document.getElementById('editBrandName').value.trim();
       const help = document.getElementById('editBrandHelp');
@@ -234,7 +221,6 @@
       return true;
     }
 
-    // ─── SweetAlert confirms ───
     function confirmAction(event, action, brandName) {
       event.preventDefault();
       Swal.fire({
@@ -269,16 +255,7 @@
       return false;
     }
 
-    // ─── Client-side search filter ───
-    document.getElementById('brandSearch').addEventListener('input', function () {
-      const term = this.value.toLowerCase();
-      document.querySelectorAll('.brand-row').forEach(row => {
-        const name = row.querySelector('.brand-name-cell').textContent.toLowerCase();
-        row.style.display = name.includes(term) ? '' : 'none';
-      });
-    });
 
-    // ─── Auto-hide toast ───
     document.addEventListener('DOMContentLoaded', function () {
       const toast = document.getElementById('toast');
       if (toast) {
