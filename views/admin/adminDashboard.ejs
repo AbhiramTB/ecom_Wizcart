@@ -5,113 +5,16 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
-  <body id="page-top">
-    
-    <div id="wrapper">
-    <%- include('./adminLayout/sidebar') %>
+  <body class="bg-light">
+    <div class="admin-layout">
+      <%- include('./partials/sidebar') %>
+      <main class="admin-main-content">
+        <div class="container-fluid">
 
-
-      
-
-      
-      <div id="content-wrapper" class="d-flex flex-column">
-
-        
-        <div id="content">
-
-          
-
-
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
-            body {
-              font-family: 'Poppins', sans-serif;
-              background-color: #f0f2f5;
-            }
-
-            .container {
-              max-width: 1200px;
-            }
-
-            h1,
-            h5 {
-              font-weight: 600;
-            }
-
-            .chart-container {
-              height: 300px;
-            }
-
-            .card {
-              border: none;
-              border-radius: 15px;
-              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-              transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            }
-
-            .card:hover {
-              transform: translateY(-5px);
-              box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            }
-
-            .metric-card {
-              background: linear-gradient(135deg, #6e8efb, #a777e3);
-              position: relative;
-            }
-
-            .metric-card::before {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              background: rgba(0, 0, 0, 0.1);
-              opacity: 0;
-              transition: opacity 0.3s ease-in-out;
-              border-radius: 15px;
-            }
-
-            .metric-card:hover::before {
-              opacity: 1;
-            }
-
-            .btn-group .btn {
-              border-radius: 30px;
-              padding: 10px 20px;
-              font-weight: 500;
-              transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-            }
-
-            .btn-group .btn:hover,
-            .btn-group .btn.active {
-              background-color: #4e73df;
-              border-color: #4e73df;
-              color: #ffffff;
-            }
-
-            .btn-group .btn i {
-              margin-right: 8px;
-            }
-
-            .display-4 {
-              font-size: 2.5rem;
-              font-weight: 700;
-            }
-
-            .card-subtitle {
-              font-size: 0.875rem;
-              opacity: 0.75;
-            }
-          </style>
-          </head>
-
-          <body>
             <div class="container py-5">
               <h1 class="text-center mb-5">Sales Dashboard</h1>
               <hr>
-              <label for="" class="text-warning">custom date:</label>
+              <label for="" class="text-dark">custom date:</label>
               <div class="row mb-5">
                 <div class="col-12">
                   <form action="/dashboard" method="GET" class="input-group">
@@ -124,7 +27,7 @@
 
                   <div class="btn-group d-flex justify-content-center" role="group">
                     <a href="/dashboard?filter=today"
-                      class="btn btn-outline-primary <%= filterOption === 'today' ? 'active' : '' %>">
+                      class="btn  btn-outline-primary <%= filterOption === 'today' ? 'active' : '' %>">
                       <i class="fas fa-calendar-day"></i> Today
                     </a>
                     <a href="/dashboard?filter=week"
@@ -145,10 +48,10 @@
 
               <div class="row mb-5">
                 <div class="col-md-3 mb-4">
-                  <div class="card metric-card text-white h-100">
+                  <div class="card bg-accent text-white h-100">
                     <div class="card-body">
                       <h5 class="card-title"><i class="fas fa-box me-2"></i>Ordered Products</h5>
-                      <p class="card-text display-4">
+                      <p class="card-text text-white display-4">
                         <%=totalOrderedProductCount %>
                       </p>
                       <h6 class="card-subtitle">for week</h6>
@@ -156,10 +59,10 @@
                   </div>
                 </div>
                 <div class="col-md-3 mb-4">
-                  <div class="card metric-card text-white h-100">
+                  <div class="card admin-metric-card bg-accent  text-black  text-white h-100">
                     <div class="card-body">
                       <h5 class="card-title"><i class="fas fa-chart-line me-2"></i>Total Sales</h5>
-                      <p class="card-text display-4">
+                      <p class="card-text display-4 text-white">
                         <%=totalSales %>
                       </p>
                       <h6 class="card-subtitle">for week</h6>
@@ -167,10 +70,10 @@
                   </div>
                 </div>
                 <div class="col-md-3 mb-4">
-                  <div class="card metric-card text-white h-100">
+                  <div class="card admin-metric-card bg-accent  text-black text-white h-100">
                     <div class="card-body">
                       <h5 class="card-title"><i class="fas fa-percent me-2"></i>Total Discounts</h5>
-                      <p class="card-text display-4">
+                      <p class="card-text text-white  display-4">
                         <%=totalDiscount %>
                       </p>
                       <h6 class="card-subtitle">for week</h6>
@@ -178,10 +81,10 @@
                   </div>
                 </div>
                 <div class="col-md-3 mb-4">
-                  <div class="card metric-card text-white h-100">
+                  <div class="card admin-metric-card bg-accent  text-black text-white h-100">
                     <div class="card-body">
                       <h5 class="card-title"><i class="fas fa-coins me-2"></i>Final Revenue</h5>
-                      <p class="card-text display-4">₹<%=totalProfit %>
+                      <p class="card-text text-white display-4">₹<%=totalProfit %>
                       </p>
                       <h6 class="card-subtitle">for week</h6>
                     </div>
@@ -215,88 +118,7 @@
               <hr>
               <hr>
               <style>
-                .container {
-                  max-width: 1200px;
-                }
-
-                h1 {
-                  color: #1a237e;
-                  font-weight: 700;
-                  margin-bottom: 2rem;
-                  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-                }
-
-                .card {
-                  border: none;
-                  border-radius: 15px;
-                  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-                  transition: all 0.3s ease;
-                }
-
-                .card:hover {
-                  transform: translateY(-5px);
-                  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-                }
-
-                .card-title {
-                  font-size: 1.5rem;
-                  font-weight: 600;
-                  color: #333;
-                  margin-bottom: 1.5rem;
-                  border-bottom: 2px solid #007bff;
-                  padding-bottom: 0.5rem;
-                }
-
-                .list-group-item {
-                  border: none;
-                  border-radius: 10px;
-                  margin-bottom: 10px;
-                  transition: all 0.2s ease;
-                }
-
-                .list-group-item:hover {
-                  background-color: #e3f2fd;
-                  transform: scale(1.02);
-                }
-
-                .list-group-numbered>li::before {
-                  color: #007bff;
-                  font-weight: bold;
-                  background-color: #e3f2fd;
-                  border-radius: 50%;
-                  width: 25px;
-                  height: 25px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                }
-
-                .badge {
-                  font-size: 0.9rem;
-                  background-color: #007bff;
-                  color: #fff;
-                  padding: 8px 12px;
-                  border-radius: 20px;
-                }
-
-                .product-icon,
-                .category-icon,
-                .brand-icon {
-                  margin-right: 10px;
-                  font-size: 1.2rem;
-                }
-
-                .product-icon {
-                  color: #4caf50;
-                }
-
-                .category-icon {
-                  color: #ff9800;
-                }
-
-                .brand-icon {
-                  color: #e91e63;
-                }
+           
 
                 @keyframes fadeInUp {
                   from {
@@ -553,18 +375,7 @@
           </div>
           <% } %>
 
-      </div>
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          var toast = document.getElementById('toast');
-          if (toast) {
-            toast.classList.add('show');
-            // Hide the toast message after 3 seconds (3000 milliseconds)
-            setTimeout(function () {
-              toast.classList.remove('show');
-            }, 3000);
-          }
-        });
-      </script>
-
-      <%- include('./adminLayout/footer') %>
+      </div> <!-- End container-fluid -->
+    </main>
+  </div>
+  <%- include('./adminLayout/footer') %>

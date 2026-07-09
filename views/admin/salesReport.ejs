@@ -1,56 +1,12 @@
 <%- include('./adminLayout/header') %>
 <link rel="stylesheet" href="css/mystyle.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <style>
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: bold;
-        }
-
-        .card {
-            margin-bottom: 20px;
-        }
-
-        .table th,
-        .table td {
-            vertical-align: middle;
-        }
-
-        .chart-placeholder {
-            background-color: #f8f9fa;
-            height: 200px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #6c757d;
-            border-radius: 5px;
-        }
-
-        .btn-group .btn {
-            margin-left: 5px;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-    </style>
 </head>
-
-<body>
-    <div class="row">
-       
-
-   
-<div class="col-2">
-    <%- include('./adminLayout/sidebar') %>
-
-</div>
-
-
-    <div class="col-10 ">
-        <div class="container">
+<body class="bg-light">
+  <div class="admin-layout">
+    <%- include('./partials/sidebar') %>
+    <main class="admin-main-content">
+      <div class="container-fluid">
         <h1 class="mb-4">Sales Report</h1>
 
         
@@ -75,7 +31,7 @@
         </div>
 
         
-        <div class="col-12 bg-info p-2 text-white text-center mb-4">
+        <div class="col-12  bg-accent p-2 text-white  text-center mb-4" aria-disabled="true" >
             <%= filterOption || 'All Time' %>
         </div>
 
@@ -93,44 +49,44 @@
         <div class="row">
             
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card bg-primary text-white shadow-sm border-0">
+                <div class="card bg-accent  text-white shadow-sm border-0">
                     <div class="card-body d-flex flex-column align-items-center">
                         <h5 class="card-title mb-3">Total Sales</h5>
-                        <p class="card-text fs-3 fw-bold">₹<%= totalSales || 'N/A' %></p>
-                        <p class="card-subtitle text-light mb-2">for <%= filterOption || 'Selected Period' %></p>
+                        <p class="card-text fs-3 text-white fw-bold">₹<%= totalSales || 'N/A' %></p>
+                        <p class="card-subtitle text-white text-light mb-2">for <%= filterOption || 'Selected Period' %></p>
                     </div>
                 </div>
             </div>
 
             
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card bg-success text-white shadow-sm border-0">
+                <div class="card bg-accent text-white shadow-sm border-0">
                     <div class="card-body d-flex flex-column align-items-center">
                         <h5 class="card-title mb-3">Coupon Discounts</h5>
-                        <p class="card-text fs-3 fw-bold">₹<%= totalDiscount || 'N/A' %></p>
-                        <p class="card-subtitle text-light mb-2">for <%= filterOption || 'Selected Period' %></p>
+                        <p class="card-text fs-3 text-white fw-bold">₹<%= totalDiscount || 'N/A' %></p>
+                        <p class="card-subtitle text-white text-light mb-2">for <%= filterOption || 'Selected Period' %></p>
+                    </div>
+                </div>  
+            </div>
+
+            
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card bg-accent text-white shadow-sm border-0">
+                    <div class="card-body d-flex flex-column align-items-center">
+                        <h5 class="card-title  text-white mb-3">Total Product Discount</h5>
+                        <p class="card-text fs-3 text-white  fw-bold">₹<%= totalProductDiscount || '0.00' %></p>
+                        <p class="card-subtitle  text-white text-light mb-2">for <%= filterOption || 'Selected Period' %></p>
                     </div>
                 </div>
             </div>
 
             
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card bg-info text-white shadow-sm border-0">
+                <div class="card bg-accent text-dark shadow-sm border-0">
                     <div class="card-body d-flex flex-column align-items-center">
-                        <h5 class="card-title mb-3">Total Product Discount</h5>
-                        <p class="card-text fs-3 fw-bold">₹<%= totalProductDiscount || '0.00' %></p>
-                        <p class="card-subtitle text-light mb-2">for <%= filterOption || 'Selected Period' %></p>
-                    </div>
-                </div>
-            </div>
-
-            
-            <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card bg-warning text-dark shadow-sm border-0">
-                    <div class="card-body d-flex flex-column align-items-center">
-                        <h5 class="card-title mb-3">Total Profit</h5>
-                        <p class="card-text fs-3 fw-bold">₹<%= totalProfit || 'N/A' %></p>
-                        <p class="card-subtitle text-dark mb-2">for <%= filterOption || 'Selected Period' %></p>
+                        <h5 class="card-title text-white  mb-3">Total Profit</h5>
+                        <p class="card-text fs-3  text-white fw-bold">₹<%= totalProfit || 'N/A' %></p>
+                        <p class="card-subtitle  text-white   text-dark mb-2">for <%= filterOption || 'Selected Period' %></p>
                     </div>
                 </div>
             </div>
@@ -225,11 +181,7 @@
             </div>
         </div>
 
-    </div>
-
-</div>
-</div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <%- include('./adminLayout/footer') %>
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <%- include('./adminLayout/footer') %>

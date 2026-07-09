@@ -1,22 +1,9 @@
 <%- include('./adminLayout/header') %>
 
-<div id="wrapper">
-  
-    <%- include('./adminLayout/sidebar') %>
-
-  
-
-  
-  <div id="content-wrapper" class="d-flex flex-column">
-    
-    <div id="content">
-      
-      <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-        
-        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-          <i class="fa fa-bars"></i>
-        </button>
-      </nav>
+<body class="bg-light">
+  <div class="admin-layout">
+    <%- include('./partials/sidebar') %>
+    <main class="admin-main-content">
       
       <div class="container" style="max-width: 600px; margin-top: 50px;">
         <div class="card shadow-sm">
@@ -295,5 +282,6 @@
     });
   }
   </script>
-
-<%- include('../layout/footer') %>
+    </main>
+  </div>
+<%- include('./adminLayout/footer') %>

@@ -116,8 +116,8 @@
 </style>
 
 <div class="login-card">
-    <div class="brand-title">Wizcart</div>
-    <div class="brand-subtitle">Admin Login</div>
+    <div class="brand-title text-accent">Wizcart</div>
+    <div class="brand-subtitle text-accent">Admin Login</div>
 
     <form id="SignUPForm" action="/adminLoginData" method="post" onsubmit="return validateForm()">
         <div class="form-group">
@@ -132,7 +132,7 @@
             <div id="errmesg-password" class="error-message"></div>
         </div>
 
-        <button class="_btn_05" type="submit">Continue</button>
+        <button class="_btn_05 bg-accent" type="submit">Continue</button>
 
         <% if (typeof(message) !== 'undefined') { %>
             <div class="error-message text-center" style="margin-top: 15px;">

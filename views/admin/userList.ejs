@@ -1,27 +1,11 @@
 <%- include('./adminLayout/header') %>
 <link rel="stylesheet" href="css/mystyle.css">
 
-    
-    <div id="wrapper">
-
-        
-    <%- include('./adminLayout/sidebar') %>
-
-        
-
-        
-        <div id="content-wrapper" class="d-flex flex-column">
-
-            
-            <div id="content">
-
-                
-              
-
-                
-                <div class="container-fluid">
-
-                  
+<body class="bg-light">
+  <div class="admin-layout">
+    <%- include('./partials/sidebar') %>
+    <main class="admin-main-content">
+      <div class="container-fluid">
 
                     
                     <div class="card shadow mb-4">
@@ -105,41 +89,7 @@
          
             
 
-        </div>
-        
-
-
-    
-
-    
-   
-
-    
-  
-
-    <% if (toast.length > 0) { %>
-        <div id="toast" class="toast-black  toast show"><%= toast[0] %></div>
-    <% } %>
-
-   <script>
-
-    document.addEventListener('DOMContentLoaded', function() {
-        var toast = document.getElementById('toast');
-        if (toast) {
-            toast.classList.add('show');
-            // Hide the toast message after 3 seconds (3000 milliseconds)
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-    });
-
-   </script>
-    
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-    <script src="js/sb-admin-2.min.js"></script>
-
-    <%- include('./adminLayout/footer') %>
-
+    </div> <!-- End container-fluid -->
+  </main>
+</div>
+<%- include('./adminLayout/footer') %>

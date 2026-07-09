@@ -1,14 +1,9 @@
 <%- include('./adminLayout/header') %>
 
-  <div id="wrapper">
-
-    <%- include('./adminLayout/sidebar') %>
-      <div id="content-wrapper" class="d-flex flex-column">
-
-        <div id="content">
-          <div id="wrapper">
-            <div id="content-wrapper" class="d-flex flex-column">
-              <div id="content">
+<body class="bg-light">
+  <div class="admin-layout">
+    <%- include('./partials/sidebar') %>
+    <main class="admin-main-content">
                 <div class="container " style="max-width: 900px; margin-top: 10px;">
                   <div class="card " style="background-color: rgb(231, 246, 253);">
                     <div class="card-header text-center">
@@ -337,12 +332,6 @@
                 });
             }
           </script>
-        </div>
-
-      </div>
-
+    </main>
   </div>
-
-  </div>
-
-  <%- include('../layout/footer') %>
+  <%- include('./adminLayout/footer') %>

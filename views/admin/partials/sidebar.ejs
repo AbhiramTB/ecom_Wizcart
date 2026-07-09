@@ -1,0 +1,82 @@
+<div class="bg-dark text-white p-3 vh-100 position-fixed admin-sidebar-container" style="width: 250px; overflow-y: auto; z-index: 1000;">
+  <a class="d-flex align-items-center mb-4 text-white text-decoration-none justify-content-center mt-3" href="/dashboard">
+    <img src="/images/logo.png" alt="Wizcart Logo" style="width: 120px; object-fit: contain;">
+  </a>
+  <hr class="text-white-50">
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item mb-2">
+      <a href="/dashboard" class="nav-link text-white">
+        <i class="fas fa-th-large me-2"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a href="/salesReport?filter=today" class="nav-link text-white">
+        <i class="fas fa-chart-line me-2"></i> Sales Report
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a href="/ledger" class="nav-link text-white">
+        <i class="fas fa-book me-2"></i> Ledger Book
+      </a>
+    </li>
+    
+    <li class="nav-item mt-3 mb-1 px-3"><small class="text-uppercase text-white-50 fw-bold" style="font-size: 0.75rem;">Management</small></li>
+    <li class="nav-item mb-2">
+      <a href="/userList" class="nav-link text-white">
+        <i class="fas fa-users me-2"></i> Users
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a href="/orderMangement" class="nav-link text-white">
+        <i class="fas fa-truck me-2"></i> Orders
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a href="/returnOrders" class="nav-link text-white">
+        <i class="fas fa-undo-alt me-2"></i> Returns
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a href="/couponMangement" class="nav-link text-white">
+        <i class="fas fa-ticket-alt me-2"></i> Coupons
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a href="/offerManagemanent" class="nav-link text-white">
+        <i class="fas fa-percentage me-2"></i> Offers
+      </a>
+    </li>
+    
+    <li class="nav-item mt-3 mb-1 px-3"><small class="text-uppercase text-white-50 fw-bold" style="font-size: 0.75rem;">Catalog</small></li>
+    <li class="nav-item mb-2">
+      <a href="#productSubmenu" data-bs-toggle="collapse" class="nav-link text-white">
+        <i class="fas fa-box me-2"></i> Products <i class="fas fa-caret-down ms-auto float-end mt-1"></i>
+      </a>
+      <ul class="collapse nav flex-column ms-3" id="productSubmenu" data-bs-parent="#menu">
+        <li class="w-100">
+          <a href="/addProduct" class="nav-link text-white py-1"> Add Product </a>
+        </li>
+        <li>
+          <a href="/Products" class="nav-link text-white py-1"> All Products </a>
+        </li>
+      </ul>
+    </li>
+    <li class="nav-item mb-2">
+      <a href="/category" class="nav-link text-white">
+        <i class="fas fa-layer-group me-2"></i> Categories
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a href="/brands" class="nav-link text-white">
+        <i class="fas fa-trademark me-2"></i> Brands
+      </a>
+    </li>
+    
+    <li class="nav-item mt-3 mb-1 px-3"><small class="text-uppercase text-white-50 fw-bold" style="font-size: 0.75rem;">Account</small></li>
+    <li class="nav-item mb-2">
+      <a href="/logout" class="nav-link text-danger">
+        <i class="fas fa-sign-out-alt me-2"></i> Logout
+      </a>
+    </li>
+  </ul>
+</div>

@@ -1,28 +1,11 @@
 
 <%- include('./adminLayout/header') %>
 <link rel="stylesheet" href="css/mystyle.css">
-<body id="page-top">
-
-    
-    <div id="wrapper">
-
-        
-    <%- include('./adminLayout/sidebar') %>
-
-        
-
-        
-        <div id="content-wrapper" class="d-flex flex-column">
-
-            
-            <div id="content">
-
-                
-             
-
-                
-
-              
+<body class="bg-light">
+  <div class="admin-layout">
+    <%- include('./partials/sidebar') %>
+    <main class="admin-main-content">
+      <div class="container-fluid">
                
 <div class="container-fluid">
     <h2 class="mb-4">Product Orders</h2>
@@ -332,34 +315,9 @@ document.getElementById("searchInput").addEventListener('keyup', function() {
         });
 
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var toast = document.getElementById('toast');
-        if (toast) {
-            toast.classList.add('show');
-            // Hide the toast message after 3 seconds (3000 milliseconds)
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 7000);
-        }
-    });
-
-   </script>
-    
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-    
-    <script src="js/sb-admin-2.min.js"></script>
-
-    
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-    
-    <script src="js/demo/datatables-demo.js"></script>
-
-    <%- include('./adminLayout/footer') %>
+    </script>
+      </div> 
+    </main>
+  </div>
+<%- include('./adminLayout/footer') %>
 

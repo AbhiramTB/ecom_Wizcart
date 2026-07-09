@@ -1,11 +1,9 @@
 <%- include('./adminLayout/header') %>
-<body id="page-top">
-  <div id="wrapper">
-    <%- include('./adminLayout/sidebar') %>
-    <div id="content-wrapper" class="d-flex flex-column">
-      <div id="content">
-        <!-- Main Content -->
-        <div class="container-fluid mt-4">
+<body class="bg-light">
+  <div class="admin-layout">
+    <%- include('./partials/sidebar') %>
+    <main class="admin-main-content">
+      <div class="container-fluid mt-4">
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Order Details</h1>
             <a href="/orderMangement" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
@@ -192,11 +190,10 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </main>
+  </div>  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     function editStatus(productId, paymentMethod, paymentStatus, finalPrice) {
       const form = document.getElementById(`statusUpdate-${productId}`);

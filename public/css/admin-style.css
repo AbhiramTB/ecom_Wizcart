@@ -1,0 +1,125 @@
+/* Admin Global Layout overrides */
+body {
+    background-color: #f8f9fa;
+}
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-sidebar-container {
+    width: 250px;
+    flex-shrink: 0;
+    background-color: #212529 !important; /* Force Bootstrap dark color */
+    color: #ffffff !important;
+}
+
+.admin-main-content {
+    flex-grow: 1;
+    padding: 2rem;
+    margin-left: 250px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Override Bootstrap bg-primary to match application color */
+.bg-primary {
+    background-color: var(--wz-primary) !important;
+}
+
+/* Admin Global Button Styles */
+.admin-layout .btn-primary {
+    background-color: var(--wz-primary);
+    border-color: var(--wz-primary);
+    color: #fff;
+}
+
+.admin-layout .btn-primary:hover, .admin-layout .btn-primary:focus {
+    background-color: var(--wz-primary-light);
+    border-color: var(--wz-primary-light);
+    color: #fff;
+}
+
+.admin-layout .btn-outline-primary {
+    color: var(--wz-primary);
+    border-color: var(--wz-primary);
+}
+
+.admin-layout .btn-outline-primary:hover, .admin-layout .btn-outline-primary:focus {
+    background-color: var(--wz-primary);
+    color: #fff;
+}
+
+/* Admin Global Pagination Styles */
+.admin-layout .pagination .page-item.active .page-link {
+    background-color: var(--wz-accent);
+    border-color: var(--wz-accent);
+}
+
+.admin-layout .pagination .page-link {
+    color: var(--wz-primary);
+}
+
+/* Update general card styles for Admin */
+.admin-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    background-color: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.admin-card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-card-header h3, .admin-card-header h4, .admin-card-header h5, .admin-card-header h6 {
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+/* Dashboard Metric Cards */
+.admin-metric-card {
+    border-radius: 10px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.admin-metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.05);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.admin-metric-card:hover::before {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .admin-main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    .admin-sidebar-container {
+        display: none;
+    }
+}
