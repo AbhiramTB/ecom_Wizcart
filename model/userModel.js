@@ -27,6 +27,6 @@ const userSchema = new mongoose.Schema({
   address:{
     type:Array
   }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

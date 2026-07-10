@@ -712,3 +712,10 @@
   vertical-align: middle;
 }
 
+
+/* ── Mobile Responsive Navbar ── */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}

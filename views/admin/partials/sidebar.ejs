@@ -1,9 +1,27 @@
-<div class="bg-dark text-white p-3 vh-100 position-fixed admin-sidebar-container" style="width: 250px; overflow-y: auto; z-index: 1000;">
-  <a class="d-flex align-items-center mb-4 text-white text-decoration-none justify-content-center mt-3" href="/dashboard">
-    <img src="/images/logo.png" alt="Wizcart Logo" style="width: 120px; object-fit: contain;">
+<!-- Mobile Topbar -->
+<nav class="navbar navbar-dark bg-dark d-lg-none px-3 w-100" style="position: sticky; top: 0; z-index: 1020; background-color: #212529 !important;">
+  <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <a class="navbar-brand ms-3" href="/dashboard">
+    <img src="/images/logo.png" alt="Wizcart Logo" style="height: 30px; object-fit: contain;">
   </a>
-  <hr class="text-white-50">
-  <ul class="nav nav-pills flex-column mb-auto">
+</nav>
+
+<!-- Sidebar (Offcanvas on Mobile, Static on Desktop) -->
+<div class="offcanvas-lg offcanvas-start bg-dark text-white admin-sidebar-container" tabindex="-1" id="adminSidebar" aria-labelledby="adminSidebarLabel" style="width: 250px; z-index: 1050;">
+  <div class="offcanvas-header d-lg-none">
+    <a class="d-flex align-items-center text-white text-decoration-none" href="/dashboard">
+      <img src="/images/logo.png" alt="Wizcart Logo" style="width: 120px; object-fit: contain;">
+    </a>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#adminSidebar" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body p-0 flex-column h-100" style="overflow-y: auto;">
+    <a class="d-none d-lg-flex align-items-center mb-4 text-white text-decoration-none justify-content-center mt-3" href="/dashboard">
+      <img src="/images/logo.png" alt="Wizcart Logo" style="width: 120px; object-fit: contain;">
+    </a>
+    <hr class="text-white-50 d-none d-lg-block mx-3">
+    <ul class="nav nav-pills flex-column mb-auto px-3">
     <li class="nav-item mb-2">
       <a href="/dashboard" class="nav-link text-white">
         <i class="fas fa-th-large me-2"></i> Dashboard
@@ -79,4 +97,5 @@
       </a>
     </li>
   </ul>
+  </div>
 </div>

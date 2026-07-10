@@ -2,10 +2,11 @@
 <link rel="stylesheet" href="css/mystyle.css">
 <body class="bg-light">
   <div class="admin-layout">
-    <%- include('./partials/sidebar') %>
+    <%- include('./partials/topbar') %>
     <main class="admin-main-content">
       <div class="container-fluid">
     <h1 class="mb-4">Offer Management</h1>
+    <div class="table-responsive">
     <table class="table table-bordered table-hover">
       <thead>
         <tr>
@@ -82,6 +83,7 @@
         <% }); %>
       </tbody>
     </table>
+    </div>
   </div>
 
   <!-- Pagination -->

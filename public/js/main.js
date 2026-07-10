@@ -287,9 +287,9 @@
 
 	
 	$(function(){
-		mobileMenuOutsideClick();
-		offcanvasMenu();
-		burgerMenu();
+		// mobileMenuOutsideClick();
+		// offcanvasMenu();
+		// burgerMenu();
 		contentWayPoint();
 		sliderMain();
 		dropdown();

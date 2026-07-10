@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="css/mystyle.css">
 <body class="bg-light">
   <div class="admin-layout">
-    <%- include('./partials/sidebar') %>
+    <%- include('./partials/topbar') %>
     <main class="admin-main-content">
       <div class="container-fluid">
                  
@@ -15,29 +15,29 @@
                       <div class="card-body">
                         <ul class="list-group">
                             <% categories.forEach((e, index) => { %>
-                                <li class="list-group-item d-flex justify-content-between align-items-center" <% if (e.Hide_category == 1) { %> style="background-color:bg-light;" <% } %>>
-                                  <h3 class="text-start font-monospace text-dark"><%= e.category_name %></h3>
-                                  <div class="d-flex">
+                                <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3" <% if (e.Hide_category == 1) { %> style="background-color:bg-light;" <% } %>>
+                                  <h5 class="text-start font-monospace text-dark m-0"><%= e.category_name %></h5>
+                                  <div class="d-flex gap-2">
                                     <% if (e.Hide_category == 1) { %>
-                                      <form action="/catShow" method="post" onsubmit="return confirmUnhide(event,this)" class="me-2 ml-3 mr-3">
+                                      <form action="/catShow" method="post" onsubmit="return confirmUnhide(event,this)" class="m-0">
                                         <input type="hidden" name="id" value="<%= e._id %>">
-                                        <button type="submit" class="btn btn-secondary btn-m" title="Show"><i class="fas fa-eye"></i></button>
+                                        <button type="submit" class="btn btn-secondary btn-sm" title="Show"><i class="fas fa-eye"></i></button>
                                       </form>
                                     <% } else { %>
-                                      <form action="/catHide" method="post" onsubmit="return confirmhide(event,this)" class="me-2 ml-3 mr-3">
+                                      <form action="/catHide" method="post" onsubmit="return confirmhide(event,this)" class="m-0">
                                         <input type="hidden" name="id" value="<%= e._id %>">
-                                        <button type="submit" class="btn btn-secondary btn-m" title="Hide"><i class="fas fa-eye-slash"></i></button>
+                                        <button type="submit" class="btn btn-secondary btn-sm" title="Hide"><i class="fas fa-eye-slash"></i></button>
                                       </form>
                                     <% } %>
                                     
                                     <input type="hidden" name="id" id="editCatId<%= index %>" value="<%= e._id %>">
                                     <input type="text" class="editCategoryName" id="editCatName<%= index %>" hidden value="<%= e.category_name %>">
                                     <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" hidden id="editModal<%= index %>"></button>
-                                    <button type="button" class="btn btn-primary btn-m me-3 ms-3" onclick="confirmedit(<%=index%>)" title="Edit"><i class="fas fa-edit"></i></button>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="confirmedit(<%=index%>)" title="Edit"><i class="fas fa-edit"></i></button>
                                     
-                                    <form action="/catDelete" method="post" onsubmit="return confirmDelete(event,this)" id="deleteForm-<%= e._id %>" class="ml-3">
+                                    <form action="/catDelete" method="post" onsubmit="return confirmDelete(event,this)" id="deleteForm-<%= e._id %>" class="m-0">
                                       <input type="hidden" name="id" value="<%= e._id %>">
-                                      <button type="submit" class="btn btn-danger btn-m" title="Delete"><i class="fas fa-trash"></i></button>
+                                      <button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fas fa-trash"></i></button>
                                     </form>
                                   </div>
                                 </li>

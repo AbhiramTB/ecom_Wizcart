@@ -4,7 +4,7 @@
 </head>
 <body class="bg-light">
   <div class="admin-layout">
-    <%- include('./partials/sidebar') %>
+    <%- include('./partials/topbar') %>
     <main class="admin-main-content">
       <div class="container-fluid">
         <h1 class="mb-4">Sales Report</h1>
@@ -101,6 +101,7 @@
                     </div>
                     <div class="card-body">
                         <% if (Coupons && Coupons.length > 0) { %>
+                            <div class="table-responsive">
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -119,6 +120,7 @@
                                     <% }); %>
                                 </tbody>
                             </table>
+                            </div>
                         <% } else { %>
                             <p>No coupons used in this period.</p>
                         <% } %>
@@ -135,6 +137,7 @@
                         Order Completed <strong><%= totalOrderedProductCount %></strong> Products on a <%= filterOption %>
                     </div>
                     <div class="card-body">
+                        <div class="table-responsive">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -165,6 +168,7 @@
                                 <% } %>
                             </tbody>
                         </table>
+                        </div>
                         
                         
                         <nav>

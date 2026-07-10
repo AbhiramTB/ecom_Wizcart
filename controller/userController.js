@@ -531,7 +531,7 @@ const logout = async (req, res) => {
         console.error("Error destroying session during logout:", err.message);
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(USER_MESSAGES.LOGOUT_ERROR);
       }
-      res.redirect("/wizcart");
+      res.redirect("/");
     });
   } catch (error) {
     console.log(error.message);
@@ -1525,12 +1525,12 @@ const myOrderDetails = async (req, res) => {
       return res.status(HttpStatus.NOT_FOUND).render("error", { message: USER_MESSAGES.NOT_FOUND });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(productId)) {
+    if (!id || !mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(HttpStatus.BAD_REQUEST).render("error", { message: "Invalid request parameters" });
     }
 
     const orderData = await Order.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      { $match: { orderNumber: id } },
       {
         $lookup: {
           from: "products",
@@ -1559,7 +1559,7 @@ const myOrderDetails = async (req, res) => {
     const productInfo = order.newone[productIndex];
 
     const existingReview = await Review.findOne({
-      orderId: id,
+      orderId: order._id,
       productId: productInfo._id,
       userId: req.session.user_id
     });
@@ -1587,7 +1587,7 @@ const invoiceDownload = async (req, res) => {
   try {
     const { objectId, productId } = req.params;
     
-    const order = await Order.findOne({ _id: objectId });
+    const order = await Order.findOne({ orderNumber: objectId });
 
     const productIndex = order.product.findIndex(
       (p) => p._id.toString() === productId
@@ -1770,7 +1770,7 @@ const cancellProductStatus = async (req, res) => {
     let product_price;
 
     // Find the order by its ID
-    const order = await Order.findOne({ _id: object_id });
+    const order = await Order.findOne({ orderNumber: object_id });
 
     if (!order) {
       return res.status(HttpStatus.NOT_FOUND).json({ status: 'error', message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
@@ -1872,7 +1872,7 @@ const orderReturn = async (req, res) => {
    
 
 
-    const order = await Order.findOne({ _id: object_id });
+    const order = await Order.findOne({ orderNumber: object_id });
 
     if (!order) {
       return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
@@ -2221,7 +2221,7 @@ const submitReview = async (req, res) => {
     }
 
 
-    const order = await Order.findOne({ _id: orderId, user_id: userId });
+    const order = await Order.findOne({ orderNumber: orderId, user_id: userId });
     if (!order) {
       return res.status(HttpStatus.NOT_FOUND).send("Order not found");
     }

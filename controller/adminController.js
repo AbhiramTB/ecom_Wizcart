@@ -424,7 +424,7 @@ const userList = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const totalUsers = await User.countDocuments();
-    const allUser = await User.find({}).skip(skip).limit(limit);
+    const allUser = await User.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit);
     const toast = req.flash("info");
     res.render("admin/userList", {
       users: allUser,
@@ -471,7 +471,7 @@ const products = async (req, res) => {
     const limit = parseInt(req.query.limit) || 3;
     const skip = (page - 1) * limit;
     const totalProducts = await Product.countDocuments();
-    const productData = await Product.find({}).populate('category_name').populate('brand').skip(skip).limit(limit);
+    const productData = await Product.find({}).sort({ createdAt: -1 }).populate('category_name').populate('brand').skip(skip).limit(limit);
     const toast = req.flash("info");
     res.render("admin/allProduct", {
       Product: productData,
@@ -679,7 +679,7 @@ const deleteProduct = async (req, res) => {
 
 const category = async (req, res) => {
   try {
-    const categories = await Category.find({});
+    const categories = await Category.find({}).sort({ createdAt: -1 });
     if (categories) {
       const toast = req.flash("info");
       res.render("admin/category", { categories, toast });
@@ -822,12 +822,16 @@ const editCategory = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    console.log(req.session.admin_id);
-    req.session.destroy();
-    req.flash("info", ` LogOut succesfully ✅`);
-    res.redirect("/admin");
+    req.session.destroy((err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ success: false });
+      }
+      res.status(200).json({ success: true, message: "Logout successful" });
+    });
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ success: false });
   }
 };
 
@@ -877,7 +881,7 @@ const updateStatus = async (req, res) => {
       canceled:  [],
     };
 
-    const order = await Order.findOne({ _id: object_id });
+    const order = await Order.findOne({ orderNumber: object_id });
     if (!order) {
       return res.status(HttpStatus.NOT_FOUND).json({ message: 'Order not found' });
     }
@@ -957,13 +961,10 @@ const updateStatus = async (req, res) => {
 
 const orderDetails = async (req, res) => {
   try {
-    const orderId = req.query.id;
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      return res.status(HttpStatus.BAD_REQUEST).send("Invalid Order ID");
-    }
+    const orderId = req.query.id; // This is now orderNumber
 
     const orderData = await Order.aggregate([
-      { $match: { _id: new mongoose.Types.ObjectId(orderId) } },
+      { $match: { orderNumber: orderId } },
       {
         $lookup: {
           from: "products",
@@ -978,7 +979,7 @@ const orderDetails = async (req, res) => {
       return res.status(HttpStatus.NOT_FOUND).send("Order not found");
     }
 
-    const reviews = await Review.find({ orderId: orderId });
+    const reviews = await Review.find({ orderId: orderData[0]._id });
 
     res.render("admin/orderDetails", { order: orderData[0], reviews });
   } catch (error) {
@@ -1098,6 +1099,7 @@ const returnOrders = async (req, res) => {
 
         },
       },
+      { $sort: { orderDate: -1 } }
     ]);
 
     if (returnRequests) {
@@ -1124,7 +1126,7 @@ const acceptAndRefund = async (req, res) => {
       return res.status(HttpStatus.BAD_REQUEST).json({ message: PRODUCT_MESSAGES.INVALID_PRICE });
     }
 
-    const order = await Order.findOne({ _id: orderId });
+    const order = await Order.findOne({ orderNumber: orderId });
     console.log(order);
 
     if (!order) {
@@ -1212,7 +1214,7 @@ const rejectReturn = async (req, res) => {
     const { orderId, productId } = req.body;
 
 
-    const order = await Order.findOne({ _id: orderId });
+    const order = await Order.findOne({ orderNumber: orderId });
     console.log(order);
 
     if (!order) {
@@ -1552,7 +1554,7 @@ const offerManagemanent1 = async (req, res) => {
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
     const totalProducts = await Product.countDocuments();
-    const products = await Product.find({}).skip(skip).limit(limit);
+    const products = await Product.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit);
     res.render("admin/offerManagement", {
       products,
       currentPage: page,
@@ -1861,7 +1863,7 @@ const ledger = async (req, res) => {
     const limit = parseInt(req.query.limit) || 2;
     const skip = (page - 1) * limit;
     const totalOrders = await Order.countDocuments({ paymentMethod: { $ne: 'razorpay' } });
-    const orders = await Order.find({ paymentMethod: { $ne: 'razorpay' } }).skip(skip).limit(limit);
+    const orders = await Order.find({ paymentMethod: { $ne: 'razorpay' } }).sort({ orderDate: -1 }).skip(skip).limit(limit);
     res.render('admin/ledger', {
       orders,
       currentPage: page,

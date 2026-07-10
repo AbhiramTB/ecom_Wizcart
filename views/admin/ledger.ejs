@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="css/mystyle.css">
 <body class="bg-light">
   <div class="admin-layout">
-    <%- include('./partials/sidebar') %>
+    <%- include('./partials/topbar') %>
     <main class="admin-main-content">
       <div class="container-fluid">
         <h2 class="mb-4">Ledger Book</h2>
@@ -15,7 +15,7 @@
                             <strong>Date:</strong> <%= new Date(order.orderDate).toISOString().split('T')[0] %>
                         </div>
                         <div class="col-3">
-                            <strong>Order ID:</strong> <%= order._id %>
+                            <strong>Order ID:</strong> <%= order.orderNumber %>
                         </div>
                         <div class="col-3">
                             <strong>Payment Method:</strong> <%= order.paymentMethod.charAt(0).toUpperCase() + order.paymentMethod.slice(1) %>

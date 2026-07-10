@@ -40,7 +40,7 @@ adminRoute.post("/catDelete", isLogin, adminController.deleteCategory);
 adminRoute.post("/catHide", isLogin, adminController.hideCategory);
 adminRoute.post("/catShow", isLogin, adminController.showCategory);
 adminRoute.post("/editcategory", isLogin, adminController.editCategory);
-adminRoute.get("/logout", isLogin, adminController.logout);
+adminRoute.get("/adminLogout", isLogin, adminController.logout);
 
 //orderMangement
 adminRoute.get("/orderMangement", isLogin,adminController.orderMangement);

@@ -9,9 +9,7 @@
 </a>
 
     <div class="wz-nav-links" id="navLinks">
-      <div class="wz-nav-search-mobile">
-        <input type="search" placeholder="Search products..." />
-      </div>
+
       <a href="/home" class="active">Home</a>
       <a href="/shopmore">Shop</a>
       <a href="/wishlist">Wishlist</a>
@@ -51,24 +49,11 @@
         </a>
       <% } %>
 
-      <div class="wz-hamburger" id="hamburger" onclick="toggleMobileMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
     </div>
   </div>
-  <div class="wz-mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
 </nav>
 
 <script>
-  function toggleMobileMenu() {
-    document.getElementById('navLinks').classList.toggle('active');
-    document.getElementById('hamburger').classList.toggle('active');
-    document.getElementById('mobileOverlay').classList.toggle('active');
-    document.body.style.overflow = document.getElementById('navLinks').classList.contains('active') ? 'hidden' : '';
-  }
-
   document.addEventListener('click', function(e) {
     var dd = document.getElementById('userDropdown');
     if (dd && !dd.contains(e.target)) dd.classList.remove('open');

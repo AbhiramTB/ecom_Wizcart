@@ -5,22 +5,18 @@ body {
 
 .admin-layout {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
-}
-
-.admin-sidebar-container {
-    width: 250px;
-    flex-shrink: 0;
-    background-color: #212529 !important; /* Force Bootstrap dark color */
-    color: #ffffff !important;
+    overflow-x: hidden; /* Prevent horizontal scroll on the entire page */
+    max-width: 100vw;
 }
 
 .admin-main-content {
     flex-grow: 1;
     padding: 2rem;
-    margin-left: 250px;
     background-color: #f8f9fa;
-    min-height: 100vh;
+    min-width: 0; /* Critical for flex items to allow internal scrolling */
+    max-width: 100vw;
 }
 
 /* Override Bootstrap bg-primary to match application color */
@@ -114,12 +110,4 @@ body {
     opacity: 1;
 }
 
-@media (max-width: 768px) {
-    .admin-main-content {
-        margin-left: 0;
-        padding: 1rem;
-    }
-    .admin-sidebar-container {
-        display: none;
-    }
-}
+
