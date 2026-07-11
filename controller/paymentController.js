@@ -208,7 +208,7 @@ const createOrder = async (req, res) => {
         shipment_address: orderAddress,
         product: orderProducts,
         paymentMethod: PaymentMethod,
-        Payment: paymentStatus,
+        payment: paymentStatus,
         totalPrice: price.totalPrice,
         discount: price.discount,
         finalPrice: price.finalPrice,
@@ -217,23 +217,21 @@ const createOrder = async (req, res) => {
 
       savedOrder = await order.save();
 
+      // Decrement stock and clear cart immediately for all payment methods
+      await Promise.all(
+        cartProduct.Product.map(async (item) => {
+          const product = await Product.findById(item.productId);
+          if (product) {
+            product.in_stock -= item.quantity;
+            await product.save();
+          } else {
+            console.log(`Product not found: ${item.productId}`);
+          }
+        })
+      );
+      await Cart.deleteOne({ user_id: userId });
+
       if (PaymentMethod === "COD") {
-
-        await Promise.all(
-          cartProduct.Product.map(async (item) => {
-            const product = await Product.findById(item.productId);
-            if (product) {
-              product.in_stock -= item.quantity;
-              await product.save();
-            } else {
-              console.log(`Product not found: ${item.productId}`);
-            }
-          })
-        );
-
-
-        await Cart.deleteOne({ user_id: userId });
-
         res.status(HttpStatus.CREATED).json({
           success: true,
           message: PAYMENT_MESSAGES.ORDER_CREATED,
@@ -359,32 +357,6 @@ const verifyPayment = async (req, res) => {
       }
     );
     console.log("Order update result:", updateOrder);
-
-
-    const cartProduct = await Cart.findOne({ user_id: req.session.user_id });
-    if (!cartProduct || cartProduct.Product.length === 0) {
-      console.log("Cart is empty");
-      return res.status(HttpStatus.BAD_REQUEST).json({
-        message: PAYMENT_MESSAGES.CART_EMPTY,
-        status: "failure",
-      });
-    }
-
-
-    await Promise.all(
-      cartProduct.Product.map(async (item) => {
-        const product = await Product.findById(item.productId);
-        if (product) {
-          product.in_stock -= item.quantity;
-          await product.save();
-        } else {
-          console.log(`Product not found: ${item.productId}`);
-        }
-      })
-    );
-
-
-    await Cart.deleteOne({ user_id: req.session.user_id });
 
     res.json({
       message: PAYMENT_MESSAGES.VERIFICATION_SUCCESS,

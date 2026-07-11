@@ -120,7 +120,7 @@
              
      <!-- Button to Show Coupon Card -->
 <!-- Button to Show Coupon Card -->
-<button onclick="showCouponCard()" id="show-couponCard" style="background-color: #007bff; color: #ffffff; border: none; padding: 10px 20px; cursor: pointer;">
+<button onclick="showCouponCard()" id="show-couponCard" style="background-color: var(--wz-primary, #1a1a2e); color: #ffffff; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; transition: background-color 0.3s;">
   <i class="fa-solid fa-gift" style="color: #ffffff;"></i> Apply Coupon
 </button>
 
@@ -129,8 +129,11 @@
   <form action="#">
       <div style="margin: 10px 0;">
           <label for="Coupon" style="display: block; margin-bottom: 5px;">Enter Coupon Code</label>
-          <input type="text" id="Coupon" style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;" placeholder="Your Coupon Number...">
-          <input type="button" onclick="applyCoupon()" value="Apply" style="background-color: #007bff; color: #ffffff; border: none; padding: 8px 15px; margin-top: 10px; cursor: pointer;">
+          <input type="text" id="Coupon" style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; color: #000000; background-color: #ffffff;" placeholder="Your Coupon Number...">
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <input type="button" onclick="applyCoupon()" value="Apply" style="background-color: var(--wz-accent, #e94560); color: #ffffff; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; transition: background-color 0.3s; flex: 1;">
+            <input type="button" data-bs-toggle="modal" data-bs-target="#availableCouponsModal" value="View Available Coupons" style="background-color: #6c757d; color: #ffffff; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; transition: background-color 0.3s; flex: 2;">
+          </div>
       </div>
   </form>
 </div>
@@ -152,7 +155,7 @@
           .coupon-card {
               width: 300px;
               
-              background-color:#88c8bc;
+              background-color: var(--wz-primary, #1a1a2e);
               color: white;
               border-radius: 10px;
               padding-left: 10px;
@@ -207,7 +210,7 @@
           .coupon-card {
             width: 300px;
             height: 110px;
-            background:#88c8bc;
+            background: var(--wz-primary, #1a1a2e);
             border-radius: 8px;
             padding: 16px;
             color: white;
@@ -275,7 +278,7 @@
           
           .remove-coupon-btn:hover {
             background-color: white;
-            color: #4285F4;
+            color: var(--wz-primary, #1a1a2e);
           }
           </style>
   <% } %>
@@ -901,8 +904,8 @@
             confirmButtonColor: "#4CAF50",
             cancelButtonColor: "#f44336",
             confirmButtonText: "Yes, delete it!",
-            background: '#333',
-            color: '#fff',
+            background: '#ffffff',
+            color: '#333333',
             customClass: {
                 confirmButton: 'custom-confirm-button-class',
                 cancelButton: 'custom-cancel-button-class'
@@ -958,8 +961,8 @@
                         icon: 'error',
                         title: 'Oops...',
                         text: 'Error removing item: ' + error.message,
-                        background: '#333',
-                        color: '#fff'
+                        background: '#ffffff',
+                        color: '#333333'
                     });
                 });
             }
@@ -1653,28 +1656,22 @@ async function applyCoupon() {
                     title: 'Coupon Applied Successfully!',
                     html: `
                         <div class="coupon-success">
-                            <i class="fas fa-tags fa-3x mb-3" style="color: #28a745;"></i>
+                            <i class="fas fa-tags fa-3x mb-3" style="color: var(--wz-accent, #e94560);"></i>
                             <p>You're eligible for a discount of</p>
-                            <h2 class="discount-amount">₹${data.Coupon.discount_Price}</h2>
+                            <h2 class="discount-amount" style="color: var(--wz-primary, #1a1a2e);">₹${data.Coupon.discount_Price}</h2>
                         </div>
                     `,
                     icon: 'success',
                     showCancelButton: true,
-                    confirmButtonColor: '#28a745',
+                    confirmButtonColor: 'var(--wz-primary, #1a1a2e)',
                     cancelButtonColor: '#dc3545',
                     confirmButtonText: 'Great, continue shopping!',
                     cancelButtonText: 'Remove coupon',
+                    background: '#ffffff',
                     customClass: {
-                        popup: 'animated bounceIn',
-                        title: 'text-success',
-                        content: 'text-center'
-                    },
-                    backdrop: `
-                        rgba(0,0,123,0.4)
-                        url("/images/confetti.gif")
-                        left top
-                        no-repeat
-                    `
+                        popup: 'custom-swal-popup',
+                        title: 'custom-swal-title',
+                    }
                 }).then((result) => {
 
                   
@@ -1802,8 +1799,8 @@ function removeCoupon() {
     confirmButtonColor: "#3085d6",
     cancelButtonColor: "#d33",
     confirmButtonText: "Yes, remove it!",
-    background: '#88c8bc',
-    color: '#ffffff'
+    background: '#ffffff',
+    color: '#333333'
   }).then((result) => {
     if (result.isConfirmed) {
       fetch('/removeCoupon', {
@@ -1823,8 +1820,8 @@ function removeCoupon() {
           icon: 'error',
           title: 'Oops...',
           text: 'An error occurred: ' + error.message,
-          background: '#88c8bc',
-          color: '#ffffff'
+          background: '#ffffff',
+          color: '#333333'
         });
       });
     }
@@ -1846,6 +1843,62 @@ function showCouponCard() {
 
 
   </script>
+
+<!-- Available Coupons Modal -->
+<div class="modal fade" id="availableCouponsModal" tabindex="-1" aria-labelledby="availableCouponsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="background-color: #ffffff; color: #333333; border: none; border-radius: 8px;">
+      <div class="modal-header" style="border-bottom: 1px solid #dee2e6;">
+        <h5 class="modal-title" id="availableCouponsModalLabel" style="color: #333;">Available Coupons</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+        <% if (typeof allCoupons !== 'undefined' && allCoupons.length > 0) { %>
+          <ul class="list-group list-group-flush">
+          <% allCoupons.forEach(function(c) { 
+              let isValid = true;
+              let reason = "";
+              if (totalAmount < c.minPurchaseAmount) {
+                isValid = false;
+                reason = `Min purchase ₹${c.minPurchaseAmount} required`;
+              }
+              const expiryDate = new Date(c.expiry_Date);
+              if (expiryDate < new Date()) {
+                isValid = false;
+                reason = "Expired";
+              }
+          %>
+            <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: <%= isValid ? '#ffffff' : '#f8f9fa' %>; border-bottom: 1px solid #dee2e6; margin-bottom: 0; padding: 15px; opacity: <%= isValid ? '1' : '0.6' %>;">
+              <div style="flex: 1;">
+                <h6 style="color: <%= isValid ? '#007bff' : '#6c757d' %>; font-weight: bold; margin-bottom: 5px; font-size: 16px;"><%= c.Coupon_Code %></h6>
+                <div style="font-size: 14px; margin-bottom: 2px; color: #555;"><%= c.Description %></div>
+                <div style="font-size: 13px; color: #888;">Discount: ₹<%= c.discount_Price %> | Expires: <%= new Date(c.expiry_Date).toLocaleDateString() %></div>
+              </div>
+              <div style="margin-left: 15px; min-width: 100px; text-align: right;">
+                <% if (isValid) { %>
+                  <button class="btn btn-primary btn-sm" onclick="selectCouponCode('<%= c.Coupon_Code %>')" data-bs-dismiss="modal" style="background-color: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 13px;">Use Code</button>
+                <% } else { %>
+                  <span style="font-size: 12px; color: #dc3545; font-weight: 500;"><%= reason %></span>
+                <% } %>
+              </div>
+            </li>
+          <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="text-center" style="color: #666; margin: 20px 0;">No coupons available at the moment.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function selectCouponCode(code) {
+  document.getElementById('Coupon').value = code;
+  // Automatically apply it after setting the value
+  applyCoupon();
+}
+</script>
 
   <%- include('../layout/siteFooter') %>
 </div>

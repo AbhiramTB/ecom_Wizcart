@@ -1342,6 +1342,7 @@ const checkOut = async (req, res) => {
       }
   
       const coupon = await Coupons.findOne({ Coupon_Code: cart.coupon });
+      const allCoupons = await Coupons.find({ is_active: true });
       
  
   
@@ -1365,10 +1366,11 @@ const checkOut = async (req, res) => {
         user: sanitizeUser(user),
          key: RAZORPAY_ID_KEY ,
          coupon,
+         allCoupons,
          wallet:wallet1
       });
     } else {
-      res.render("user/checkout", { cartItems: [], totalAmount: 0, discount: 0, couponDetails: {}, user: typeof user !== "undefined" ? sanitizeUser(user) : null });
+      res.render("user/checkout", { cartItems: [], totalAmount: 0, discount: 0, couponDetails: {}, user: typeof user !== "undefined" ? sanitizeUser(user) : null, allCoupons: [] });
     }
   } catch (error) {
     console.error('Error during checkout:', error);
@@ -2198,16 +2200,14 @@ const removeWishlist = async (req, res) => {
 
 
 
-const paymentPending= async (req,res)=>{
+const paymentPending = async (req, res) => {
   try {
-
     const clearCart = await Cart.deleteOne({ user_id: new mongoose.Types.ObjectId(req.session.user_id)});
-   if(clearCart){
-    res.render('user/orderPending', { user: typeof user !== "undefined" ? sanitizeUser(user) : null });
-
-   }
+    if(clearCart){
+      res.render('user/orderPending', { user: typeof user !== "undefined" ? sanitizeUser(user) : null });
+    }
   } catch (error) {
-    
+    console.log(error);
   }
 }
 
