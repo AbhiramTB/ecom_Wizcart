@@ -11,6 +11,7 @@ const { log, error } = require("console");
 const Coupons = require("../model/couponModel");
 const Wallet = require("../model/walletModel");
 const Review = require("../model/reviewModel");
+const CategoryOffer = require("../model/categoryOfferModel");
 require("passport");
 const mongoose = require("mongoose");
 const { HttpStatus } = require("../constants/httpStatus");
@@ -1619,7 +1620,12 @@ const newOffer = async (req, res) => {
       return res.status(HttpStatus.BAD_REQUEST).send("Discount price cannot exceed or equal the product MRP");
     }
 
-    const lastPrice = offerProduct_mrp - discount;
+    const product = await Product.findById(offerProduct_id);
+    const categoryOffer = await CategoryOffer.findOne({ category_id: product.category_name });
+    const cat_discount = categoryOffer ? categoryOffer.discount : 0;
+    
+    const best_discount = Math.max(discount, cat_discount);
+    const lastPrice = offerProduct_mrp - best_discount;
 
     console.log(lastPrice);
     const updateResult = await Product.updateOne(
@@ -1645,11 +1651,17 @@ const removeOffer = async (req, res) => {
     const removeID = req.body.removeID;
     const mrp = parseInt(req.body.removeMrp, 10);
 
+    const product = await Product.findById(removeID);
+    const categoryOffer = await CategoryOffer.findOne({ category_id: product.category_name });
+    const cat_discount = categoryOffer ? categoryOffer.discount : 0;
+    
+    const lastPrice = mrp - cat_discount;
+
     const updateResult = await Product.updateOne(
       { _id: removeID },
       {
         $set: {
-          price: mrp,
+          price: lastPrice,
           offer_price: 0
         },
       }
@@ -1913,6 +1925,81 @@ const ledger = async (req, res) => {
   }
 }
 
+const categoryOffers = async (req, res) => {
+  try {
+    const categories = await Category.aggregate([
+      {
+        $lookup: {
+          from: "categoryoffers",
+          localField: "_id",
+          foreignField: "category_id",
+          as: "offerDetails"
+        }
+      }
+    ]);
+    const formattedCategories = categories.map(cat => {
+      if (cat.offerDetails && cat.offerDetails.length > 0) {
+        cat.offer = cat.offerDetails[0];
+      }
+      return cat;
+    });
+    res.render("admin/categoryOfferManagement", { categories: formattedCategories });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const newCategoryOffer = async (req, res) => {
+  try {
+    const category_id = req.body.category_id;
+    const discount = parseInt(req.body.discount, 10);
+    
+    await CategoryOffer.findOneAndUpdate(
+      { category_id: category_id },
+      { discount: discount },
+      { upsert: true, new: true }
+    );
+
+    const products = await Product.find({ category_name: category_id });
+    for (let product of products) {
+      const prod_discount = product.offer_price || 0;
+      const best_discount = Math.max(discount, prod_discount);
+      const new_price = product.Maximum_Retail_Price - best_discount;
+      
+      await Product.updateOne(
+        { _id: product._id },
+        { $set: { price: new_price } }
+      );
+    }
+    res.redirect("/categoryOffers");
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const removeCategoryOffer = async (req, res) => {
+  try {
+    const category_id = req.body.category_id;
+    
+    await CategoryOffer.findOneAndDelete({ category_id: category_id });
+
+    // Update all products in this category to fallback to their own offer
+    const products = await Product.find({ category_name: category_id });
+    for (let product of products) {
+      const prod_discount = product.offer_price || 0;
+      const new_price = product.Maximum_Retail_Price - prod_discount;
+      
+      await Product.updateOne(
+        { _id: product._id },
+        { $set: { price: new_price } }
+      );
+    }
+    res.redirect("/categoryOffers");
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 module.exports = {
   adminLogin,
   adminLogindata,
@@ -1953,5 +2040,8 @@ module.exports = {
   removeOffer,
   downloadExcel,
   downloadPdf,
-  ledger
+  ledger,
+  categoryOffers,
+  newCategoryOffer,
+  removeCategoryOffer
 };

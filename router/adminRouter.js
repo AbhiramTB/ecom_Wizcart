@@ -71,6 +71,11 @@ adminRoute.get(
 adminRoute.post("/new-offer", isLogin, adminController.newOffer);
 adminRoute.post("/remove-offer", isLogin, adminController.removeOffer);
 
+// CATEGORY OFFERS
+adminRoute.get("/categoryOffers", isLogin, adminController.categoryOffers);
+adminRoute.post("/new-category-offer", isLogin, adminController.newCategoryOffer);
+adminRoute.post("/remove-category-offer", isLogin, adminController.removeCategoryOffer);
+
 adminRoute.get("/download/excel", isLogin, adminController.downloadExcel);
 adminRoute.get("/download/pdf", isLogin, adminController.downloadPdf);
 

@@ -24,12 +24,15 @@ const env = require("../lib/env");
 const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = env;
 const Wallet=require('../model/walletModel')
 const Review = require("../model/reviewModel");
+const CategoryOffer = require("../model/categoryOfferModel");
 const PDFDocument = require('pdfkit');
 const fs=require('fs')
 
 const homeLogin = async (req, res) => {
   try {
     const products = await Product.find({}).limit(8);
+    console.log(products)
+    console.log('--------------0987-----------------')
     const toast = req.flash("info");
     if (products) {
       if (req.session.user_id) {
@@ -63,7 +66,8 @@ const homeLogin = async (req, res) => {
 const home = async (req, res) => {
   try {
     const products = await Product.find({}).limit(8);
-
+      console.log(products)
+      console.log('-----------------------')
     if (products) {
       if (req.session.user_id) {
         const user = await User.findById(req.session.user_id);
@@ -504,11 +508,17 @@ const singleProduct = async (req, res) => {
 
     const reviews = await Review.find({ productId: singleId }).populate('userId');
 
+    const categoryOffer = await CategoryOffer.findOne({ category_id: singleProduct.category_name._id });
+    const cat_discount = categoryOffer ? categoryOffer.discount : 0;
+    const prod_discount = singleProduct.offer_price || 0;
+    const hasCategoryOffer = cat_discount > 0 && cat_discount > prod_discount;
+
     res.render("user/singleProduct", {
       singleProduct,
       isCartexist,
       existingWishlist,
       reviews,
+      hasCategoryOffer,
       user: sanitizeUser(user) || "",
       cartQuantity: cartQuantity || 0,
     });

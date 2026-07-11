@@ -9,6 +9,7 @@ const Product=require('../model/productModel');
 const { uploadToCloudinary } = require('../lib/cloudinary');
 const { HttpStatus } = require("../constants/httpStatus");
 const { PRODUCT_MESSAGES, ERROR_MESSAGES } = require("../constants/messages");
+const CategoryOffer = require('../model/categoryOfferModel');
 
 
 
@@ -49,12 +50,16 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
         console.log(`File uploaded to Cloudinary: ${cloudinaryUrl}`);
     }
 
+    const categoryOffer = await CategoryOffer.findOne({ category_id: productCategory });
+    const cat_discount = categoryOffer ? categoryOffer.discount : 0;
+    const final_price = productPrice - cat_discount;
+
     const productDetails = new Product({
         product_name: productName,
         product_description: ProductDescription,
         category_name: productCategory,
         brand: Brand,
-        price: productPrice,
+        price: final_price,
         in_stock: Stock,
         product_img: productImages,
         Hide_product: 0,
@@ -111,6 +116,10 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
 
            console.log(updateImg);
 
+        const categoryOffer = await CategoryOffer.findOne({ category_id: editProductCategory });
+        const cat_discount = categoryOffer ? categoryOffer.discount : 0;
+        const final_price = editProductPrice - cat_discount;
+
         const updateResult = await Product.updateOne(
             { _id: productId },
             {
@@ -119,7 +128,7 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
                     product_description: editProductDescription,
                     category_name: editProductCategory,
                     brand: editBrand,
-                    price: editProductPrice,
+                    price: final_price,
                     in_stock: editStock,
                     product_img: updateImg,
                     Hide_product: 0,

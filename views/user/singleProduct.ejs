@@ -242,6 +242,9 @@
               <% if (difference > 0) { %>
                 <span class="wz-product-mrp">₹<%= singleProduct.Maximum_Retail_Price %></span>
                 <span class="wz-offer-badge-inline"><%= discountPercentage.toFixed(0) %>% OFF</span>
+                <% if (hasCategoryOffer) { %>
+                  <span class="badge bg-primary ms-2" style="font-size: 0.8em; vertical-align: middle;">Category offer applied!</span>
+                <% } %>
               <% } %>
             </div>
 
