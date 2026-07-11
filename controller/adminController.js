@@ -940,6 +940,42 @@ const updateStatus = async (req, res) => {
 
       product.in_stock += quantity;
       await product.save();
+
+      // Refund to wallet if payment was already made (Razorpay or Wallet)
+      if (order.paymentMethod !== 'COD') {
+        const product_price = order.product[productIndex].productPrice;
+        const product_name = product.product_name || 'Product';
+
+        const walletIsexist = await Wallet.findOne({ user_id: new mongoose.Types.ObjectId(order.user_id) });
+
+        if (!walletIsexist) {
+          const addToWallet = new Wallet({
+            user_id: new mongoose.Types.ObjectId(order.user_id),
+            balance: product_price,
+            transactions: [{
+              amount: product_price,
+              type: 'refund',
+              description: product_name + ' cancellation refund'
+            }]
+          });
+          await addToWallet.save();
+        } else {
+          const updatedBalance = walletIsexist.balance + product_price;
+          await Wallet.updateOne(
+            { user_id: new mongoose.Types.ObjectId(order.user_id) },
+            {
+              $set: { balance: updatedBalance },
+              $push: {
+                transactions: {
+                  amount: product_price,
+                  type: 'refund',
+                  description: product_name + ' cancellation refund'
+                }
+              }
+            }
+          );
+        }
+      }
     }
 
     await order.save();
@@ -1591,6 +1627,7 @@ const newOffer = async (req, res) => {
       {
         $set: {
           price: lastPrice,
+          offer_price: discount
         },
       }
     );
@@ -1613,6 +1650,7 @@ const removeOffer = async (req, res) => {
       {
         $set: {
           price: mrp,
+          offer_price: 0
         },
       }
     );

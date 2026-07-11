@@ -34,6 +34,10 @@ const ProductSchema = new mongoose.Schema({
   },
   Maximum_Retail_Price:{
    type:Number,
+  },
+  offer_price: {
+    type: Number,
+    default: 0
   }
 });
 

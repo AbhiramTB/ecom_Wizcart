@@ -58,7 +58,8 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
         in_stock: Stock,
         product_img: productImages,
         Hide_product: 0,
-        Maximum_Retail_Price: productPrice
+        Maximum_Retail_Price: productPrice,
+        offer_price: 0
     });
 
     
@@ -122,7 +123,8 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
                     in_stock: editStock,
                     product_img: updateImg,
                     Hide_product: 0,
-                    Maximum_Retail_Price: editProductPrice
+                    Maximum_Retail_Price: editProductPrice,
+                    offer_price: 0
                 },
             }
         );
