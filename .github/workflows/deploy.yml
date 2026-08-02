@@ -34,6 +34,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /home/ubuntu/ecom_Wizcart
-            git pull origin production 
+            git reset --hard origin/production
             npm ci
             pm2 restart wizcart
