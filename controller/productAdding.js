@@ -52,7 +52,12 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
 
     const categoryOffer = await CategoryOffer.findOne({ category_id: productCategory });
     const cat_discount = categoryOffer ? categoryOffer.discount : 0;
-    const final_price = productPrice - cat_discount;
+    
+    let final_price = productPrice - cat_discount;
+    if (final_price <= 0) {
+      const tenPercent = productPrice * 0.10;
+      final_price = tenPercent < 1 ? 1 : Math.round(tenPercent);
+    }
 
     const productDetails = new Product({
         product_name: productName,
@@ -118,7 +123,12 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
 
         const categoryOffer = await CategoryOffer.findOne({ category_id: editProductCategory });
         const cat_discount = categoryOffer ? categoryOffer.discount : 0;
-        const final_price = editProductPrice - cat_discount;
+
+        let final_price = editProductPrice - cat_discount;
+        if (final_price <= 0) {
+          const tenPercent = editProductPrice * 0.10;
+          final_price = tenPercent < 1 ? 1 : Math.round(tenPercent);
+        }
 
         const updateResult = await Product.updateOne(
             { _id: productId },

@@ -1608,72 +1608,6 @@ const PDFDocument = require("pdfkit");
 
 
 
-const newOffer = async (req, res) => {
-  try {
-    const offerProduct_id = req.body.offerProduct_id;
-    console.log(offerProduct_id);
-
-    const offerProduct_mrp = parseInt(req.body.offerProduct_mrp, 10);
-    const discount = parseInt(req.body.discount, 10);
-
-    if (discount >= offerProduct_mrp) {
-      return res.status(HttpStatus.BAD_REQUEST).send("Discount price cannot exceed or equal the product MRP");
-    }
-
-    const product = await Product.findById(offerProduct_id);
-    const categoryOffer = await CategoryOffer.findOne({ category_id: product.category_name });
-    const cat_discount = categoryOffer ? categoryOffer.discount : 0;
-    
-    const best_discount = Math.max(discount, cat_discount);
-    const lastPrice = offerProduct_mrp - best_discount;
-
-    console.log(lastPrice);
-    const updateResult = await Product.updateOne(
-      { _id: offerProduct_id },
-      {
-        $set: {
-          price: lastPrice,
-          offer_price: discount
-        },
-      }
-    );
-
-    if (updateResult.modifiedCount) {
-      res.redirect("/offerManagemanent");
-    }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
-
-const removeOffer = async (req, res) => {
-  try {
-    const removeID = req.body.removeID;
-    const mrp = parseInt(req.body.removeMrp, 10);
-
-    const product = await Product.findById(removeID);
-    const categoryOffer = await CategoryOffer.findOne({ category_id: product.category_name });
-    const cat_discount = categoryOffer ? categoryOffer.discount : 0;
-    
-    const lastPrice = mrp - cat_discount;
-
-    const updateResult = await Product.updateOne(
-      { _id: removeID },
-      {
-        $set: {
-          price: lastPrice,
-          offer_price: 0
-        },
-      }
-    );
-
-    if (updateResult.modifiedCount) {
-      res.redirect("/offerManagemanent");
-    }
-  } catch (error) {}
-};
-
-
 const generateReportData = async (startDate, endDate, filter) => {
   try {
     const groupedOrders = await Order.aggregate([
@@ -1925,6 +1859,86 @@ const ledger = async (req, res) => {
   }
 }
 
+const newOffer = async (req, res) => {
+  try {
+    const offerProduct_id = req.body.offerProduct_id;
+    const offerProduct_mrp = parseInt(req.body.offerProduct_mrp, 10);
+    const discount = parseInt(req.body.discount, 10);
+
+    const product = await Product.findById(offerProduct_id);
+    if (!product) {
+      return res.redirect("/offerManagemanent");
+    }
+
+    const mrp = offerProduct_mrp || product.Maximum_Retail_Price;
+    const maxDiscount = Math.floor(mrp * 0.90);
+
+    if (isNaN(discount) || discount < 0) {
+      return res.redirect("/offerManagemanent");
+    }
+
+    if (discount > maxDiscount) {
+      return res.status(HttpStatus.BAD_REQUEST).send(`Discount cannot exceed 90% of MRP (maximum ₹${maxDiscount})`);
+    }
+
+    const categoryOffer = await CategoryOffer.findOne({ category_id: product.category_name });
+    const cat_discount = categoryOffer ? categoryOffer.discount : 0;
+    
+    const best_discount = Math.min(Math.max(discount, cat_discount), maxDiscount);
+    const lastPrice = Math.max(Math.ceil(mrp * 0.10), mrp - best_discount);
+
+    await Product.updateOne(
+      { _id: offerProduct_id },
+      {
+        $set: {
+          price: lastPrice,
+          offer_price: discount
+        },
+      }
+    );
+
+    return res.redirect("/offerManagemanent");
+  } catch (error) {
+    console.log(error.message);
+    return res.redirect("/offerManagemanent");
+  }
+};
+
+const removeOffer = async (req, res) => {
+  try {
+    const removeID = req.body.removeID;
+    const mrp = parseInt(req.body.removeMrp, 10);
+
+    const product = await Product.findById(removeID);
+    if (!product) {
+      return res.redirect("/offerManagemanent");
+    }
+
+    const categoryOffer = await CategoryOffer.findOne({ category_id: product.category_name });
+    const cat_discount = categoryOffer ? categoryOffer.discount : 0;
+    
+    const productMrp = !isNaN(mrp) ? mrp : (product.Maximum_Retail_Price || 0);
+    const maxDiscount = Math.floor(productMrp * 0.90);
+    const effectiveDiscount = Math.min(cat_discount, maxDiscount);
+    const lastPrice = Math.max(Math.ceil(productMrp * 0.10), productMrp - effectiveDiscount);
+
+    await Product.updateOne(
+      { _id: removeID },
+      {
+        $set: {
+          price: lastPrice,
+          offer_price: 0
+        },
+      }
+    );
+
+    return res.redirect("/offerManagemanent");
+  } catch (error) {
+    console.log("Error in removeOffer:", error.message);
+    return res.redirect("/offerManagemanent");
+  }
+};
+
 const categoryOffers = async (req, res) => {
   try {
     const categories = await Category.aggregate([
@@ -1937,13 +1951,35 @@ const categoryOffers = async (req, res) => {
         }
       }
     ]);
-    const formattedCategories = categories.map(cat => {
+
+    const formattedCategories = await Promise.all(categories.map(async (cat) => {
       if (cat.offerDetails && cat.offerDetails.length > 0) {
         cat.offer = cat.offerDetails[0];
       }
+
+      const products = await Product.find({ category_name: cat._id });
+      if (products && products.length > 0) {
+        let minMrp = Infinity;
+        products.forEach(p => {
+          if (p.Maximum_Retail_Price !== undefined && p.Maximum_Retail_Price < minMrp) {
+            minMrp = p.Maximum_Retail_Price;
+          }
+        });
+        cat.minProductMrp = minMrp === Infinity ? null : minMrp;
+        cat.maxCategoryDiscount = minMrp === Infinity ? null : Math.floor(minMrp * 0.90);
+      } else {
+        cat.minProductMrp = null;
+        cat.maxCategoryDiscount = null;
+      }
+
       return cat;
+    }));
+
+    res.render("admin/categoryOfferManagement", {
+      categories: formattedCategories,
+      error: req.query.error || null,
+      success: req.query.success || null
     });
-    res.render("admin/categoryOfferManagement", { categories: formattedCategories });
   } catch (error) {
     console.log(error.message);
   }
@@ -1954,26 +1990,40 @@ const newCategoryOffer = async (req, res) => {
     const category_id = req.body.category_id;
     const discount = parseInt(req.body.discount, 10);
     
+    if (isNaN(discount) || discount < 0) {
+      return res.redirect("/categoryOffers?error=" + encodeURIComponent("Invalid discount amount."));
+    }
+
+    const products = await Product.find({ category_name: category_id });
+    
+    for (let product of products) {
+      const maxDiscount = Math.floor(product.Maximum_Retail_Price * 0.90);
+      if (discount > maxDiscount) {
+        return res.redirect("/categoryOffers?error=" + encodeURIComponent(`Discount (₹${discount}) exceeds maximum 90% discount limit (₹${maxDiscount}) for product '${product.product_name || 'item'}' in this category.`));
+      }
+    }
+
     await CategoryOffer.findOneAndUpdate(
       { category_id: category_id },
       { discount: discount },
       { upsert: true, new: true }
     );
 
-    const products = await Product.find({ category_name: category_id });
     for (let product of products) {
       const prod_discount = product.offer_price || 0;
-      const best_discount = Math.max(discount, prod_discount);
-      const new_price = product.Maximum_Retail_Price - best_discount;
+      const maxDiscount = Math.floor(product.Maximum_Retail_Price * 0.90);
+      const best_discount = Math.min(Math.max(discount, prod_discount), maxDiscount);
+      const new_price = Math.max(Math.ceil(product.Maximum_Retail_Price * 0.10), product.Maximum_Retail_Price - best_discount);
       
       await Product.updateOne(
         { _id: product._id },
         { $set: { price: new_price } }
       );
     }
-    res.redirect("/categoryOffers");
+    return res.redirect("/categoryOffers?success=" + encodeURIComponent("Category offer saved successfully."));
   } catch (error) {
     console.log(error.message);
+    return res.redirect("/categoryOffers?error=" + encodeURIComponent("An error occurred while setting category offer."));
   }
 };
 
@@ -1987,16 +2037,19 @@ const removeCategoryOffer = async (req, res) => {
     const products = await Product.find({ category_name: category_id });
     for (let product of products) {
       const prod_discount = product.offer_price || 0;
-      const new_price = product.Maximum_Retail_Price - prod_discount;
+      const maxDiscount = Math.floor(product.Maximum_Retail_Price * 0.90);
+      const effective_discount = Math.min(prod_discount, maxDiscount);
+      const new_price = Math.max(Math.ceil(product.Maximum_Retail_Price * 0.10), product.Maximum_Retail_Price - effective_discount);
       
       await Product.updateOne(
         { _id: product._id },
         { $set: { price: new_price } }
       );
     }
-    res.redirect("/categoryOffers");
+    return res.redirect("/categoryOffers?success=" + encodeURIComponent("Category offer removed successfully."));
   } catch (error) {
     console.log(error.message);
+    return res.redirect("/categoryOffers?error=" + encodeURIComponent("An error occurred while removing category offer."));
   }
 };
 
