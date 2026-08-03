@@ -40,7 +40,7 @@
             <div class="d-flex justify-content-start">
               <button class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editOfferModal<%= product._id %>">Edit Offer</button>
           
-              <form id="removeOfferForm<%= product._id %>" action="/remove-offer" method="post" onsubmit="return confirmRemoveOffer('<%= product._id %>')">
+              <form id="removeOfferForm<%= product._id %>" action="/remove-offer" method="post" onsubmit="return confirmRemoveOffer(event, '<%= product._id %>')">
                 <input type="hidden" name="removeID" value="<%= product._id %>">
                 <input type="hidden" name="removeMrp" value="<%= product.Maximum_Retail_Price %>">
                 <button class="btn btn-danger btn-sm" type="submit">Remove Offer</button>
@@ -122,32 +122,41 @@
           var mrp = <%= product.Maximum_Retail_Price %>;
           var sellingPrice = <%= product.price %>;
     
+          var maxAllowed = Math.floor(mrp * 0.90);
+
           discountInput.addEventListener('input', function () {
             var discountValue = parseFloat(discountInput.value);
-            var finalPrice = sellingPrice - discountValue;
-    
+
             if (!isNaN(discountValue) && discountValue > 0) {
-              var discountPercentage = ((sellingPrice - finalPrice) / mrp) * 100;
-    
-              // Check if discount amount exceeds or equals the MRP
-              if (discountValue >= mrp) {
+              if (discountValue > maxAllowed) {
+                errorDiv.textContent = `Discount cannot exceed 90% of MRP (maximum ₹${maxAllowed.toFixed(2)}).`;
                 errorDiv.style.display = "block";
-                discountBadge.textContent = "Invalid Discount";
+                discountBadge.textContent = `Exceeds 90% Limit (Max ₹${maxAllowed.toFixed(2)})`;
                 discountBadge.className = "badge bg-danger";
               } else {
+                var discountPercentage = (discountValue / mrp) * 100;
                 errorDiv.style.display = "none";
                 discountBadge.textContent = `Discount: ₹${discountValue.toFixed(2)} (${discountPercentage.toFixed(2)}%)`;
                 discountBadge.className = "badge bg-success";
               }
             } else {
+              errorDiv.style.display = "none";
               discountBadge.textContent = "No Offer";
               discountBadge.className = "badge bg-secondary";
             }
           });
-    
+
           form.addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent default form submission to show the confirmation dialog
-    
+
+            var discountValue = parseFloat(discountInput.value);
+
+            if (isNaN(discountValue) || discountValue <= 0 || discountValue > maxAllowed) {
+              errorDiv.textContent = `Discount must be between ₹1 and ₹${maxAllowed.toFixed(2)} (max 90% of MRP).`;
+              errorDiv.style.display = "block";
+              return false;
+            }
+
             Swal.fire({
               title: 'Add New Offer',
               text: 'Are you sure you want to add this exciting new offer?',
@@ -155,38 +164,15 @@
               imageWidth: 200,
               imageHeight: 200,
               imageAlt: 'New Offer Image',
-            
               showCancelButton: true,
               confirmButtonColor: '#4CAF50',
               cancelButtonColor: '#F44336',
               confirmButtonText: 'Yes, add it!',
               cancelButtonText: 'No, cancel',
-              background: '#f7f7f7',
-              backdrop: `
-                rgba(0,0,123,0.4)
-                url("https://example.com/path/to/confetti.gif")
-                left top
-                no-repeat
-              `
+              background: '#f7f7f7'
             }).then((result) => {
               if (result.isConfirmed) {
-                var discountValue = parseFloat(discountInput.value);
-    
-                // Prevent form submission if the discount is greater than or equal to MRP
-                if (discountValue >= mrp) {
-                  errorDiv.style.display = "block";
-                } else {
-                  errorDiv.style.display = "none";
-                  form.submit(); // Submit the form if the discount is valid
-                  Swal.fire({
-                    title: 'Offer Added!',
-                    text: 'Your new offer has been successfully added to the store.',
-                    icon: 'success',
-                    confirmButtonColor: '#4CAF50',
-                    timer: 3000,
-                    timerProgressBar: true
-                  });
-                }
+                form.submit();
               }
             });
           });
@@ -195,30 +181,24 @@
     });
 
 
-    function confirmRemoveOffer(productId) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "Do you really want to remove this offer?",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, remove it!',
-      cancelButtonText: 'No, keep it'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        document.getElementById('removeOfferForm' + productId).submit();
-        Swal.fire({
-          title: 'Offer Removed!',
-          text: 'The offer has been successfully removed.',
-          icon: 'success',
-          confirmButtonColor: '#4CAF50',
-          timer: 3000,
-          timerProgressBar: true
-        });
-      }
-    });
-  }
+    function confirmRemoveOffer(event, productId) {
+      if (event) event.preventDefault();
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to remove this offer?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'No, keep it'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          document.getElementById('removeOfferForm' + productId).submit();
+        }
+      });
+      return false;
+    }
 
     </script>
     </script>

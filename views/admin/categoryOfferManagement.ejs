@@ -30,7 +30,7 @@
             <div class="d-flex justify-content-start">
               <button class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editOfferModal<%= category._id %>">Edit Offer</button>
           
-              <form id="removeOfferForm<%= category._id %>" action="/remove-category-offer" method="post" onsubmit="return confirmRemoveOffer('<%= category._id %>')">
+              <form id="removeOfferForm<%= category._id %>" action="/remove-category-offer" method="post" onsubmit="return confirmRemoveOffer(event, '<%= category._id %>')">
                 <input type="hidden" name="category_id" value="<%= category._id %>">
                 <button class="btn btn-danger btn-sm" type="submit">Remove Offer</button>
               </form>
@@ -45,12 +45,17 @@
                 <h5 class="modal-title">Edit Offer for <%= category.category_name %></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <form action="/new-category-offer" method="POST">
+              <form id="categoryOfferForm<%= category._id %>" action="/new-category-offer" method="POST">
                 <div class="modal-body">
                   <div class="mb-3">
-                    <label class="form-label">Discount Amount (₹)</label>
-                    <input type="number" class="form-control" name="discount" value="<%= category.offer ? category.offer.discount : '' %>" required>
+                    <label for="categoryDiscount<%= category._id %>" class="form-label">Discount Amount (₹)</label>
+                    <input type="number" min="0" step="1" class="form-control" id="categoryDiscount<%= category._id %>" name="discount" value="<%= category.offer ? category.offer.discount : '' %>" required>
                     <input type="hidden" name="category_id" value="<%= category._id %>">
+                    <% if (category.maxCategoryDiscount !== null) { %>
+                      <small class="text-muted d-block mt-1">Maximum allowed discount (90% of lowest MRP ₹<%= category.minProductMrp %>): <strong>₹<%= category.maxCategoryDiscount %></strong></small>
+                    <% } %>
+                    <span id="categoryDiscountBadge<%= category._id %>" class="badge bg-secondary mt-2">Enter discount amount</span>
+                    <div id="categoryError<%= category._id %>" class="text-danger mt-2" style="display:none;"></div>
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -72,8 +77,103 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-function confirmRemoveOffer(categoryId) {
-  event.preventDefault();
+document.addEventListener('DOMContentLoaded', function () {
+  <% if (typeof error !== 'undefined' && error) { %>
+    Swal.fire({
+      icon: 'error',
+      title: 'Offer Rejected',
+      text: '<%= error %>',
+      confirmButtonColor: '#d33'
+    });
+  <% } %>
+
+  <% if (typeof success !== 'undefined' && success) { %>
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: '<%= success %>',
+      timer: 2500,
+      showConfirmButton: false
+    });
+  <% } %>
+
+  <% categories.forEach(category => { %>
+    (function() {
+      var discountInput = document.getElementById('categoryDiscount<%= category._id %>');
+      var discountBadge = document.getElementById('categoryDiscountBadge<%= category._id %>');
+      var errorDiv = document.getElementById('categoryError<%= category._id %>');
+      var form = document.getElementById('categoryOfferForm<%= category._id %>');
+      var maxDiscount = <%= category.maxCategoryDiscount !== null ? category.maxCategoryDiscount : 'null' %>;
+      var minMrp = <%= category.minProductMrp !== null ? category.minProductMrp : 'null' %>;
+
+      if (discountInput) {
+        discountInput.addEventListener('input', function () {
+          var discountValue = parseFloat(discountInput.value);
+          if (isNaN(discountValue) || discountValue < 0) {
+            errorDiv.textContent = "Discount cannot be negative or invalid.";
+            errorDiv.style.display = "block";
+            discountBadge.textContent = "Invalid Discount";
+            discountBadge.className = "badge bg-danger mt-2";
+          } else if (maxDiscount !== null && discountValue > maxDiscount) {
+            errorDiv.textContent = `Discount (₹${discountValue}) exceeds the maximum 90% discount limit (₹${maxDiscount}) for this category.`;
+            errorDiv.style.display = "block";
+            discountBadge.textContent = `Exceeds 90% Limit (Max ₹${maxDiscount})`;
+            discountBadge.className = "badge bg-danger mt-2";
+          } else if (discountValue === 0) {
+            errorDiv.style.display = "none";
+            discountBadge.textContent = "No Offer (₹0)";
+            discountBadge.className = "badge bg-secondary mt-2";
+          } else {
+            errorDiv.style.display = "none";
+            discountBadge.textContent = `Category Discount: ₹${discountValue.toFixed(2)}`;
+            discountBadge.className = "badge bg-success mt-2";
+          }
+        });
+
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+          var discountValue = parseFloat(discountInput.value);
+
+          if (isNaN(discountValue) || discountValue < 0) {
+            errorDiv.textContent = "Please enter a valid discount amount.";
+            errorDiv.style.display = "block";
+            return false;
+          }
+
+          if (maxDiscount !== null && discountValue > maxDiscount) {
+            errorDiv.textContent = `Discount (₹${discountValue}) exceeds the maximum 90% discount limit (₹${maxDiscount}) for this category.`;
+            errorDiv.style.display = "block";
+            Swal.fire({
+              icon: 'error',
+              title: 'Discount Exceeds 90% Limit',
+              text: `Discount amount (₹${discountValue}) exceeds maximum 90% discount limit (₹${maxDiscount}) for products in this category.`,
+              confirmButtonColor: '#d33'
+            });
+            return false;
+          }
+
+          Swal.fire({
+            title: 'Apply Category Offer',
+            text: 'Are you sure you want to save this category discount?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4CAF50',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, save it!',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              form.submit();
+            }
+          });
+        });
+      }
+    })();
+  <% }); %>
+});
+
+function confirmRemoveOffer(event, categoryId) {
+  if (event) event.preventDefault();
   Swal.fire({
     title: 'Are you sure?',
     text: "Do you really want to remove this category offer?",
