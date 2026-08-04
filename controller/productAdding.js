@@ -35,16 +35,16 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
     const numStock = parseInt(Stock, 10);
 
     if (isNaN(numPrice) || numPrice < 0) {
-      req.flash('info', '❗ Product price must be a valid non-negative number');
+      if (typeof req.flash === 'function') req.flash('info', '❗ Product price must be a valid non-negative number');
       return res.redirect('/Products');
     }
 
     if (isNaN(numStock) || numStock < 0) {
-      req.flash('info', '❗ Stock quantity must be a valid non-negative integer');
+      if (typeof req.flash === 'function') req.flash('info', '❗ Stock quantity must be a valid non-negative integer');
       return res.redirect('/Products');
     }
 
-    const croppedImages = req.files.filter(file => file.fieldname === 'croppedImages');
+    const croppedImages = (req.files && Array.isArray(req.files)) ? req.files.filter(file => file.fieldname === 'croppedImages') : [];
     let productImages = [];
 
     for (let i = 0; i < croppedImages.length; i++) {
@@ -78,7 +78,7 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
 
     const signupDataSuccess = await productDetails.save();
     if (signupDataSuccess) {
-        req.flash('info', '✅ New Product Added');
+        if (typeof req.flash === 'function') req.flash('info', '✅ New Product Added');
         res.redirect('/Products');
     }
 
@@ -96,7 +96,7 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
 
 productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
     try {
-        const croppedImages = req.files.filter(file => file.fieldname === 'croppedImages');
+        const croppedImages = (req.files && Array.isArray(req.files)) ? req.files.filter(file => file.fieldname === 'croppedImages') : [];
         let productImages = [];
 
         for (let i = 0; i < croppedImages.length; i++) {
@@ -116,20 +116,23 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
             editProductDescription,
         } = req.body;
 
+        const productData = await Product.findById(productId);
+        if (!productData) {
+            return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.UPDATE_FAILED);
+        }
 
-          
-        const productData = await Product.findById({_id:productId})
+        const existingImages = Array.isArray(productData.product_img) ? productData.product_img : [];
+        const updateImg = [...existingImages, ...productImages];
 
-        const updateImg =[...productData.product_img,...productImages]
-
-           console.log(updateImg);
+        const numPrice = parseFloat(editProductPrice) || 0;
+        const numStock = parseInt(editStock, 10) || 0;
 
         const categoryOffer = await CategoryOffer.findOne({ category_id: editProductCategory });
         const cat_discount = categoryOffer ? categoryOffer.discount : 0;
 
-        let final_price = editProductPrice - cat_discount;
+        let final_price = numPrice - cat_discount;
         if (final_price <= 0) {
-          const tenPercent = editProductPrice * 0.10;
+          const tenPercent = numPrice * 0.10;
           final_price = tenPercent < 1 ? 1 : Math.round(tenPercent);
         }
 
@@ -142,10 +145,10 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
                     category_name: editProductCategory,
                     brand: editBrand,
                     price: final_price,
-                    in_stock: editStock,
+                    in_stock: numStock,
                     product_img: updateImg,
                     Hide_product: 0,
-                    Maximum_Retail_Price: editProductPrice,
+                    Maximum_Retail_Price: numPrice,
                     offer_price: 0
                 },
             }
@@ -154,7 +157,7 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
         if (updateResult.matchedCount === 0) {
             return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.UPDATE_FAILED);
         }
-        req.flash('info', 'PRODUCT WAS SUCCESSFULLY EDITED ');
+        if (typeof req.flash === 'function') req.flash('info', 'PRODUCT WAS SUCCESSFULLY EDITED ');
         res.redirect('/Products');
     } catch (error) {
         console.error(error.message);

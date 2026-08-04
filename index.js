@@ -20,7 +20,6 @@ const env = require("./lib/env");
 mongoose.connect(env.MONGODB_CONNECT);
 
 
-app.use(productAddRoute.productAddRoute);
 app.use(nocache());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -30,12 +29,6 @@ const e = require("express");
 const { errorPage } = require("./controller/errorController");
 
 app.use(cookieParser(env.COOKIE_SECRET));
-app.use(flash());
-app.use(cors({
-  origin:env.CORS_ORIGIN,
-  credentials:true
-}));
-
 
 app.use(
   session({
@@ -45,13 +38,18 @@ app.use(
   })
 );
 
-
+app.use(flash());
+app.use(cors({
+  origin:env.CORS_ORIGIN,
+  credentials:true
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname,"public")));
 
+app.use(productAddRoute.productAddRoute);
 app.use(adminRoute.adminRoute);
 app.use(userRoute.userRoute);
 app.use(googleAuth.authRoute);
