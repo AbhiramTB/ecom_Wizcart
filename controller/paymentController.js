@@ -238,31 +238,53 @@ const createOrder = async (req, res) => {
           order: savedOrder,
         });
       } else if (PaymentMethod === "razorpay") {
+        const calculatedAmount = Math.round(price.finalPrice * 100);
+        console.log("=== [RAZORPAY ORDER CREATION] ===");
+        console.log("Cart Final Price (INR):", price.finalPrice);
+        console.log("Calculated Amount (Paise):", calculatedAmount);
+        console.log("Receipt ID:", savedOrder._id.toString());
 
-        const razorpayOrder = await instance.orders.create({
-          amount: price.finalPrice * 100, 
+        try {
+          const razorpayOrder = await instance.orders.create({
+            amount: calculatedAmount,
+            currency: "INR",
+            receipt: savedOrder._id.toString(),
+            payment_capture: "1",
+          });
 
-          currency: "INR",
-          receipt: savedOrder._id.toString(),
+          console.log("✅ Razorpay Order Created Successfully:", razorpayOrder);
 
-          payment_capture: "1",
-        });
+          savedOrder.razorpayOrderId = razorpayOrder.id;
+          await savedOrder.save();
 
+          return res.status(HttpStatus.CREATED).json({
+            success: true,
+            order: savedOrder,
+            razorpayOrder: razorpayOrder,
+          });
+        } catch (rzpErr) {
+          console.error("🚨 Razorpay API Order Creation Failed!");
+          console.error("Status Code:", rzpErr.statusCode);
+          console.error("Error Code:", rzpErr.error ? rzpErr.error.code : undefined);
+          console.error("Description:", rzpErr.error ? rzpErr.error.description : rzpErr.message);
+          console.error("Full Error Object:", JSON.stringify(rzpErr, null, 2));
 
-        savedOrder.razorpayOrderId = razorpayOrder.id;
-        await savedOrder.save();
-
-        res.status(HttpStatus.CREATED).json({
-          success: true,
-          order: savedOrder,
-          razorpayOrder: razorpayOrder,
-        });
+          return res.status(HttpStatus.BAD_REQUEST).json({
+            success: false,
+            message: `Razorpay Error: ${rzpErr.error ? rzpErr.error.description : rzpErr.message}`,
+            errorDetails: rzpErr
+          });
+        }
       }
     }
   } catch (error) {
-    console.error("Error creating order:", error.stack); 
+    console.error("Global Error creating order:", error);
+    if (error.stack) console.error(error.stack);
 
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: ERROR_MESSAGES.SERVER_ERROR });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ 
+      success: false, 
+      message: error.message || ERROR_MESSAGES.SERVER_ERROR 
+    });
   }
 };
 

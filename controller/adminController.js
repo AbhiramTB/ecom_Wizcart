@@ -16,6 +16,7 @@ require("passport");
 const mongoose = require("mongoose");
 const { HttpStatus } = require("../constants/httpStatus");
 const { USER_MESSAGES, PRODUCT_MESSAGES, CATEGORY_MESSAGES, COUPON_MESSAGES, PAYMENT_MESSAGES, ERROR_MESSAGES } = require("../constants/messages");
+const { deleteFromCloudinary } = require("../lib/cloudinary");
 
 
 
@@ -555,24 +556,37 @@ let id;
 const editProduct = async (req, res) => {
   try {
     id = req.body.id;
-
-    res.redirect("/editProductForm");
+    if (id) {
+      return res.redirect(`/editProductForm?id=${id}`);
+    }
+    res.redirect("/Products");
   } catch (error) {
-    console.log(error.message);
+    console.error("Error in editProduct:", error.message);
+    res.redirect("/Products");
   }
 };
 
 
 const editProductForm = async (req, res) => {
   try {
-    const productData = await Product.findById({ _id: id }).populate('category_name').populate('brand');
+    const productId = req.query.id || req.params.id || id;
+    if (!productId) {
+      req.flash("info", "❗ Invalid product ID");
+      return res.redirect("/Products");
+    }
+    const productData = await Product.findById(productId).populate('category_name').populate('brand');
     const category = await Category.find({});
     const brands = await Brand.find({ isBlocked: false }).sort({ brand_name: 1 });
     if (productData) {
-      res.render("admin/editProduct", { product: productData, id: id, category, brands });
-      id = null;
+      res.render("admin/editProduct", { product: productData, id: productId, category, brands });
+    } else {
+      req.flash("info", "❗ Product not found");
+      res.redirect("/Products");
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error loading edit product form:", error.message);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
+  }
 };
 
 
@@ -580,7 +594,19 @@ const editProductForm = async (req, res) => {
 const deleteImg = async (req, res) => {
   try {
     const { imageIndex, productId } = req.body;
-    console.log(imageIndex, productId);
+    console.log("Delete Image Request:", imageIndex, productId);
+
+    const product = await Product.findById(productId);
+    if (!product || !product.product_img) {
+      return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.NOT_FOUND);
+    }
+
+    const idx = parseInt(imageIndex, 10);
+    if (!isNaN(idx) && product.product_img[idx]) {
+      const targetImageUrl = product.product_img[idx];
+      // Delete image asset from Cloudinary to avoid orphaned files
+      await deleteFromCloudinary(targetImageUrl);
+    }
 
     let productKey = `product_img.${imageIndex}`;
 
@@ -599,24 +625,13 @@ const deleteImg = async (req, res) => {
     );
 
     if (pullResult.modifiedCount > 0) {
-      // // Delete the file from the file system
-
-      //  const uploadsDir = path.join(__dirname, '..', 'public', productKey);
-
-      // fs.unlink(uploadsDir, (err) => {
-      //   if (err) {
-      //     console.error(`Error deleting ${uploadsDir} file:`, err);
-      //   } else {
-      //     console.log(`${uploadsDir} was deleted successfully`);
-      //   }
-      // });
-      req.flash("info", " 🗑️ image delete successfully ");
+      req.flash("info", " 🗑️ Image deleted successfully ");
       res.redirect("/Products");
     } else {
       res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.IMAGE_NOT_FOUND);
     }
   } catch (error) {
-    console.log(error.message);
+    console.error("Error in deleteImg:", error.message);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
   }
 };
@@ -626,8 +641,6 @@ const deleteImg = async (req, res) => {
 const hideProduct = async (req, res) => {
   try {
     const id = req.body._id;
-    const a = await Product.findById(id);
-    console.log(`this is ${a}`);
     const hidden = await Product.findByIdAndUpdate(
       id,
       { $set: { Hide_product: 1 } },
@@ -636,9 +649,12 @@ const hideProduct = async (req, res) => {
     if (hidden) {
       req.flash("info", "Product was Hide  successfully ✔️ ");
       res.redirect("/Products");
+    } else {
+      res.redirect("/Products");
     }
   } catch (error) {
     console.log(error.message);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
   }
 };
 
@@ -647,7 +663,6 @@ const hideProduct = async (req, res) => {
 const unHide = async (req, res) => {
   try {
     const id = req.body._id;
-    console.log("hello");
     const unhidden = await Product.findByIdAndUpdate(
       id,
       { $set: { Hide_product: 0 } },
@@ -656,9 +671,12 @@ const unHide = async (req, res) => {
     if (unhidden) {
       req.flash("info", "Product was unhide  successfully ✔️ ");
       res.redirect("/Products");
+    } else {
+      res.redirect("/Products");
     }
   } catch (error) {
     console.log(error.message);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
   }
 };
 
@@ -669,11 +687,16 @@ const deleteProduct = async (req, res) => {
     let id = req.body._id;
     let productData = await Product.deleteOne({ _id: id });
 
-    if (productData) {
+    if (productData.deletedCount > 0) {
       req.flash("info", " 🗑️ Product was Delete succesfully ");
-      res.redirect("/Products");
+    } else {
+      req.flash("info", "❗ Product not found ");
     }
-  } catch (error) {}
+    res.redirect("/Products");
+  } catch (error) {
+    console.error("Error deleting product:", error.message);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.AN_ERROR_OCCURRED);
+  }
 };
 
 
@@ -1062,15 +1085,29 @@ const createCoupon = async (req, res) => {
     const { couponCode, discount, expiryDate, description, minPurchaseAmount } =
       req.body;
 
+    const formattedCode = couponCode.trim().toUpperCase();
+
+    // Check if coupon code already exists
+    const existingCoupon = await Coupons.findOne({ Coupon_Code: formattedCode });
+    if (existingCoupon) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: `Coupon code "${formattedCode}" already exists. Please use a unique code.`,
+      });
+    }
+
     const discountVal = parseInt(discount, 10);
     const minPurchaseVal = parseInt(minPurchaseAmount, 10);
 
     if (discountVal >= minPurchaseVal) {
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: COUPON_MESSAGES.DISCOUNT_EXCEEDS_MIN_PURCHASE });
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: COUPON_MESSAGES.DISCOUNT_EXCEEDS_MIN_PURCHASE,
+      });
     }
 
     const newcoupon = new Coupons({
-      Coupon_Code: couponCode,
+      Coupon_Code: formattedCode,
       discount_Price: discount,
       expiry_Date: expiryDate,
       Description: description,
@@ -1080,11 +1117,20 @@ const createCoupon = async (req, res) => {
 
     const result = await newcoupon.save();
     if (result) {
-      res.status(HttpStatus.OK).json({ message: COUPON_MESSAGES.CREATED });
+      return res.status(HttpStatus.OK).json({ success: true, message: COUPON_MESSAGES.CREATED });
     }
-    console.log(result);
   } catch (error) {
-    console.log(error.message);
+    console.error("Error creating coupon:", error.message);
+    if (error.code === 11000) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: "Coupon code already exists. Please use a unique code.",
+      });
+    }
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+    });
   }
 };
 
@@ -1118,6 +1164,7 @@ const returnOrders = async (req, res) => {
       {
         $project: {
           _id: 1,
+          orderNumber: 1,
           user_id: 1,
           name: 1,
           email: 1,
@@ -1152,19 +1199,17 @@ const returnOrders = async (req, res) => {
 
 const acceptAndRefund = async (req, res) => {
   try {
-
-
     const { orderId, productId, productPrice, productName, user_id } = req.body;
 
-    console.log(orderId);
+    console.log("Processing return request for orderId:", orderId);
 
-    const price = parseFloat(productPrice);
-    if (isNaN(price)) {
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: PRODUCT_MESSAGES.INVALID_PRICE });
+    let order;
+    if (mongoose.Types.ObjectId.isValid(orderId)) {
+      order = await Order.findById(orderId);
     }
-
-    const order = await Order.findOne({ orderNumber: orderId });
-    console.log(order);
+    if (!order) {
+      order = await Order.findOne({ orderNumber: orderId });
+    }
 
     if (!order) {
       return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
@@ -1181,20 +1226,21 @@ const acceptAndRefund = async (req, res) => {
     }
     console.log("Product Index:", productIndex);
 
+    const price = order.product[productIndex].productPrice || parseFloat(productPrice);
+    if (isNaN(price)) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: PRODUCT_MESSAGES.INVALID_PRICE });
+    }
+
     const quantity = order.product[productIndex].quantity;
     order.product[productIndex].status = "Returned";
 
     const product = await Product.findOne({
       _id: order.product[productIndex].productId,
     });
-    if (!product) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: PRODUCT_MESSAGES.NOT_FOUND });
+    if (product) {
+      product.in_stock += quantity;
+      await product.save();
     }
-    console.log("Product found:", product);
-
-    product.in_stock += quantity;
-    await product.save();
-
 
     await order.save(); 
 
@@ -1212,8 +1258,8 @@ const acceptAndRefund = async (req, res) => {
         transactions: [
           {
             amount: price,
-            type: order.paymentMethod,
-            description: `${productName || "Product"} amount credited`,
+            type: "credit",
+            description: `${productName || "Product"} amount credited for return`,
           },
         ],
       });
@@ -1228,8 +1274,8 @@ const acceptAndRefund = async (req, res) => {
           $push: {
             transactions: {
               amount: price,
-              type: order.paymentMethod,
-              description: `${productName || "Product"} amount credited`,
+              type: "credit",
+              description: `${productName || "Product"} amount credited for return`,
             },
           },
         }
@@ -1250,9 +1296,14 @@ const rejectReturn = async (req, res) => {
   try {
     const { orderId, productId } = req.body;
 
-
-    const order = await Order.findOne({ orderNumber: orderId });
-    console.log(order);
+    // Support both MongoDB _id and human-readable orderNumber lookup
+    let order;
+    if (mongoose.Types.ObjectId.isValid(orderId)) {
+      order = await Order.findById(orderId);
+    }
+    if (!order) {
+      order = await Order.findOne({ orderNumber: orderId });
+    }
 
     if (!order) {
       return res.status(HttpStatus.NOT_FOUND).json({ message: PAYMENT_MESSAGES.ORDER_NOT_FOUND });
@@ -1269,7 +1320,6 @@ const rejectReturn = async (req, res) => {
     }
     console.log("Product Index:", productIndex);
 
-    const quantity = order.product[productIndex].quantity;
     order.product[productIndex].status = "return rejected";
 
     await order.save();
@@ -1281,7 +1331,8 @@ const rejectReturn = async (req, res) => {
       message: PAYMENT_MESSAGES.RETURN_REJECTED,
     });
   } catch (error) {
-    console.log(error.message);
+    console.error("Error rejecting return request:", error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR });
   }
 };
 

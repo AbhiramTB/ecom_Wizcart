@@ -34,7 +34,8 @@ const addBrand = async (req, res) => {
       return res.redirect("/brands");
     }
 
-    const regex = new RegExp(`^${brandName}$`, "i");
+    const escapedName = brandName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`^${escapedName}$`, "i");
     const exists = await Brand.findOne({ brand_name: regex });
     if (exists) {
       req.flash(
@@ -72,7 +73,8 @@ const editBrand = async (req, res) => {
       return res.redirect("/brands");
     }
 
-    const regex = new RegExp(`^${brandName}$`, "i");
+    const escapedName = brandName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`^${escapedName}$`, "i");
     const exists = await Brand.findOne({ brand_name: regex, _id: { $ne: edit_id } });
     if (exists) {
       req.flash(

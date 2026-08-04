@@ -106,28 +106,6 @@
            
 
 
-              <% 
-              // Count the non-null images
-              var nonNullImages = product.product_img.filter(img => img !== null).length;
-              var maxImages = 3;
-              var remainingSlots = maxImages - nonNullImages;
-            %>
-            
-            <% for (var i = 0; i < remainingSlots; i++) { %>
-              <div class="form-group d-flex align-items-center mb-3">
-                <div class="mr-3">
-                  <label for="image<%= nonNullImages + i %>">Upload New Image <%= nonNullImages + i + 1 %></label>
-                  <input type="file" class="form-control-file" id="image<%= nonNullImages + i %>" name="editImage">
-                </div>
-              </div>
-              <br>
-              <br>
-              <br>
-              <hr>
-            <% } %>
-            
-                
-  
               <button type="submit" class="btn btn-primary btn-block">Submit</button>
             </form>
   
