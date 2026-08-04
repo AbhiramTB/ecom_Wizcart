@@ -1458,7 +1458,7 @@ function orderPlaced() {
     .then(data => {
       if (data.razorpayOrder) {
         document.getElementById("rzp-text").value = data.razorpayOrder.id;
-        initiateRazorpayTransaction();
+        initiateRazorpayTransaction(data.razorpayOrder);
       } else {
         window.location = "/orderSuccess";
       }
@@ -1496,15 +1496,22 @@ function orderPlaced() {
   }
 
   // Function to initiate Razorpay payment
-  function initiateRazorpayTransaction() {
-    document.getElementById('captchaModalClose').click()
+  function initiateRazorpayTransaction(razorpayOrderData) {
+    console.log("=== [FRONTEND RAZORPAY INITIATED] ===");
+    console.log("Razorpay Order Data from Server:", razorpayOrderData);
+
+    const captchaBtn = document.getElementById('captchaModalClose');
+    if (captchaBtn) captchaBtn.click();
+
     var options = {
         key: "<%= key %>", // Replace with your Razorpay key
+        amount: (razorpayOrderData && razorpayOrderData.amount) ? razorpayOrderData.amount : undefined,
         currency: "INR",
         name: "WIZCART",
         description: "wizcart private limited",
         order_id: document.getElementById("rzp-text").value,
         handler: async function (response) {
+            console.log("✅ Payment Gateway Success Callback Received:");
             console.log("Payment ID: ", response.razorpay_payment_id);
             console.log("Order ID: ", response.razorpay_order_id);
             console.log("Signature: ", response.razorpay_signature);
@@ -1524,6 +1531,7 @@ function orderPlaced() {
                 });
 
                 const captureData = await captureResponse.json();
+                console.log("Server Verification Response:", captureData);
 
                 if (captureResponse.ok) {
                     // Payment details have been successfully captured
@@ -1533,15 +1541,14 @@ function orderPlaced() {
                         icon: 'success',
                         confirmButtonText: 'OK'
                     }).then(() => {
-                        // Redirect or perform any additional action after payment success
                         window.location = "/orderSuccess";
                     });
                 } else {
-                    // Payment capture failed
+                    console.error("🚨 Capture failed:", captureData);
                     handlePaymentFailure(response.razorpay_order_id);
                 }
             } catch (err) {
-                // Handle errors during payment capture
+                console.error("🚨 Error capturing payment:", err);
                 handlePaymentFailure(response.razorpay_order_id);
             }
         },
@@ -1549,14 +1556,22 @@ function orderPlaced() {
             color: "#0EB9F2"
         }
     };
-    
+
+    console.log("Razorpay SDK Initializing Options:", options);
     var rzp1 = new Razorpay(options);
     
     // Add an event listener for payment failure
     rzp1.on('payment.failed', function (response) {
-        console.error('Payment failed:', response.error);
+        console.error('🚨 [RAZORPAY MODAL PAYMENT FAILED] 🚨');
+        console.error('Error Code:', response.error.code);
+        console.error('Error Description:', response.error.description);
+        console.error('Error Source:', response.error.source);
+        console.error('Error Step:', response.error.step);
+        console.error('Error Reason:', response.error.reason);
+        console.error('Full Error Metadata:', response.error.metadata);
+        
         rzp1.close(); // Close the Razorpay modal
-        handlePaymentFailure()
+        handlePaymentFailure();
     });
 
     rzp1.open(); // Open the Razorpay payment modal

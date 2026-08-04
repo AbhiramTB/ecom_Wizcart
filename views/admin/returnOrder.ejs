@@ -67,7 +67,7 @@
                                         <div class="user-details">
                                             <h5>Order Details</h5>
                                             <p><strong>Product:</strong> <%= request.productDetails.product_name %></p>
-                                            <p><strong>Order ID:</strong> <%= request._id %></p>
+                                            <p><strong>Order ID:</strong> <%= request.orderNumber || request._id %></p>
                                             <p><strong>Price:</strong>₹<%= request.product.productPrice %></p>
                                             <p><strong>Status:</strong> <%= request.product.status %></p>
 

@@ -28,17 +28,21 @@ if (!fs.existsSync(uploadsDir)) {
 
 
 productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
-   
-   try{
-
+   try {
     const { productName, productCategory, productPrice, Stock, Brand, ProductDescription } = req.body;
 
-    console.log(productName);
-    console.log(productCategory);
-    console.log(productPrice);
-    console.log(Stock);
-    console.log(Brand);
-    console.log(ProductDescription);
+    const numPrice = parseFloat(productPrice);
+    const numStock = parseInt(Stock, 10);
+
+    if (isNaN(numPrice) || numPrice < 0) {
+      req.flash('info', '❗ Product price must be a valid non-negative number');
+      return res.redirect('/Products');
+    }
+
+    if (isNaN(numStock) || numStock < 0) {
+      req.flash('info', '❗ Stock quantity must be a valid non-negative integer');
+      return res.redirect('/Products');
+    }
 
     const croppedImages = req.files.filter(file => file.fieldname === 'croppedImages');
     let productImages = [];
@@ -53,9 +57,9 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
     const categoryOffer = await CategoryOffer.findOne({ category_id: productCategory });
     const cat_discount = categoryOffer ? categoryOffer.discount : 0;
     
-    let final_price = productPrice - cat_discount;
+    let final_price = numPrice - cat_discount;
     if (final_price <= 0) {
-      const tenPercent = productPrice * 0.10;
+      const tenPercent = numPrice * 0.10;
       final_price = tenPercent < 1 ? 1 : Math.round(tenPercent);
     }
 
@@ -65,19 +69,18 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
         category_name: productCategory,
         brand: Brand,
         price: final_price,
-        in_stock: Stock,
+        in_stock: numStock,
         product_img: productImages,
         Hide_product: 0,
-        Maximum_Retail_Price: productPrice,
+        Maximum_Retail_Price: numPrice,
         offer_price: 0
     });
 
-    
-        const signupDataSuccess = await productDetails.save();
-        if (signupDataSuccess) {
-            req.flash('info', '✅ New Product Added');
-            res.redirect('/Products');
-        }
+    const signupDataSuccess = await productDetails.save();
+    if (signupDataSuccess) {
+        req.flash('info', '✅ New Product Added');
+        res.redirect('/Products');
+    }
 
     } catch (error) {
         console.error('Error saving product details:', error);
@@ -148,7 +151,7 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
             }
         );
 
-        if (updateResult.modifiedCount === 0) {
+        if (updateResult.matchedCount === 0) {
             return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.UPDATE_FAILED);
         }
         req.flash('info', 'PRODUCT WAS SUCCESSFULLY EDITED ');

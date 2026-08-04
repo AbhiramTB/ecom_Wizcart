@@ -415,6 +415,8 @@
               })
             });
 
+            const result = await response.json();
+
             if (response.ok) {
               Swal.fire({
                 title: "Coupon created successfully!",
@@ -423,14 +425,13 @@
                 imageHeight: 100,
               }).then(()=>{
                 document.getElementById('closeBtn').click()
-              location.reload()
+                location.reload()
               })
-             
             } else {
               Swal.fire({
                 icon: 'error',
-                title: 'Oops...',
-                text: 'Failed to create coupon',
+                title: 'Duplicate / Invalid Coupon',
+                text: result.message || 'Failed to create coupon',
               });
             }
           }
