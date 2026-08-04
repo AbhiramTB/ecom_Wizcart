@@ -37,9 +37,8 @@ userRoute.post("/otpData", isLogout, userController.otpData);
 userRoute.get("/user-block", userController.userBlocked);
 
 // HOME ---------------------------
-userRoute.get("/", isLogout, userController.home);
-
-userRoute.get("/home", isLogin, userController.homeLogin);
+userRoute.get("/", userController.home);
+userRoute.get("/home", (req, res) => res.redirect("/"));
 
 // SHOP MORE --------------------
 userRoute.get("/shopmore",userController.shopmore);

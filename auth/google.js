@@ -76,7 +76,7 @@ authRoute.get('/signup/google/callback',
     } else {
       req.session.user_id = req.user.id;
       userProfile = req.user; // Set userProfile when user logs in
-      res.redirect('/home');
+      res.redirect('/');
     }
   }
 );
