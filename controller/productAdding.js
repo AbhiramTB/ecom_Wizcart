@@ -35,12 +35,12 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
     const numStock = parseInt(Stock, 10);
 
     if (isNaN(numPrice) || numPrice < 0) {
-      req.flash('info', '❗ Product price must be a valid non-negative number');
+      if (typeof req.flash === 'function') req.flash('info', '❗ Product price must be a valid non-negative number');
       return res.redirect('/Products');
     }
 
     if (isNaN(numStock) || numStock < 0) {
-      req.flash('info', '❗ Stock quantity must be a valid non-negative integer');
+      if (typeof req.flash === 'function') req.flash('info', '❗ Stock quantity must be a valid non-negative integer');
       return res.redirect('/Products');
     }
 
@@ -78,7 +78,7 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
 
     const signupDataSuccess = await productDetails.save();
     if (signupDataSuccess) {
-        req.flash('info', '✅ New Product Added');
+        if (typeof req.flash === 'function') req.flash('info', '✅ New Product Added');
         res.redirect('/Products');
     }
 
@@ -157,7 +157,7 @@ productAddRoute.post('/loadEditProduct', upload.any(), async (req, res) => {
         if (updateResult.matchedCount === 0) {
             return res.status(HttpStatus.NOT_FOUND).send(PRODUCT_MESSAGES.UPDATE_FAILED);
         }
-        req.flash('info', 'PRODUCT WAS SUCCESSFULLY EDITED ');
+        if (typeof req.flash === 'function') req.flash('info', 'PRODUCT WAS SUCCESSFULLY EDITED ');
         res.redirect('/Products');
     } catch (error) {
         console.error('Error editing product:', error.message);
