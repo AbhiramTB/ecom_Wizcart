@@ -17,7 +17,7 @@ const isLogin = async (req, res, next) => {
        
             next();
       } else {
-        res.redirect("/home");
+        res.redirect("/");
       }
     } catch (error) {
       console.error("Error in isLogout middleware:", error.message);
