@@ -563,20 +563,33 @@ const profile = async (req, res) => {
 
 const ProfileNameUpdate = async (req, res) => {
   try {
-    const newName = req.body.updateName;
+    const rawName = req.body.updateName || "";
+    const newName = rawName.trim();
+
+    if (!newName || !/^[a-zA-Z ]{2,30}$/.test(newName)) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: "Name must be 2–30 characters long and contain only letters and spaces."
+      });
+    }
 
     const updateStatus = await User.updateOne(
       { _id: req.session.user_id },
       { $set: { name: newName } }
     );
 
-    if (updateStatus) {
-      res.json({ message: "Form data received successfully", name: name });
-      console.log("hello");
+    if (updateStatus.acknowledged) {
+      return res.json({ success: true, message: "Name updated successfully", name: newName });
     } else {
-      res.json({ success: false, message: "No changes made" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "No changes made" });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error in ProfileNameUpdate:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "An error occurred while updating profile name"
+    });
+  }
 };
 
 let newOtp;
