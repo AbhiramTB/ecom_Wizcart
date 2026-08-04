@@ -28,32 +28,31 @@ const CategoryOffer = require("../model/categoryOfferModel");
 const PDFDocument = require('pdfkit');
 const fs=require('fs')
 
-const homeLogin = async (req, res) => {
+const home = async (req, res) => {
   try {
     const products = await Product.find({}).limit(8);
-    console.log(products)
-    console.log('--------------0987-----------------')
     const toast = req.flash("info");
     if (products) {
-      if (req.session.user_id) {
+      if (req.session && req.session.user_id) {
         const user = await User.findById(req.session.user_id);
 
         if (user) {
           const cartQuantity = await getCartQuantity(req.session.user_id);
-          console.log("This is the new cart quantity: " + cartQuantity);
 
-          res.render("user/home", {
+          return res.render("user/home", {
             products: products,
             user: sanitizeUser(user),
             toast,
             cartQuantity,
           });
-        } else {
-          res.redirect("/login");
         }
-      } else {
-        res.render("user/home", { products: products, user: typeof user !== "undefined" ? sanitizeUser(user) : null, toast });
       }
+      return res.render("user/home", {
+        products: products,
+        user: null,
+        toast,
+        cartQuantity: 0,
+      });
     } else {
       res.status(404).render("notFound");
     }
@@ -63,37 +62,7 @@ const homeLogin = async (req, res) => {
   }
 };
 
-const home = async (req, res) => {
-  try {
-    const products = await Product.find({}).limit(8);
-      console.log(products)
-      console.log('-----------------------')
-    if (products) {
-      if (req.session.user_id) {
-        const user = await User.findById(req.session.user_id);
-
-        if (user) {
-          const toast = ["LOGIN SUCCESSFULLY ✅"];
-          res.render("user/home", { products: products, user: sanitizeUser(user), toast });
-        } else {
-          res.redirect("/login");
-        }
-      } else {
-        let toast = req.flash("info");
-        if (toast.length === 0) {
-          console.log("No toast messages");
-          toast = [];
-          res.render("user/home", { products: products, user: typeof user !== "undefined" ? sanitizeUser(user) : null, toast });
-        }
-      }
-    } else {
-      res.status(404).render("notFound");
-    }
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).render("error", { message: "Server Error" });
-  }
-};
+const homeLogin = home;
 
 const shopmore = async (req, res) => {
   try {
@@ -256,7 +225,7 @@ const loginData = async (req, res) => {
       req.flash("info", "✅ login successful");
       return res
         .status(HttpStatus.OK)
-        .json({ redirectUrl: "/home", message: "Login successful!" });
+        .json({ redirectUrl: "/", message: "Login successful!" });
     } else {
       return res.status(HttpStatus.UNAUTHORIZED).json({ message: USER_MESSAGES.INVALID_EMAIL_OR_PASSWORD });
     }
@@ -563,20 +532,33 @@ const profile = async (req, res) => {
 
 const ProfileNameUpdate = async (req, res) => {
   try {
-    const newName = req.body.updateName;
+    const rawName = req.body.updateName || "";
+    const newName = rawName.trim();
+
+    if (!newName || !/^[a-zA-Z ]{2,30}$/.test(newName)) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        message: "Name must be 2–30 characters long and contain only letters and spaces."
+      });
+    }
 
     const updateStatus = await User.updateOne(
       { _id: req.session.user_id },
       { $set: { name: newName } }
     );
 
-    if (updateStatus) {
-      res.json({ message: "Form data received successfully", name: name });
-      console.log("hello");
+    if (updateStatus.acknowledged) {
+      return res.json({ success: true, message: "Name updated successfully", name: newName });
     } else {
-      res.json({ success: false, message: "No changes made" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "No changes made" });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error in ProfileNameUpdate:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "An error occurred while updating profile name"
+    });
+  }
 };
 
 let newOtp;
