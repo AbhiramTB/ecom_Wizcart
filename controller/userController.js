@@ -2224,18 +2224,37 @@ const paymentPending = async (req, res) => {
 const submitReview = async (req, res) => {
   try {
     const { productId, orderId, userReview } = req.body;
-    const userId = req.session.user_id;
+    const userId = req.session ? req.session.user_id : null;
+
+    if (!userId) {
+      return res.status(HttpStatus.UNAUTHORIZED).send("Session expired. Please log in again.");
+    }
 
     if (!productId || !orderId || !userReview) {
       return res.status(HttpStatus.BAD_REQUEST).send("Missing review details");
     }
 
+    const userIds = [userId];
+    if (mongoose.Types.ObjectId.isValid(userId)) {
+      userIds.push(new mongoose.Types.ObjectId(userId));
+    }
+
     let order;
     if (mongoose.Types.ObjectId.isValid(orderId)) {
-      order = await Order.findOne({ _id: orderId, user_id: userId });
+      order = await Order.findOne({ _id: orderId, user_id: { $in: userIds } });
     }
     if (!order) {
-      order = await Order.findOne({ orderNumber: orderId, user_id: userId });
+      order = await Order.findOne({ orderNumber: orderId, user_id: { $in: userIds } });
+    }
+    if (!order) {
+      if (mongoose.Types.ObjectId.isValid(orderId)) {
+        order = await Order.findById(orderId);
+      } else {
+        order = await Order.findOne({ orderNumber: orderId });
+      }
+      if (order && order.user_id.toString() !== userId.toString()) {
+        order = null;
+      }
     }
 
     if (!order) {
@@ -2250,7 +2269,6 @@ const submitReview = async (req, res) => {
       return res.status(HttpStatus.NOT_FOUND).send("Product not found in this order");
     }
 
-    // Case-insensitive status check
     const statusLower = (productItem.status || "").toLowerCase();
     if (statusLower !== 'delivered' && statusLower !== 'returned') {
       return res.status(HttpStatus.BAD_REQUEST).send("Product not delivered yet");
@@ -2259,13 +2277,13 @@ const submitReview = async (req, res) => {
     const newReview = new Review({
       productId: productItem.productId,
       orderId: order._id, 
-      userId,
+      userId: order.user_id,
       userReview
     });
 
     await newReview.save();
 
-    res.redirect(`/myOrderDetails?id=${order.orderNumber}&productId=${productItem._id}`);
+    res.redirect(`/myOrderDetails?id=${order.orderNumber || order._id}&productId=${productItem._id}`);
   } catch (error) {
     console.error("Error submitting review:", error);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send("Error submitting review");
