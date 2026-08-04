@@ -2230,29 +2230,42 @@ const submitReview = async (req, res) => {
       return res.status(HttpStatus.BAD_REQUEST).send("Missing review details");
     }
 
+    let order;
+    if (mongoose.Types.ObjectId.isValid(orderId)) {
+      order = await Order.findOne({ _id: orderId, user_id: userId });
+    }
+    if (!order) {
+      order = await Order.findOne({ orderNumber: orderId, user_id: userId });
+    }
 
-    const order = await Order.findOne({ orderNumber: orderId, user_id: userId });
     if (!order) {
       return res.status(HttpStatus.NOT_FOUND).send("Order not found");
     }
 
+    const productItem = order.product.find(
+      (p) => p.productId.toString() === productId || p._id.toString() === productId
+    );
 
-    const productItem = order.product.find(p => p.productId.toString() === productId);
-    if (!productItem || (productItem.status !== 'delivered' && productItem.status !== 'Returned')) {
+    if (!productItem) {
+      return res.status(HttpStatus.NOT_FOUND).send("Product not found in this order");
+    }
+
+    // Case-insensitive status check
+    const statusLower = (productItem.status || "").toLowerCase();
+    if (statusLower !== 'delivered' && statusLower !== 'returned') {
       return res.status(HttpStatus.BAD_REQUEST).send("Product not delivered yet");
     }
 
-
     const newReview = new Review({
-      productId,
-      orderId,
+      productId: productItem.productId,
+      orderId: order._id, 
       userId,
       userReview
     });
 
     await newReview.save();
 
-    res.redirect(`/myOrderDetails?id=${orderId}&productId=${productItem._id}`);
+    res.redirect(`/myOrderDetails?id=${order.orderNumber}&productId=${productItem._id}`);
   } catch (error) {
     console.error("Error submitting review:", error);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send("Error submitting review");
