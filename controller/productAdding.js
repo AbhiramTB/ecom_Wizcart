@@ -29,40 +29,31 @@ if (!fs.existsSync(uploadsDir)) {
 
 productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
    try {
-    console.log('[DEBUG /productAdded] Received request at', new Date().toISOString());
-    console.log('[DEBUG /productAdded] Body:', req.body);
-    console.log('[DEBUG /productAdded] Files:', req.files ? req.files.map(f => ({ fieldname: f.fieldname, originalname: f.originalname, size: f.size })) : 'req.files is undefined');
-
     const { productName, productCategory, productPrice, Stock, Brand, ProductDescription } = req.body;
 
     const numPrice = parseFloat(productPrice);
     const numStock = parseInt(Stock, 10);
 
     if (isNaN(numPrice) || numPrice < 0) {
-      console.warn('[DEBUG /productAdded] Invalid price:', productPrice);
       req.flash('info', '❗ Product price must be a valid non-negative number');
       return res.redirect('/Products');
     }
 
     if (isNaN(numStock) || numStock < 0) {
-      console.warn('[DEBUG /productAdded] Invalid stock:', Stock);
       req.flash('info', '❗ Stock quantity must be a valid non-negative integer');
       return res.redirect('/Products');
     }
 
-    const croppedImages = req.files ? req.files.filter(file => file.fieldname === 'croppedImages') : [];
-    console.log(`[DEBUG /productAdded] Found ${croppedImages.length} cropped images to upload.`);
+    const croppedImages = req.files.filter(file => file.fieldname === 'croppedImages');
     let productImages = [];
 
     for (let i = 0; i < croppedImages.length; i++) {
         const file = croppedImages[i];
-        console.log(`[DEBUG /productAdded] Uploading image ${i + 1}/${croppedImages.length} (${file.originalname || 'file'}, size: ${file.size}) to Cloudinary...`);
         const cloudinaryUrl = await uploadToCloudinary(file);
         productImages.push(cloudinaryUrl);
-        console.log(`[DEBUG /productAdded] File uploaded to Cloudinary successfully: ${cloudinaryUrl}`);
+        console.log(`File uploaded to Cloudinary: ${cloudinaryUrl}`);
     }
 
-    console.log('[DEBUG /productAdded] Finding CategoryOffer for category_id:', productCategory);
     const categoryOffer = await CategoryOffer.findOne({ category_id: productCategory });
     const cat_discount = categoryOffer ? categoryOffer.discount : 0;
     
@@ -72,7 +63,6 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
       final_price = tenPercent < 1 ? 1 : Math.round(tenPercent);
     }
 
-    console.log('[DEBUG /productAdded] Saving Product to MongoDB...');
     const productDetails = new Product({
         product_name: productName,
         product_description: ProductDescription,
@@ -87,16 +77,14 @@ productAddRoute.post('/productAdded', upload.any(), async (req, res) => {
     });
 
     const signupDataSuccess = await productDetails.save();
-    console.log('[DEBUG /productAdded] Product saved successfully! ID:', signupDataSuccess._id);
     if (signupDataSuccess) {
         req.flash('info', '✅ New Product Added');
-        return res.redirect('/Products');
+        res.redirect('/Products');
     }
 
     } catch (error) {
-        console.error('[DEBUG /productAdded] CRITICAL ERROR saving product details:', error);
-        console.error('[DEBUG /productAdded] Error Stack:', error.stack);
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(`Error adding product: ${error.message}`);
+        console.error('Error saving product details:', error);
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
     }
 });
 
