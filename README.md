@@ -28,7 +28,6 @@
 - [🛣️ Main Routes & API Endpoints](#️-main-routes--api-endpoints)
 - [💳 Payment & Refund Workflow](#-payment--refund-workflow)
 - [📄 Database Models](#-database-models)
-- [🤝 Contributing](#-contributing)
 - [📜 License](#-license)
 
 ---
@@ -425,35 +424,9 @@ WizCart utilizes **11 Mongoose Schemas** to maintain clean relational consistenc
 * **`categoryOfferModel.js`**: Category-level promotions and active date ranges.
 * **`reviewModel.js`**: Customer product reviews and 1-5 star ratings.
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Follow these steps:
-
-1. **Fork** the repository.
-2. **Create a branch** for your feature:
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-3. **Commit** your changes:
-   ```bash
-   git commit -m "Add AmazingFeature"
-   ```
-4. **Push** to the branch:
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
-5. **Open a Pull Request**.
-
----
-
-## 📜 License
-
-This project is licensed under the **ISC License**. Feel free to use and adapt this project for educational and personal use.
 
 ---
 
 <p align="center">
-  Developed with ❤️ by <a href="https://github.com/AbhiramTB">Abhiram</a>
+  Developed with ❤️👨🏻‍💻 by <a href="https://github.com/AbhiramTB">Abhiram</a>
 </p>
